@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lutèce Group — Gestion Staff</title>
-<script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -963,11 +962,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 // CONFIG SUPABASE — Remplacez ces 2 valeurs par les vôtres
 // ============================================================
 // Initialisation Supabase — config.js est chargé avant ce script
-// Supabase initialisé depuis variables Vercel (via config.js)
-const sb = supabase.createClient(
-  window.SUPABASE_URL || '',
-  window.SUPABASE_KEY  || ''
-);
+let sb = null; // Initialisé après config.js
 
 // ============================================================
 // ÉTAT GLOBAL
@@ -1000,7 +995,7 @@ async function doLogin(){
 
   // Vérifier que Supabase est configuré
   if(!window.SUPABASE_URL || !window.SUPABASE_KEY) {
-    showLoginErr('Erreur de configuration serveur. Contactez l'administrateur.');
+    showLoginErr('Erreur de configuration serveur.');
     return;
   }
 
@@ -2691,13 +2686,49 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // ============================================================
 // INIT
 // ============================================================
-(async()=>{
-  const ok = await checkSession();
-  if (ok) { startApp(); }
-  else {
+// Fonction d'initialisation appelée après config.js chargé
+window._startInit = async function() {
+  try {
+    // Créer sb avec les clés disponibles
+    window._sb = supabase.createClient(
+      window.SUPABASE_URL || '',
+      window.SUPABASE_KEY || ''
+    );
+    // Rendre sb disponible globalement
+    Object.defineProperty(window, 'sb', { get: () => window._sb });
+
+    const ok = await checkSession();
+    if (ok) { startApp(); }
+    else {
+      document.getElementById('login-screen').style.display = 'block';
+      document.getElementById('app').style.display = 'none';
+    }
+  } catch(e) {
     document.getElementById('login-screen').style.display = 'block';
     document.getElementById('app').style.display = 'none';
   }
+};
+
+// Signaler que le script principal est prêt
+window._appReady = true;
+if (window._supabaseReady) window._startInit();
+</script>
+<script>
+// Charger config.js dynamiquement et initialiser après
+(function() {
+  var s = document.createElement('script');
+  s.src = '/config.js';
+  s.onload = function() {
+    // config.js chargé - initialiser Supabase et lancer l'app
+    window._supabaseReady = true;
+    if (window._appReady) window._startInit();
+  };
+  s.onerror = function() {
+    document.getElementById('login-screen').style.display = 'block';
+    var e = document.getElementById('login-err');
+    if (e) { e.textContent = 'Erreur de configuration serveur.'; e.style.display = 'block'; }
+  };
+  document.head.appendChild(s);
 })();
 </script>
 </body>
