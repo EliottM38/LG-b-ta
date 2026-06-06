@@ -1000,9 +1000,13 @@ async function doLogin(){
   const pass = document.getElementById('login-pass').value;
   if(!user||!pass) return;
 
-  // Vérifier que Supabase est configuré
   if(!window.SUPABASE_URL || !window.SUPABASE_KEY) {
-    showLoginErr('Erreur de configuration serveur. Contactez l'administrateur.');
+    showLoginErr('Erreur de configuration serveur. Contactez l\'administrateur.');
+    return;
+  }
+
+  if(!initSB()){
+    showLoginErr('Erreur de configuration serveur. Contactez l\'administrateur.');
     return;
   }
 
