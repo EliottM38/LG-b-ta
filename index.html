@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lutèce Group — Gestion Staff</title>
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
@@ -960,69 +962,14 @@ tr:hover td{background:rgba(13,31,78,.02)}
 // ============================================================
 // CONFIG SUPABASE — Remplacez ces 2 valeurs par les vôtres
 // ============================================================
-// Toutes les requêtes DB passent par /api/db (Vercel) — clé service jamais exposée
-const sb = {
-  from: (table) => new SBQuery(table)
-};
-
-class SBQuery {
-  constructor(table) {
-    this._table  = table;
-    this._action = 'select';
-    this._filters = {};
-    this._data   = null;
-    this._id     = null;
-  }
-
-  select(cols='*')         { this._filters.select = cols; return this; }
-  eq(col, val)             { if(!this._filters.eq) this._filters.eq={}; this._filters.eq[col]=val; return this; }
-  order(col, opts={})      { this._filters.order = {col, asc: opts.ascending ?? true}; return this; }
-  limit(n)                 { this._filters.limit = n; return this; }
-  single()                 { this._filters.single = true; return this; }
-
-  insert(data)             { this._action='insert'; this._data=data; return this._run(); }
-  update(data)             { this._action='update'; this._data=data; return this; }
-  delete()                 { this._action='delete'; return this; }
-  upsert(data, opts={})    { this._action='upsert'; this._data=data; if(opts.onConflict) this._filters.onConflict=opts.onConflict; return this._run(); }
-
-  // Termine la chaîne pour update/delete/select
-  then(resolve, reject)    { return this._run().then(resolve, reject); }
-
-  async _run() {
-    try {
-      const res = await fetch('/api/db', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action:  this._action,
-          table:   this._table,
-          filters: this._filters,
-          data:    this._data,
-          id:      this._id,
-        })
-      });
-      const json = await res.json();
-      if (!res.ok) return { data: null, error: { message: json.error } };
-      let data = json.data;
-      if (this._filters.single && Array.isArray(data)) data = data[0] || null;
-      return { data, error: null };
-    } catch(e) {
-      return { data: null, error: { message: e.message } };
-    }
-  }
+// Supabase client — initialisé depuis config.js (variables Vercel)
+let sb = null;
+function initSB() {
+  if (sb) return true;
+  if (!window.SUPABASE_URL || !window.SUPABASE_KEY) return false;
+  sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+  return true;
 }
-
-// Permettre sb.from('x').update(data).eq('id',id)
-const _origEq = SBQuery.prototype.eq;
-SBQuery.prototype.eq = function(col, val) {
-  if (this._action === 'update' || this._action === 'delete') {
-    this._id = val; // stocker l'id pour update/delete
-    return this._run();  // exécuter
-  }
-  if(!this._filters.eq) this._filters.eq={};
-  this._filters.eq[col] = val;
-  return this;
-};
 
 // ============================================================
 // ÉTAT GLOBAL
@@ -2747,11 +2694,23 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // INIT
 // ============================================================
 (async()=>{
+  // Attendre config.js max 3 secondes
+  for (let i = 0; i < 30; i++) {
+    if (initSB()) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  if (!sb) {
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+    const e = document.getElementById('login-err');
+    if (e) { e.textContent = 'Erreur serveur — variables Vercel manquantes.'; e.style.display = 'block'; }
+    return;
+  }
   const ok = await checkSession();
-  if(ok){ startApp(); }
-  else{
-    document.getElementById('login-screen').style.display='block';
-    document.getElementById('app').style.display='none';
+  if (ok) { startApp(); }
+  else {
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
   }
 })();
 </script>
