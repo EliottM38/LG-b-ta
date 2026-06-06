@@ -2689,14 +2689,11 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // Fonction d'initialisation appelée après config.js chargé
 window._startInit = async function() {
   try {
-    // Créer sb avec les clés disponibles
-    window._sb = supabase.createClient(
-      window.SUPABASE_URL || '',
-      window.SUPABASE_KEY || ''
+    // Initialiser sb avec les clés Vercel
+    sb = supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_KEY
     );
-    // Rendre sb disponible globalement
-    Object.defineProperty(window, 'sb', { get: () => window._sb });
-
     const ok = await checkSession();
     if (ok) { startApp(); }
     else {
@@ -2706,6 +2703,8 @@ window._startInit = async function() {
   } catch(e) {
     document.getElementById('login-screen').style.display = 'block';
     document.getElementById('app').style.display = 'none';
+    const el = document.getElementById('login-err');
+    if(el){ el.textContent = 'Erreur : '+e.message; el.style.display='block'; }
   }
 };
 
