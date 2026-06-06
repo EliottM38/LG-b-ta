@@ -962,14 +962,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 // ============================================================
 // CONFIG SUPABASE — Remplacez ces 2 valeurs par les vôtres
 // ============================================================
-// Supabase client — initialisé depuis config.js (variables Vercel)
 let sb = null;
-function initSB() {
-  if (sb) return true;
-  if (!window.SUPABASE_URL || !window.SUPABASE_KEY) return false;
-  sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-  return true;
-}
 
 // ============================================================
 // ÉTAT GLOBAL
@@ -1000,13 +993,9 @@ async function doLogin(){
   const pass = document.getElementById('login-pass').value;
   if(!user||!pass) return;
 
+  // Vérifier que Supabase est configuré
   if(!window.SUPABASE_URL || !window.SUPABASE_KEY) {
-    showLoginErr('Erreur de configuration serveur. Contactez l\'administrateur.');
-    return;
-  }
-
-  if(!initSB()){
-    showLoginErr('Erreur de configuration serveur. Contactez l\'administrateur.');
+    showLoginErr('Erreur de configuration serveur. Contactez l'administrateur.');
     return;
   }
 
@@ -2698,18 +2687,27 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // INIT
 // ============================================================
 (async()=>{
-  // Attendre config.js max 3 secondes
-  for (let i = 0; i < 30; i++) {
-    if (initSB()) break;
-    await new Promise(r => setTimeout(r, 100));
+  // Attendre que config.js injecte les variables (max 5 secondes)
+  let waited = 0;
+  while (waited < 5000) {
+    if (window.SUPABASE_URL && window.SUPABASE_KEY) break;
+    await new Promise(r => setTimeout(r, 200));
+    waited += 200;
   }
-  if (!sb) {
+
+  if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
     document.getElementById('login-screen').style.display = 'block';
     document.getElementById('app').style.display = 'none';
     const e = document.getElementById('login-err');
-    if (e) { e.textContent = 'Erreur serveur — variables Vercel manquantes.'; e.style.display = 'block'; }
+    if (e) {
+      e.textContent = 'Config manquante. Vérifiez que api/config.js est bien dans votre repo GitHub.';
+      e.style.display = 'block';
+    }
     return;
   }
+
+  sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+
   const ok = await checkSession();
   if (ok) { startApp(); }
   else {
