@@ -963,10 +963,11 @@ tr:hover td{background:rgba(13,31,78,.02)}
 // CONFIG SUPABASE — Remplacez ces 2 valeurs par les vôtres
 // ============================================================
 // Initialisation Supabase — config.js est chargé avant ce script
-let sb = null;
-if (window.SUPABASE_URL && window.SUPABASE_KEY && window.supabase) {
-  sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-}
+// Supabase initialisé depuis variables Vercel (via config.js)
+const sb = supabase.createClient(
+  window.SUPABASE_URL || '',
+  window.SUPABASE_KEY  || ''
+);
 
 // ============================================================
 // ÉTAT GLOBAL
@@ -2691,18 +2692,6 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // INIT
 // ============================================================
 (async()=>{
-  // sb est déjà initialisé en haut du script
-  // Si pas encore prêt (rare), on réessaie une fois
-  if (!sb && window.SUPABASE_URL && window.SUPABASE_KEY) {
-    sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-  }
-  if (!sb) {
-    document.getElementById('login-screen').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
-    const e = document.getElementById('login-err');
-    if (e) { e.textContent = 'Erreur de configuration.'; e.style.display = 'block'; }
-    return;
-  }
   const ok = await checkSession();
   if (ok) { startApp(); }
   else {
