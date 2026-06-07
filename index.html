@@ -854,6 +854,31 @@ tr:hover td{background:rgba(13,31,78,.02)}
 </div>
 </div>
 
+  <!-- Configuration Google Forms — visible président uniquement -->
+  <div class="card" id="card-config" style="margin-top:24px">
+    <div class="card-header">
+      <span class="card-title">⚙️ Liens Google Forms (CSV)</span>
+    </div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">
+        Configurez ici les liens CSV de vos Google Forms. Ils sont stockés en base de données — aucune clé dans le code.
+      </p>
+      <div class="field">
+        <label>Lien CSV — Formulaire SAL</label>
+        <input id="cfg-sal-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" style="width:100%">
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
+        <input id="cfg-pole-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" style="width:100%">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveAppConfig()">💾 Sauvegarder</button>
+        <button class="btn" onclick="loadConfigUI()">↻ Recharger</button>
+      </div>
+      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div id="error-bar"></div>
@@ -2587,7 +2612,7 @@ async function loadConfigUI() {
   const poleEl = document.getElementById('cfg-pole-url');
   if (salEl)  salEl.value  = SAL_CSV_URL;
   if (poleEl) poleEl.value = POLE_CSV_URL;
-  // Masquer la config aux non-présidents
+  // Visible uniquement pour les présidents
   const card = document.getElementById('card-config');
   if (card) card.style.display = currentUser.role === 'president' ? '' : 'none';
 }
