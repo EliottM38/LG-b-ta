@@ -979,6 +979,7 @@ function doLogout(){
 }
 
 async function checkSession(){
+  if(!sb) return false;
   const stored=localStorage.getItem('lg_session');
   if(!stored) return false;
   const sess=JSON.parse(stored);
@@ -2641,11 +2642,13 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // Fonction d'initialisation appelée après config.js chargé
 window._startInit = async function() {
   try {
-    // Initialiser sb avec les clés Vercel
-    sb = supabase.createClient(
-      window.SUPABASE_URL,
-      window.SUPABASE_KEY
-    );
+    if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+      document.getElementById('login-screen').style.display = 'block';
+      const e = document.getElementById('login-err');
+      if(e){ e.textContent = 'Config manquante (URL: '+(window.SUPABASE_URL?'OK':'VIDE')+', KEY: '+(window.SUPABASE_KEY?'OK':'VIDE')+')'; e.style.display='block'; }
+      return;
+    }
+    sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
     const ok = await checkSession();
     if (ok) { startApp(); }
     else {
