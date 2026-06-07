@@ -852,7 +852,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <button class="btn btn-primary" onclick="saveInterim()">Créer la demande</button>
   </div>
 </div>
-</div>
 
   <!-- Configuration Google Forms — visible président uniquement -->
   <div class="card" id="card-config" style="margin-top:24px">
@@ -865,7 +864,8 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </p>
       <div class="field">
         <label>Lien CSV — Formulaire SAL</label>
-        <input id="cfg-sal-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" style="width:100%">
+        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV — la conversion est automatique" style="width:100%">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Vous pouvez coller le lien pubhtml, il sera converti automatiquement en CSV</div>
       </div>
       <div class="field" style="margin-top:12px">
         <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
@@ -878,6 +878,8 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
+
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -2589,8 +2591,13 @@ async function sbSafe(fn, context='') {
 
 
 async function saveAppConfig() {
-  const salUrl  = document.getElementById('cfg-sal-url').value.trim();
-  const poleUrl = document.getElementById('cfg-pole-url').value.trim();
+  let salUrl  = document.getElementById('cfg-sal-url').value.trim();
+  let poleUrl = document.getElementById('cfg-pole-url').value.trim();
+  // Convertir automatiquement pubhtml -> pub?output=csv
+  salUrl  = salUrl.replace('/pubhtml', '/pub?output=csv').replace('pubhtml?', 'pub?output=csv&');
+  poleUrl = poleUrl.replace('/pubhtml', '/pub?output=csv').replace('pubhtml?', 'pub?output=csv&');
+  if (!salUrl.includes('output=csv'))  salUrl  += (salUrl.includes('?')  ? '&' : '?') + 'output=csv';
+  if (!poleUrl.includes('output=csv')) poleUrl += (poleUrl.includes('?') ? '&' : '?') + 'output=csv';
   const res     = document.getElementById('cfg-result');
   if (!salUrl || !poleUrl) { res.textContent = 'Les deux liens sont obligatoires.'; res.style.color='#991b1b'; return; }
   try {
