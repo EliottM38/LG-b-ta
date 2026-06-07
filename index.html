@@ -854,7 +854,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 </div>
 
   <!-- Configuration Google Forms — visible président uniquement -->
-  <div class="card" id="card-config" style="margin-top:24px">
+  <div class="card" id="card-config" style="margin-top:24px;display:none">
     <div class="card-header">
       <span class="card-title">⚙️ Liens Google Forms (CSV)</span>
     </div>
@@ -1012,6 +1012,9 @@ async function startApp(){
   document.getElementById('nav-objectifs').style.display=perms.objectifs?'':'none';
   document.getElementById('nav-historique').style.display=perms.historique?'':'none';
   document.getElementById('nav-rgpd').style.display='';
+  // Afficher config GForms pour les présidents
+  const cfgCard = document.getElementById('card-config');
+  if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
   // Bouton Mon Profil visible pour tous
   document.getElementById('btn-profil') && (document.getElementById('btn-profil').style.display='');
   document.getElementById('nav-acces').style.display=perms.acces?'':'none';
@@ -2614,14 +2617,14 @@ async function saveAppConfig() {
 }
 
 async function loadConfigUI() {
+  if (currentUser.role !== 'president') return;
   await loadAppConfig();
   const salEl  = document.getElementById('cfg-sal-url');
   const poleEl = document.getElementById('cfg-pole-url');
-  if (salEl)  salEl.value  = SAL_CSV_URL;
-  if (poleEl) poleEl.value = POLE_CSV_URL;
-  // Visible uniquement pour les présidents
+  if (salEl)  salEl.value  = SAL_CSV_URL  || '';
+  if (poleEl) poleEl.value = POLE_CSV_URL || '';
   const card = document.getElementById('card-config');
-  if (card) card.style.display = currentUser.role === 'president' ? '' : 'none';
+  if (card) card.style.display = '';
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
