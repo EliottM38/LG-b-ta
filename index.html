@@ -686,7 +686,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <option value="vice_president">Vice-Président</option>
       <option value="gestionnaire_parc">Gestionnaire de parc</option>
       <option value="comptable">Comptable</option>
-      <option value="staff_tm">Staff TM (visualisation uniquement)</option>
+      <option value="staff_tm">Staff TM (lecture seule)</option>
     </select>
   </div>
   <div class="modal-footer">
@@ -743,21 +743,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
 
 
-<!-- MODAL MESSAGE BIENVENUE -->
-<div class="modal-bg" id="modal-welcome">
-<div class="modal" style="max-width:640px">
-  <h2>🎉 Message de bienvenue</h2>
-  <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Copiez ce message et envoyez-le au membre sur le forum.</p>
-  <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px">
-    <div style="background:linear-gradient(135deg,#080f28,#0d1f4e,#152a6b);padding:22px 28px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;bottom:0;left:175px;width:4px;background:linear-gradient(180deg,#c9a84c,#e8c96d);transform:skewX(-15deg)"></div>
-      <div style="position:absolute;top:0;bottom:0;left:190px;width:2px;background:rgba(201,168,76,.3);transform:skewX(-15deg)"></div>
-      <img id="wm-logo" style="width:72px;height:72px;border-radius:50%;object-fit:contain;background:#fff;padding:4px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.3)">
-      <div>
-        <div style="font-size:24px;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase">Sujet membre</div>
-        <div style="width:50px;height:2px;background:linear-gradient(90deg,#c9a84c,#e8c96d);margin:7px 0"></div>
-        <div style="font-size:12px;color:#c9a84c;font-weight:600;letter-spacing:2px;text-transform:uppercase">Lutèce Group</div>
-      </div>
     </div>
     <div style="padding:18px 22px;background:#fff">
       <div id="wm-body" style="font-size:14px;color:#1a1a1a;line-height:1.8"></div>
@@ -778,26 +763,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
 </div>
 
 
-<!-- MODAL CONSENTEMENT RGPD -->
-<div class="modal-bg" id="modal-consent" style="z-index:300;display:none!important">
-<div class="modal" style="max-width:560px">
-  <h2>⚖️ Information RGPD — Consentement requis</h2>
-  <div style="font-size:13px;color:var(--text-sec);line-height:1.9;margin-bottom:16px">
-    <p>Conformément à la directive <strong>DIR_22_005_26RA</strong> de l'administration Transport-Manager, vous êtes informé(e) que :</p>
-    <ul style="margin:10px 0 10px 20px;list-style:disc">
-      <li>Cet outil (<strong>Lutèce Group Staff</strong>) stocke des données liées au jeu (pseudos, niveaux, forfaits, transactions)</li>
-      <li>Ces données sont hébergées sur <strong>Supabase (EU Ireland)</strong> et <strong>Vercel (USA)</strong></li>
-      <li>L'outil a été développé avec l'assistance de l'IA <strong>Claude (Anthropic)</strong> — aucune donnée joueur n'a été transmise à l'IA</li>
-      <li>Vous disposez d'un <strong>droit à l'oubli</strong> (suppression de vos données) à tout moment</li>
-      <li>Cet outil est déclaré auprès de l'administration TM</li>
-    </ul>
-    <p>En cliquant sur "J'accepte", vous consentez au traitement de vos données dans le cadre de la gestion de l'alliance Lutèce Group.</p>
-  </div>
-  <div class="modal-footer" style="flex-direction:column;gap:10px">
-    <button class="btn btn-primary" style="width:100%" onclick="acceptConsent()">✅ J'accepte et je continue</button>
-    <button class="btn btn-danger" style="width:100%" onclick="refuseConsent()">❌ Je refuse — me déconnecter</button>
-  </div>
-</div>
 </div>
 
 <!-- MODAL OBJECTIF -->
@@ -972,6 +937,24 @@ let membres = [], factures = [], staff = [], interimaires = [];
 let editMId = null;
 let poleData = [];
 
+
+// ============================================================
+// CONFIG DYNAMIQUE (URLs GForms stockées dans Supabase)
+// ============================================================
+async function loadAppConfig() {
+  try {
+    const { data } = await sb.from('app_config').select('*');
+    if (data) {
+      data.forEach(row => {
+        if (row.key === 'sal_csv_url')  SAL_CSV_URL  = row.value;
+        if (row.key === 'pole_csv_url') POLE_CSV_URL = row.value;
+      });
+    }
+  } catch(e) {
+    console.warn('Config non chargée:', e.message);
+  }
+}
+
 function isReadOnly() { return currentUser && currentUser.role === 'staff_tm'; }
 function tod() { return new Date().toISOString().slice(0,10); }
 function fd(d) { if(!d)return'—'; const[y,m,j]=(d||'').split('-'); return j+'/'+m+'/'+y; }
@@ -1063,6 +1046,8 @@ async function startApp(){
   document.getElementById('nav-objectifs').style.display=perms.objectifs?'':'none';
   document.getElementById('nav-historique').style.display=perms.historique?'':'none';
   document.getElementById('nav-rgpd').style.display='';
+  // Bouton Mon Profil visible pour tous
+  document.getElementById('btn-profil') && (document.getElementById('btn-profil').style.display='');
   document.getElementById('nav-acces').style.display=perms.acces?'':'none';
   document.getElementById('btn-add-membre').style.display=(perms.membres&&currentUser.role!=='comptable'&&currentUser.role!=='gestionnaire_parc'&&!isReadOnly())?'':'none';
   document.getElementById('btn-add-facture').style.display=isReadOnly()?'none':'';
@@ -1073,7 +1058,7 @@ async function startApp(){
   } else {
     showPage('membres',document.getElementById('nav-membres'));
   }
-  showConsentIfNeeded();
+  await loadAppConfig();
   await Promise.all([loadMembres(),loadFactures(),loadInterimaires(),loadStaff(),loadStatutsAndNotes()]);
   await loadHistorique();
 }
@@ -1086,7 +1071,7 @@ function showPage(id,btn){
   if(id==='membres')    renderMembres();
   if(id==='factures')   renderFactures();
   if(id==='interimaires')renderInterimaires();
-  if(id==='acces')      renderStaff();
+  if(id==='acces')      { renderStaff(); loadConfigUI(); }
   if(id==='objectifs')  loadObjectifs();
   if(id==='historique') loadHistorique();
   if(id==='sal')        loadSAL();
@@ -1219,7 +1204,7 @@ async function saveMembre(){
   toast('Membre enregistré ✓');
   closeModal('modal-membre');
   await loadMembres();
-  if(wasAdd) setTimeout(()=>showWelcomeMessage(data),300);
+
 }
 
 async function deleteMembre(id){
@@ -1873,8 +1858,8 @@ function exportInterimJpeg(id) {
 // GOOGLE FORMS — Lecture CSV publique
 // ============================================================
 // URLs CSV publiées directement (pas de CORS)
-const SAL_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT5rDBERptUUWsxiBKZycecsx1lpUnVrPxkZybcoYGG--qcUb58wKkEsihLPxkEwX9URl6hImuis1GC/pub?output=csv';
-const POLE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDvkHlXCY4w6GKqSCVmJ-L8uXzz877SBw8dcu_3fIvkyz_-Hci50QW3sxOjh5l6Mv1e6fJfDPQX5ID/pub?output=csv';
+let SAL_CSV_URL  = ''; // Chargé depuis Supabase
+let POLE_CSV_URL = ''; // Chargé depuis Supabase
 
 // Clé Supabase pour stocker les statuts des réponses
 // Variables sélection SAL & Pôle
@@ -2276,29 +2261,6 @@ function goToPendingRequest(pseudo,event){
 }
 
 // ============================================================
-// MESSAGE DE BIENVENUE
-// ============================================================
-function showWelcomeMessage(m){
-  const wmLogo=document.getElementById('wm-logo');
-  if(wmLogo)wmLogo.src=LOGO;
-  const forum=m.pseudoForum||m.pseudo_forum||m.pseudo||'—';
-  const forfait=m.forfait||'Standard';
-  const niveau=m.niveau||'—';
-  const referent=m.referent||'Le staff Lutèce Group';
-  const wmBody=document.getElementById('wm-body');
-  if(wmBody)wmBody.innerHTML=`<p><strong>Bienvenue @${forum} dans votre sujet membre.</strong> Ce sujet récapitulera toutes les dernières opérations qui ont eu lieu pour vous.</p><p style="margin-top:10px"><strong>Pour profiter de nos services c'est ici :</strong></p>`;
-  const wmCopy=document.getElementById('wm-copy');
-  if(wmCopy)wmCopy.value=`Bienvenue @${forum} dans votre sujet membre. Ce sujet récapitulera toutes les dernières opérations qui ont eu lieu pour vous.\n\nPour profiter de nos services c'est ici :\nhttps://weballiance.transport-manager.net/lutecegroup/ | SITE WEB\n\n---\nForfait : ${forfait} | Niveau : ${niveau} | Référent : ${referent}`;
-  const modal=document.getElementById('modal-welcome');
-  if(modal)modal.classList.add('open');
-}
-function copyWelcomeMsg(){
-  const ta=document.getElementById('wm-copy');if(!ta)return;
-  ta.select();
-  navigator.clipboard.writeText(ta.value).then(()=>toast('Texte copié ✓')).catch(()=>{document.execCommand('copy');toast('Texte copié ✓');});
-}
-
-// ============================================================
 // PROFIL
 // ============================================================
 function openProfil(){
@@ -2530,29 +2492,9 @@ async function deleteSelectedPole(){
 // ============================================================
 // RGPD — Consentement & Droit à l'oubli
 // ============================================================
-function checkConsent() {
-  const key = 'lg_consent_' + (currentUser?.id || '');
-  return localStorage.getItem(key) === 'accepted';
-}
 
-function acceptConsent() {
-  const key = 'lg_consent_' + (currentUser?.id || '');
-  localStorage.setItem(key, 'accepted');
-  closeModal('modal-consent');
-}
 
-function refuseConsent() {
-  doLogout();
-  closeModal('modal-consent');
-}
 
-function showConsentIfNeeded() {
-  if (!checkConsent()) {
-    const modal = document.getElementById('modal-consent');
-    modal.style.removeProperty('display');
-    modal.classList.add('open');
-  }
-}
 
 async function exercerDroitOubli() {
   const sel = document.getElementById('rgpd-membre');
@@ -2680,6 +2622,36 @@ async function sbSafe(fn, context='') {
 
 
 
+
+
+async function saveAppConfig() {
+  const salUrl  = document.getElementById('cfg-sal-url').value.trim();
+  const poleUrl = document.getElementById('cfg-pole-url').value.trim();
+  const res     = document.getElementById('cfg-result');
+  if (!salUrl || !poleUrl) { res.textContent = 'Les deux liens sont obligatoires.'; res.style.color='#991b1b'; return; }
+  try {
+    await sb.from('app_config').upsert({key:'sal_csv_url',  value:salUrl},  {onConflict:'key'});
+    await sb.from('app_config').upsert({key:'pole_csv_url', value:poleUrl}, {onConflict:'key'});
+    SAL_CSV_URL  = salUrl;
+    POLE_CSV_URL = poleUrl;
+    res.textContent = '✅ Liens sauvegardés avec succès !';
+    res.style.color = '#166534';
+  } catch(e) {
+    res.textContent = 'Erreur : ' + e.message;
+    res.style.color = '#991b1b';
+  }
+}
+
+async function loadConfigUI() {
+  await loadAppConfig();
+  const salEl  = document.getElementById('cfg-sal-url');
+  const poleEl = document.getElementById('cfg-pole-url');
+  if (salEl)  salEl.value  = SAL_CSV_URL;
+  if (poleEl) poleEl.value = POLE_CSV_URL;
+  // Masquer la config aux non-présidents
+  const card = document.getElementById('card-config');
+  if (card) card.style.display = currentUser.role === 'president' ? '' : 'none';
+}
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
