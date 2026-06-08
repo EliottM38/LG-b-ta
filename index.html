@@ -2627,8 +2627,16 @@ async function saveAppConfig() {
   const res     = document.getElementById('cfg-result');
   if (!salUrl || !poleUrl) { res.textContent = 'Les deux liens sont obligatoires.'; res.style.color='#991b1b'; return; }
   try {
-    await sb.from('app_config').upsert({key:'sal_csv_url',  value:salUrl},  {onConflict:'key'});
-    await sb.from('app_config').upsert({key:'pole_csv_url', value:poleUrl}, {onConflict:'key'});
+    // Supprimer puis insérer pour garantir la mise à jour
+    await sb.from('app_config').delete().eq('key', 'sal_csv_url');
+    await sb.from('app_config').delete().eq('key', 'pole_csv_url');
+    const r1 = await sb.from('app_config').insert({key:'sal_csv_url',  value:salUrl});
+    const r2 = await sb.from('app_config').insert({key:'pole_csv_url', value:poleUrl});
+    if (r1.error || r2.error) {
+      res.textContent = 'Erreur : ' + (r1.error?.message || r2.error?.message);
+      res.style.color = '#991b1b';
+      return;
+    }
     SAL_CSV_URL  = salUrl;
     POLE_CSV_URL = poleUrl;
     res.textContent = '✅ Liens sauvegardés avec succès !';
