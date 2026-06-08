@@ -1117,6 +1117,9 @@ function renderMembres(){
       </td>
     </tr>`;
   }).join('');
+  // Config GForms visible uniquement pour les présidents
+  const cfgCard = document.getElementById('card-config');
+  if (cfgCard && currentUser) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
 }
 
 function openAddMembre(){
@@ -1626,8 +1629,6 @@ function renderStaff(){
     </tr>`;
   }).join('');
 }
-  const cfgCard = document.getElementById('card-config');
-  if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
 
 function openAddStaff(){document.getElementById('modal-staff').classList.add('open');}
 
