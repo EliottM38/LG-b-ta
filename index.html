@@ -2639,14 +2639,18 @@ async function saveAppConfig() {
 }
 
 async function loadConfigUI() {
-  if (currentUser.role !== 'president') return;
-  await loadAppConfig();
+  if (!currentUser || currentUser.role !== 'president') return;
+  // Afficher d'abord la carte
+  const card = document.getElementById('card-config');
+  if (card) card.style.display = '';
+  // Puis charger les valeurs
+  try {
+    await loadAppConfig();
+  } catch(e) {}
   const salEl  = document.getElementById('cfg-sal-url');
   const poleEl = document.getElementById('cfg-pole-url');
   if (salEl)  salEl.value  = SAL_CSV_URL  || '';
   if (poleEl) poleEl.value = POLE_CSV_URL || '';
-  const card = document.getElementById('card-config');
-  if (card) card.style.display = '';
 }
 
 
