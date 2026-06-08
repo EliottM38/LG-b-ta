@@ -587,6 +587,53 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <table><thead><tr><th>Identifiant</th><th>Nom affiché</th><th>Rôle</th><th>Statut</th><th>Actions</th></tr></thead>
     <tbody id="tbody-staff"></tbody></table>
   </div>
+
+  <!-- Configuration Google Forms — visible président uniquement -->
+  <div class="card" id="card-config" style="margin-top:24px;display:none">
+    <div class="card-header">
+      <span class="card-title">⚙️ Liens Google Forms (CSV)</span>
+    </div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">
+        Configurez ici les liens CSV de vos Google Forms. Ils sont stockés en base de données — aucune clé dans le code.
+      </p>
+      <div class="field">
+        <label>Lien CSV — Formulaire SAL</label>
+        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV — la conversion est automatique" style="width:100%">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Vous pouvez coller le lien pubhtml, il sera converti automatiquement en CSV</div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
+        <input id="cfg-pole-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" style="width:100%">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveAppConfig()">💾 Sauvegarder</button>
+        <button class="btn" onclick="loadConfigUI()">↻ Recharger</button>
+      </div>
+      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- Config GForms — présidents uniquement -->
+  <div class="card" id="card-config" style="margin-top:24px;display:none">
+    <div class="card-header"><span class="card-title">⚙️ Liens Google Forms (CSV)</span></div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données — aucune URL dans le code source.</p>
+      <div class="field">
+        <label>Lien CSV — SAL</label>
+        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
+        <input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
+      </div>
+      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px">💾 Sauvegarder</button>
+      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
 </div>
 
 </div><!-- /app -->
@@ -852,52 +899,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <button class="btn btn-primary" onclick="saveInterim()">Créer la demande</button>
   </div>
 </div>
-
-  <!-- Configuration Google Forms — visible président uniquement -->
-  <div class="card" id="card-config" style="margin-top:24px;display:none">
-    <div class="card-header">
-      <span class="card-title">⚙️ Liens Google Forms (CSV)</span>
-    </div>
-    <div style="padding:20px">
-      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">
-        Configurez ici les liens CSV de vos Google Forms. Ils sont stockés en base de données — aucune clé dans le code.
-      </p>
-      <div class="field">
-        <label>Lien CSV — Formulaire SAL</label>
-        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV — la conversion est automatique" style="width:100%">
-        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Vous pouvez coller le lien pubhtml, il sera converti automatiquement en CSV</div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
-        <input id="cfg-pole-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" style="width:100%">
-      </div>
-      <div style="display:flex;gap:10px;margin-top:14px">
-        <button class="btn btn-primary" onclick="saveAppConfig()">💾 Sauvegarder</button>
-        <button class="btn" onclick="loadConfigUI()">↻ Recharger</button>
-      </div>
-      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
-    </div>
-  </div>
-
-</div>
-
-  <!-- Config GForms — présidents uniquement -->
-  <div class="card" id="card-config" style="margin-top:24px;display:none">
-    <div class="card-header"><span class="card-title">⚙️ Liens Google Forms (CSV)</span></div>
-    <div style="padding:20px">
-      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données — aucune URL dans le code source.</p>
-      <div class="field">
-        <label>Lien CSV — SAL</label>
-        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
-      </div>
-      <div class="field" style="margin-top:10px">
-        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
-        <input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
-      </div>
-      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px">💾 Sauvegarder</button>
-      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
-    </div>
-  </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
