@@ -881,6 +881,24 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
 </div>
 
+  <!-- Config GForms — présidents uniquement -->
+  <div class="card" id="card-config" style="margin-top:24px;display:none">
+    <div class="card-header"><span class="card-title">⚙️ Liens Google Forms (CSV)</span></div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données — aucune URL dans le code source.</p>
+      <div class="field">
+        <label>Lien CSV — SAL</label>
+        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
+        <input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
+      </div>
+      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px">💾 Sauvegarder</button>
+      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 <div id="error-bar"></div>
@@ -979,7 +997,6 @@ function doLogout(){
 }
 
 async function checkSession(){
-  if(!sb) return false;
   const stored=localStorage.getItem('lg_session');
   if(!stored) return false;
   const sess=JSON.parse(stored);
@@ -1028,6 +1045,7 @@ async function startApp(){
   } else {
     showPage('membres',document.getElementById('nav-membres'));
   }
+  await loadAppConfig();
   await loadAppConfig();
   await Promise.all([loadMembres(),loadFactures(),loadInterimaires(),loadStaff(),loadStatutsAndNotes()]);
   await loadHistorique();
@@ -1608,12 +1626,8 @@ function renderStaff(){
     </tr>`;
   }).join('');
 }
-  // Afficher config GForms pour les présidents
   const cfgCard = document.getElementById('card-config');
-  if (cfgCard) {
-    cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
-    if (currentUser.role === 'president') loadConfigUI();
-  }
+  if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
 
 function openAddStaff(){document.getElementById('modal-staff').classList.add('open');}
 
@@ -1834,8 +1848,6 @@ function exportInterimJpeg(id) {
 // GOOGLE FORMS — Lecture CSV publique
 // ============================================================
 // URLs CSV publiées directement (pas de CORS)
-let SAL_CSV_URL  = ''; // Chargé depuis Supabase
-let POLE_CSV_URL = ''; // Chargé depuis Supabase
 
 // Clé Supabase pour stocker les statuts des réponses
 // Variables sélection SAL & Pôle
@@ -2008,6 +2020,8 @@ function getAllCols(r, name) {
 }
 
 const GAS_PROXY = 'https://script.google.com/macros/s/AKfycbzHrvgKDmK-TXZ7UFQWdkiepPwKZ0whGzkirBJMOnIVanIxC1LJIhRO4NwXZ0HoGCfI/exec';
+let SAL_CSV_URL  = '';
+let POLE_CSV_URL = '';
 
 async function fetchCSV(url) {
   try {
@@ -2634,6 +2648,61 @@ async function loadConfigUI() {
   if (card) card.style.display = '';
 }
 
+
+// ============================================================
+// CONFIG GFORMS — URLs stockées dans Supabase
+// ============================================================
+async function loadAppConfig() {
+  try {
+    const { data } = await sb.from('app_config').select('*');
+    if (data) {
+      data.forEach(r => {
+        if (r.key === 'sal_csv_url')  SAL_CSV_URL  = r.value;
+        if (r.key === 'pole_csv_url') POLE_CSV_URL = r.value;
+      });
+    }
+  } catch(e) { console.warn('Config non chargée:', e.message); }
+}
+
+async function saveAppConfig() {
+  let salUrl  = document.getElementById('cfg-sal-url').value.trim();
+  let poleUrl = document.getElementById('cfg-pole-url').value.trim();
+  if (!salUrl || !poleUrl) {
+    const r = document.getElementById('cfg-result');
+    r.textContent = 'Les deux liens sont obligatoires.';
+    r.style.color = '#991b1b'; return;
+  }
+  // Convertir pubhtml -> csv automatiquement
+  salUrl  = salUrl.replace('/pubhtml', '/pub?output=csv');
+  poleUrl = poleUrl.replace('/pubhtml', '/pub?output=csv');
+  if (!salUrl.includes('output=csv'))  salUrl  += (salUrl.includes('?')  ? '&' : '?') + 'output=csv';
+  if (!poleUrl.includes('output=csv')) poleUrl += (poleUrl.includes('?') ? '&' : '?') + 'output=csv';
+  try {
+    await sb.from('app_config').upsert({key:'sal_csv_url',  value:salUrl},  {onConflict:'key'});
+    await sb.from('app_config').upsert({key:'pole_csv_url', value:poleUrl}, {onConflict:'key'});
+    SAL_CSV_URL  = salUrl;
+    POLE_CSV_URL = poleUrl;
+    const r = document.getElementById('cfg-result');
+    r.textContent = '✅ Liens sauvegardés !';
+    r.style.color = '#166534';
+  } catch(e) {
+    const r = document.getElementById('cfg-result');
+    r.textContent = 'Erreur : ' + e.message;
+    r.style.color = '#991b1b';
+  }
+}
+
+async function loadConfigUI() {
+  if (currentUser.role !== 'president') return;
+  await loadAppConfig();
+  const s = document.getElementById('cfg-sal-url');
+  const p = document.getElementById('cfg-pole-url');
+  if (s) s.value = SAL_CSV_URL  || '';
+  if (p) p.value = POLE_CSV_URL || '';
+  const card = document.getElementById('card-config');
+  if (card) card.style.display = '';
+}
+
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
 // ============================================================
@@ -2642,13 +2711,11 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // Fonction d'initialisation appelée après config.js chargé
 window._startInit = async function() {
   try {
-    if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
-      document.getElementById('login-screen').style.display = 'block';
-      const e = document.getElementById('login-err');
-      if(e){ e.textContent = 'Config manquante (URL: '+(window.SUPABASE_URL?'OK':'VIDE')+', KEY: '+(window.SUPABASE_KEY?'OK':'VIDE')+')'; e.style.display='block'; }
-      return;
-    }
-    sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    // Initialiser sb avec les clés Vercel
+    sb = supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_KEY
+    );
     const ok = await checkSession();
     if (ok) { startApp(); }
     else {
