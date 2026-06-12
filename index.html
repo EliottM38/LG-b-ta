@@ -1745,6 +1745,7 @@ function exportJpeg(id){
 
   setTimeout(()=>{
     const pdfEl=document.getElementById('pdf-content');
+    try{console.log('exportJpeg - facture object',d);const rect=pdfEl.getBoundingClientRect();console.log('exportJpeg - pdfEl rect',rect);Array.from(pdfEl.querySelectorAll('*')).forEach(el=>{try{const bg=getComputedStyle(el).backgroundImage||'';if(bg.includes('gradient'))console.log('exportJpeg - gradient on',el, bg);}catch(e){}});}catch(e){}
     pdfEl.style.width='1600px';
     html2canvas(pdfEl,{scale:6,useCORS:true,backgroundColor:'#ffffff',width:1600,logging:false,imageTimeout:0,letterRendering:true,allowTaint:false}).then(canvas=>{
       pdfEl.style.width='800px';
@@ -1826,6 +1827,7 @@ function exportInterimJpeg(id) {
 
   setTimeout(() => {
     const pdfEl2 = document.getElementById('pdf-content');
+    try{console.log('exportInterimJpeg - interim object',d);const rect=pdfEl2.getBoundingClientRect();console.log('exportInterimJpeg - pdfEl2 rect',rect);Array.from(pdfEl2.querySelectorAll('*')).forEach(el=>{try{const bg=getComputedStyle(el).backgroundImage||'';if(bg.includes('gradient'))console.log('exportInterimJpeg - gradient on',el, bg);}catch(e){}});}catch(e){}
     pdfEl2.style.width = '1200px';
     html2canvas(pdfEl2, {
       scale: 4,
