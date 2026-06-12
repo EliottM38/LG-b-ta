@@ -942,7 +942,11 @@ async function loadAppConfig() {
 function isReadOnly() { return currentUser && currentUser.role === 'staff_tm'; }
 function tod() { return new Date().toISOString().slice(0,10); }
 function fd(d) { if(!d)return'—'; const[y,m,j]=(d||'').split('-'); return j+'/'+m+'/'+y; }
-function fe(v) { return Number(v).toLocaleString('fr-FR')+' €'; }
+function fe(v) {
+  const n = Number(v);
+  if (!isFinite(n)) return '—';
+  return n.toLocaleString('fr-FR') + ' €';
+}
 function ini(s){ return (s||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
 function avc(id){ return 'av'+(id%5); }
 
