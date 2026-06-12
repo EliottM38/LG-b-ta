@@ -431,7 +431,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <span id="sal-select-count" style="font-size:13px;font-weight:700;color:#0a1f5c">0 sélectionné(s)</span>
     <button class="btn btn-sm" onclick="selectAllSAL()">Tout sélectionner</button>
     <button class="btn btn-sm" onclick="deselectAllSAL()">Désélectionner</button>
-    <button class="btn btn-sm btn-danger" onclick="deleteSelectedSAL()">🗑 Supprimer la sélection</button>
+    <button class="btn btn-sm btn-danger" onclick="deleteSelectedSAL()"> Supprimer la sélection</button>
     <button class="btn btn-sm" onclick="toggleSALSelectMode(false)" style="margin-left:auto">Annuler</button>
   </div>
   <div style="margin-bottom:10px">
@@ -468,7 +468,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <span id="pole-select-count" style="font-size:13px;font-weight:700;color:#0a1f5c">0 sélectionné(s)</span>
     <button class="btn btn-sm" onclick="selectAllPole()">Tout sélectionner</button>
     <button class="btn btn-sm" onclick="deselectAllPole()">Désélectionner</button>
-    <button class="btn btn-sm btn-danger" onclick="deleteSelectedPole()">🗑 Supprimer la sélection</button>
+    <button class="btn btn-sm btn-danger" onclick="deleteSelectedPole()"> Supprimer la sélection</button>
     <button class="btn btn-sm" onclick="togglePoleSelectMode(false)" style="margin-left:auto">Annuler</button>
   </div>
   <div style="margin-bottom:10px">
@@ -484,7 +484,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <h1>Objectifs du mois</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap" id="obj-actions">
       <button class="btn btn-primary" id="btn-add-obj" onclick="openAddObjectif()">+ Ajouter un objectif</button>
-      <button class="btn btn-export" onclick="exportObjectifsPDF()">⬇ Exporter PDF</button>
+      <button class="btn btn-export" onclick="exportObjectifsPDF()"> Exporter PDF</button>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
@@ -526,7 +526,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <div class="page-header"><h1>Conformité RGPD & Mentions légales</h1></div>
 
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><span class="card-title">📋 Informations légales — DIR_22_005_26RA</span></div>
+    <div class="card-header"><span class="card-title"> Informations légales — DIR_22_005_26RA</span></div>
     <div style="padding:20px;font-size:13px;line-height:1.9;color:var(--text-sec)">
       <p><strong style="color:var(--navy)">Nom de l'outil :</strong> Lutèce Group — Espace Staff</p>
       <p><strong style="color:var(--navy)">URL :</strong> lutece-groupe-gestion-staff.vercel.app</p>
@@ -539,7 +539,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
 
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><span class="card-title">🔒 Droits des membres</span></div>
+    <div class="card-header"><span class="card-title"> Droits des membres</span></div>
     <div style="padding:20px;font-size:13px;line-height:1.9;color:var(--text-sec)">
       <p>Conformément au RGPD (Art. 17), tout membre peut exercer son <strong>droit à l'oubli</strong> en demandant la suppression de toutes ses données.</p>
       <p style="margin-top:8px">Les données stockées sont limitées aux informations nécessaires à la gestion de l'alliance et ne sont jamais transmises à des tiers.</p>
@@ -567,7 +567,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
 
   <div class="card">
-    <div class="card-header"><span class="card-title">📊 Traçabilité des accès</span></div>
+    <div class="card-header"><span class="card-title"> Traçabilité des accès</span></div>
     <div style="padding:20px;font-size:13px;color:var(--text-sec);line-height:1.9">
       <p>Cet outil conserve un historique de toutes les actions réalisées (ajout/modification/suppression de membres, création de factures) consultable dans l'onglet <strong>Historique</strong>.</p>
       <p style="margin-top:8px">Chaque action est horodatée et attribuée au membre du staff qui l'a effectuée.</p>
@@ -591,7 +591,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <!-- Configuration Google Forms — visible président uniquement -->
   <div class="card" id="card-config" style="margin-top:24px;display:none">
     <div class="card-header">
-      <span class="card-title">⚙️ Liens Google Forms (CSV)</span>
+      <span class="card-title"> Liens Google Forms (CSV)</span>
     </div>
     <div style="padding:20px">
       <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">
@@ -607,7 +607,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
         <input id="cfg-pole-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" style="width:100%">
       </div>
       <div style="display:flex;gap:10px;margin-top:14px">
-        <button class="btn btn-primary" onclick="saveAppConfig()">💾 Sauvegarder</button>
+        <button class="btn btn-primary" onclick="saveAppConfig()"> Sauvegarder</button>
         <button class="btn" onclick="loadConfigUI()">↻ Recharger</button>
       </div>
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
@@ -618,7 +618,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
   <!-- Config GForms — présidents uniquement -->
   <div class="card" id="card-config" style="margin-top:24px;display:none">
-    <div class="card-header"><span class="card-title">⚙️ Liens Google Forms (CSV)</span></div>
+    <div class="card-header"><span class="card-title"> Liens Google Forms (CSV)</span></div>
     <div style="padding:20px">
       <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données — aucune URL dans le code source.</p>
       <div class="field">
@@ -629,7 +629,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
         <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
         <input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
       </div>
-      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px">💾 Sauvegarder</button>
+      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px"> Sauvegarder</button>
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
@@ -645,7 +645,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <p style="font-size:12px;color:#aaa;margin-bottom:14px">* Champs obligatoires</p>
   <div class="sep">Identité</div>
   <div class="row2">
-    <div class="field"><label>Pseudo in-game *</label><input id="m-pseudo"></div>
+    <div class="field"><label>Pseudo jeu *</label><input id="m-pseudo"></div>
     <div class="field"><label>Pseudo forum</label><input id="m-pseudo-forum"></div>
   </div>
   <div class="row2">
@@ -909,10 +909,9 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
 <script>
 // ============================================================
-// CONFIG SUPABASE — Remplacez ces 2 valeurs par les vôtres
+// CONFIG SUPABASE 
 // ============================================================
-// Initialisation Supabase — config.js est chargé avant ce script
-let sb = null; // Initialisé après config.js
+let sb = null;
 
 // ============================================================
 // ÉTAT GLOBAL
@@ -961,7 +960,6 @@ async function doLogin(){
   const pass = document.getElementById('login-pass').value;
   if(!user||!pass) return;
 
-  // Vérifier que Supabase est configuré
   if(!window.SUPABASE_URL || !window.SUPABASE_KEY) {
     showLoginErr('Erreur de configuration serveur.');
     return;
@@ -1118,7 +1116,7 @@ function renderMembres(){
       </td>
     </tr>`;
   }).join('');
-  // Config GForms visible uniquement pour les présidents
+  // Config GForms
   const cfgCard = document.getElementById('card-config');
   if (cfgCard && currentUser) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
 }
@@ -1680,7 +1678,6 @@ function exportJpeg(id){
     }];
   }
 
-  // Générer les lignes du tableau PDF
   const tRows = lignes.map(l => `
     <tr class="${l.sousTotal===0?'hl':''}">
       <td><strong>${l.type||'—'}</strong>${l.modele?' ('+l.modele+')':''}</td>
@@ -1691,16 +1688,15 @@ function exportJpeg(id){
     </tr>`
   ).join('');
 
-  // Résumé des véhicules pour l'en-tête
+
   const resumeVeh = lignes.map(l=>`${l.nb||1} × ${l.type||'—'}`).join(', ');
 
   document.getElementById('pdf-content').innerHTML=`<div class="pdf">
     <div class="pdf-header">
       <div class="pdf-logo-wrap">
-        <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
+        <img class="pdf-logo-img" crossorigin="anonymous" src="${LOGO}" alt="Lutèce Group">
         <div class="pdf-logo-texts">
           <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
-          <div class="pdf-logo-sub">Opérateur de transport · Alliance TransportManager.net</div>
         </div>
       </div>
       <div class="pdf-ref-block">
@@ -1739,8 +1735,7 @@ function exportJpeg(id){
       ${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}
     </div>
     <div class="pdf-footer">
-      <span>Lutèce Group · Alliance TransportManager.net · Document officiel</span>
-      <span>Généré le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span>
+      <span>Créée le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span>
     </div>
   </div>`;
 
@@ -1751,7 +1746,14 @@ function exportJpeg(id){
       pdfEl.style.width='800px';
       const a=document.createElement('a');
       a.download=`facture-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
-      a.href=canvas.toDataURL('image/jpeg',1.0);a.click();
+      a.href=canvas.toDataURL('image/jpeg',1.0);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }).catch(err=>{
+      console.error('exportJpeg error',err);
+      pdfEl.style.width='800px';
+      toast('Erreur lors de l\'export JPEG (voir console).');
     });
   },500);
 }
@@ -1769,10 +1771,9 @@ function exportInterimJpeg(id) {
   document.getElementById('pdf-content').innerHTML = `<div class="pdf">
     <div class="pdf-header">
       <div class="pdf-logo-wrap">
-        <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
+        <img class="pdf-logo-img" crossorigin="anonymous" src="${LOGO}" alt="Lutèce Group">
         <div class="pdf-logo-texts">
           <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
-          <div class="pdf-logo-sub">Opérateur de transport · Alliance TransportManager.net</div>
         </div>
       </div>
       <div class="pdf-ref-block">
@@ -1815,8 +1816,7 @@ function exportInterimJpeg(id) {
       ${d.notes ? `<div class="pdf-stitle" style="margin-top:20px">Notes & Détails de mission</div><div class="pdf-notes-box">${d.notes}</div>` : ''}
     </div>
     <div class="pdf-footer">
-      <span>Lutèce Group · Alliance TransportManager.net · Document officiel</span>
-      <span>Généré le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span>
+      <span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span>
     </div>
   </div>`;
 
@@ -1837,7 +1837,13 @@ function exportInterimJpeg(id) {
       const a = document.createElement('a');
       a.download = `interim-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
       a.href = canvas.toDataURL('image/jpeg', 1.0);
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+    }).catch(err => {
+      console.error('exportInterimJpeg error', err);
+      pdfEl2.style.width = '800px';
+      toast('Erreur lors de l\'export JPEG (voir console).');
     });
   }, 300);
 }
@@ -1862,7 +1868,6 @@ let salStatuts  = {};
 let poleStatuts = {};
 
 // Lire les statuts sauvegardés dans Supabase
-// loadStatuts remplacée par loadStatutsAndNotes ci-dessus
 
 // Notes staff — chargées en même temps que les statuts
 let salNotes  = {};
@@ -2482,10 +2487,8 @@ async function deleteSelectedPole(){
 
 
 // ============================================================
-// RGPD — Consentement & Droit à l'oubli
+// RGPD
 // ============================================================
-
-
 
 
 async function exercerDroitOubli() {
@@ -2510,14 +2513,14 @@ async function exercerDroitOubli() {
     await logAction('membre_suppression', m.pseudo, `Droit à l'oubli RGPD exercé — toutes les données de ${m.pseudo} supprimées`);
     membres = membres.filter(x => x.id !== id);
     res.style.background = '#dcfce7';
-    res.innerHTML = `✅ Toutes les données de <strong>${m.pseudo}</strong> ont été supprimées conformément au droit à l'oubli (Art. 17 RGPD). Action tracée dans l'historique.`;
+    res.innerHTML = ` Toutes les données de <strong>${m.pseudo}</strong> ont été supprimées conformément au droit à l'oubli (Art. 17 RGPD). Action tracée dans l'historique.`;
     // Rafraîchir le select
     loadRGPDSelect();
     renderMembres();
     await loadFactures();
   } catch(e) {
     res.style.background = '#fee2e2';
-    res.innerHTML = '❌ Erreur : ' + e.message;
+    res.innerHTML = ' Erreur : ' + e.message;
   }
 }
 
@@ -2527,7 +2530,6 @@ function loadRGPDSelect() {
   sel.innerHTML = '<option value="">— Sélectionner un membre —</option>' +
     membres.map(m => `<option value="${m.id}">${m.pseudo} — ${m.entreprise||''}</option>`).join('');
 }
-
 
 // ============================================================
 // SYSTÈME D'ERREURS GLOBAL
@@ -2585,32 +2587,6 @@ async function sbSafe(fn, context='') {
     return { data: null, error: e };
   }
 }
-
-
-// ============================================================
-// API TRANSPORT MANAGER
-// ============================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2697,7 +2673,7 @@ async function saveAppConfig() {
     SAL_CSV_URL  = salUrl;
     POLE_CSV_URL = poleUrl;
     const r = document.getElementById('cfg-result');
-    r.textContent = '✅ Liens sauvegardés !';
+    r.textContent = ' Liens sauvegardés !';
     r.style.color = '#166534';
   } catch(e) {
     const r = document.getElementById('cfg-result');
