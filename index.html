@@ -925,21 +925,6 @@ let poleData = [];
 
 // ============================================================
 // CONFIG DYNAMIQUE (URLs GForms stockées dans Supabase)
-// ============================================================
-async function loadAppConfig() {
-  try {
-    const { data } = await sb.from('app_config').select('*');
-    if (data) {
-      data.forEach(row => {
-        if (row.key === 'sal_csv_url')  SAL_CSV_URL  = row.value;
-        if (row.key === 'pole_csv_url') POLE_CSV_URL = row.value;
-      });
-    }
-  } catch(e) {
-    console.warn('Config non chargée:', e.message);
-  }
-}
-
 function isReadOnly() { return currentUser && currentUser.role === 'staff_tm'; }
 function tod() { return new Date().toISOString().slice(0,10); }
 function fd(d) { if(!d)return'—'; const[y,m,j]=(d||'').split('-'); return j+'/'+m+'/'+y; }
@@ -1156,7 +1141,7 @@ function openViewMembre(id){
   const hasPending=membreHasPendingRequest(m.pseudo);
   document.getElementById('view-membre-content').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${m.pseudo||'—'}</div></div>
+      <div class="pdf-field"><div class="pdf-field-lbl">Pseudo in-game</div><div class="pdf-field-val">${m.pseudo||'—'}</div></div>
       <div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${m.pseudo_forum||'—'}</div></div>
       <div class="pdf-field"><div class="pdf-field-lbl">Entreprise</div><div class="pdf-field-val">${m.entreprise||'—'}</div></div>
       <div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${m.niveau||'—'}</div></div>
@@ -1232,11 +1217,11 @@ const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAH0CAYAAADL1t+K
 
 
 const TARIFS = {
-  minibus:  { semaine:550,  mois:2750 },
-  midibus:  { semaine:750, mois:3750 },
-  standard: { semaine:900, mois:4500 },
-  articule: { semaine:1150, mois:5750 },
-  carle:    { semaine:800, mois:4000 },
+  minibus:  { semaine:900,  mois:3000 },
+  midibus:  { semaine:1200, mois:4000 },
+  standard: { semaine:1500, mois:5000 },
+  articule: { semaine:1800, mois:6000 },
+  carle:    { semaine:1500, mois:5000 },
 };
 const TLABEL = { minibus:'Minibus', midibus:'Midibus', standard:'Standard', articule:'Articulé', carle:'Car | LE' };
 const DLABEL = { semaine:'semaine', mois:'mois' };
@@ -1700,6 +1685,7 @@ function exportJpeg(id){
         <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
         <div class="pdf-logo-texts">
           <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
+          <div class="pdf-logo-sub">Opérateur de transport · Alliance TransportManager.net</div>
         </div>
       </div>
       <div class="pdf-ref-block">
@@ -1738,7 +1724,8 @@ function exportJpeg(id){
       ${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}
     </div>
     <div class="pdf-footer">
-      <span>Créée le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span>
+      <span>Lutèce Group · Alliance TransportManager.net · Document officiel</span>
+      <span>Généré le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span>
     </div>
   </div>`;
 
@@ -1794,6 +1781,7 @@ function exportInterimJpeg(id) {
         <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
         <div class="pdf-logo-texts">
           <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
+          <div class="pdf-logo-sub">Opérateur de transport · Alliance TransportManager.net</div>
         </div>
       </div>
       <div class="pdf-ref-block">
@@ -1836,7 +1824,8 @@ function exportInterimJpeg(id) {
       ${d.notes ? `<div class="pdf-stitle" style="margin-top:20px">Notes & Détails de mission</div><div class="pdf-notes-box">${d.notes}</div>` : ''}
     </div>
     <div class="pdf-footer">
-      <span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span>
+      <span>Lutèce Group · Alliance TransportManager.net · Document officiel</span>
+      <span>Généré le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span>
     </div>
   </div>`;
 
@@ -2610,80 +2599,6 @@ async function sbSafe(fn, context='') {
 
 
 // ============================================================
-// API TRANSPORT MANAGER
-// ============================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-async function saveAppConfig() {
-  let salUrl  = document.getElementById('cfg-sal-url').value.trim();
-  let poleUrl = document.getElementById('cfg-pole-url').value.trim();
-  // Convertir automatiquement pubhtml -> pub?output=csv
-  salUrl  = salUrl.replace('/pubhtml', '/pub?output=csv').replace('pubhtml?', 'pub?output=csv&');
-  poleUrl = poleUrl.replace('/pubhtml', '/pub?output=csv').replace('pubhtml?', 'pub?output=csv&');
-  if (!salUrl.includes('output=csv'))  salUrl  += (salUrl.includes('?')  ? '&' : '?') + 'output=csv';
-  if (!poleUrl.includes('output=csv')) poleUrl += (poleUrl.includes('?') ? '&' : '?') + 'output=csv';
-  const res     = document.getElementById('cfg-result');
-  if (!salUrl || !poleUrl) { res.textContent = 'Les deux liens sont obligatoires.'; res.style.color='#991b1b'; return; }
-  try {
-    // Supprimer puis insérer pour garantir la mise à jour
-    await sb.from('app_config').delete().eq('key', 'sal_csv_url');
-    await sb.from('app_config').delete().eq('key', 'pole_csv_url');
-    const r1 = await sb.from('app_config').insert({key:'sal_csv_url',  value:salUrl});
-    const r2 = await sb.from('app_config').insert({key:'pole_csv_url', value:poleUrl});
-    if (r1.error || r2.error) {
-      res.textContent = 'Erreur : ' + (r1.error?.message || r2.error?.message);
-      res.style.color = '#991b1b';
-      return;
-    }
-    SAL_CSV_URL  = salUrl;
-    POLE_CSV_URL = poleUrl;
-    res.textContent = '✅ Liens sauvegardés avec succès !';
-    res.style.color = '#166534';
-  } catch(e) {
-    res.textContent = 'Erreur : ' + e.message;
-    res.style.color = '#991b1b';
-  }
-}
-
-async function loadConfigUI() {
-  if (!currentUser || currentUser.role !== 'president') return;
-  // Afficher d'abord la carte
-  const card = document.getElementById('card-config');
-  if (card) card.style.display = '';
-  // Puis charger les valeurs
-  try {
-    await loadAppConfig();
-  } catch(e) {}
-  const salEl  = document.getElementById('cfg-sal-url');
-  const poleEl = document.getElementById('cfg-pole-url');
-  if (salEl)  salEl.value  = SAL_CSV_URL  || '';
-  if (poleEl) poleEl.value = POLE_CSV_URL || '';
-}
-
 
 // ============================================================
 // CONFIG GFORMS — URLs stockées dans Supabase
@@ -2737,6 +2652,150 @@ async function loadConfigUI() {
   if (p) p.value = POLE_CSV_URL || '';
   const card = document.getElementById('card-config');
   if (card) card.style.display = '';
+}
+
+
+// ============================================================
+// INTÉRIMAIRES — Fonctions manquantes
+// ============================================================
+const TARIFS_INTERIM = {
+  conduite: {
+    standard: { semaine: 800 },
+    ultimate: { semaine: 500, gratuit_max: 30 }
+  },
+  maintenance: {
+    standard: { jour: 150 },
+    ultimate: { jour: 75, prioritaire: true }
+  }
+};
+
+function openAddInterim() {
+  const sel = document.getElementById('i-membre');
+  if (!sel) { alert('Erreur: modal intérimaires introuvable'); return; }
+  sel.innerHTML = membres.length
+    ? membres.map(m => `<option value="${m.id}">${m.pseudo}${m.entreprise?' — '+m.entreprise:''}</option>`).join('')
+    : '<option value="">— Aucun membre —</option>';
+  document.getElementById('i-date-debut').value = tod();
+  document.getElementById('i-date-fin').value   = '';
+  document.getElementById('i-nb').value         = '1';
+  document.getElementById('i-nb-unites').value  = '1';
+  document.getElementById('i-pole').value       = 'conduite';
+  onInterimMembreChange();
+  document.getElementById('modal-interim').classList.add('open');
+}
+
+function onInterimMembreChange() {
+  const id = parseInt(document.getElementById('i-membre').value);
+  const m  = membres.find(x => x.id === id);
+  if (!m) return;
+  const pfEl = document.getElementById('i-pseudo-forum');
+  const ftEl = document.getElementById('i-forfait-display');
+  if (pfEl) pfEl.value = m.pseudo_forum || '';
+  if (ftEl) ftEl.value = m.forfait      || '';
+  calcInterim();
+}
+
+function calcInterim() {
+  const id    = parseInt(document.getElementById('i-membre').value);
+  const m     = membres.find(x => x.id === id);
+  const isUlt = m && m.forfait === 'Ultimate';
+  const pole  = document.getElementById('i-pole').value;
+  const nb    = parseInt(document.getElementById('i-nb').value) || 1;
+  const nbu   = parseInt(document.getElementById('i-nb-unites').value) || 1;
+
+  // Afficher/cacher nb semaines selon pôle
+  const wrapEl = document.getElementById('i-nb-unites-wrap');
+  if (wrapEl) wrapEl.style.display = pole === 'conduite' ? '' : 'none';
+
+  let pu = 0, total = 0, gratuit = false, prioritaire = false;
+  let poleLabel = '', nbLabel = '';
+
+  if (pole === 'conduite') {
+    poleLabel = 'Pôle Conduite — Conducteurs';
+    nbLabel   = nb + ' conducteur(s) × ' + nbu + ' semaine(s)';
+    if (isUlt) {
+      const dejaLoues = interimaires.filter(i => i.pole === 'conduite' && i.statut === 'Accepté').reduce((s,i) => s + (i.nb_personnes||0), 0);
+      if (dejaLoues < 30) { pu = 0; gratuit = true; }
+      else { pu = 500; }
+    } else {
+      pu = 800;
+    }
+    total = gratuit ? 0 : pu * nb * nbu;
+  } else {
+    poleLabel  = 'Pôle Maintenance — Mécaniciens';
+    nbLabel    = nb + ' mécanicien(s)';
+    prioritaire = isUlt;
+    pu    = isUlt ? 75 : 150;
+    total = pu * nb;
+  }
+
+  const puEl    = document.getElementById('i-pu');
+  const nbLblEl = document.getElementById('i-nb-label');
+  const plEl    = document.getElementById('i-pole-label');
+  const totEl   = document.getElementById('i-total-display');
+  const gratEl  = document.getElementById('i-gratuit-label');
+  const prioEl  = document.getElementById('i-prioritaire-label');
+
+  if (puEl)    puEl.textContent    = gratuit ? 'Gratuit (Ultimate)' : fe(pu) + (pole==='conduite'?' / sem.':(pole==='maintenance'?' / jour':''));
+  if (nbLblEl) nbLblEl.textContent = nbLabel;
+  if (plEl)    plEl.textContent    = poleLabel;
+  if (totEl)   totEl.textContent   = gratuit ? 'Gratuit' : fe(total);
+  if (gratEl)  gratEl.style.display  = gratuit ? '' : 'none';
+  if (prioEl)  prioEl.style.display  = prioritaire ? '' : 'none';
+}
+
+async function saveInterim() {
+  const id = parseInt(document.getElementById('i-membre').value);
+  const m  = membres.find(x => x.id === id);
+  if (!m) { alert('Sélectionnez un membre.'); return; }
+  const dd = document.getElementById('i-date-debut').value;
+  const df = document.getElementById('i-date-fin').value;
+  if (!dd || !df) { alert('Les dates sont obligatoires.'); return; }
+
+  const pole  = document.getElementById('i-pole').value;
+  const nb    = parseInt(document.getElementById('i-nb').value) || 1;
+  const nbu   = parseInt(document.getElementById('i-nb-unites').value) || 1;
+  const isUlt = m.forfait === 'Ultimate';
+
+  let pu = 0, total = 0, gratuit = false, prioritaire = false;
+  if (pole === 'conduite') {
+    if (isUlt) { pu = 0; gratuit = true; }
+    else       { pu = 800; }
+    total = gratuit ? 0 : pu * nb * nbu;
+  } else {
+    prioritaire = isUlt;
+    pu    = isUlt ? 75 : 150;
+    total = pu * nb;
+  }
+
+  const rec = {
+    membre_id:    id,
+    membre_pseudo: m.pseudo,
+    membre_forum:  document.getElementById('i-pseudo-forum').value || m.pseudo_forum || '',
+    forfait:       m.forfait,
+    niveau:        m.niveau || '',
+    pole,
+    nb_personnes:  nb,
+    nb_unites:     nbu,
+    duree_key:     pole === 'conduite' ? 'semaine' : 'jour',
+    prix_unitaire: pu,
+    total,
+    gratuit,
+    prioritaire,
+    date_debut:    dd,
+    date_fin:      df,
+    statut:        'En attente',
+    notes:         '',
+    date_creation: tod(),
+    created_by:    currentUser.id,
+  };
+
+  const { error } = await sb.from('interimaires').insert(rec);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  await logAction('interim', m.pseudo, `Demande intérimaires créée : ${nb} ${pole === 'conduite' ? 'conducteur(s)' : 'mécanicien(s)'} — ${fe(total)}`);
+  toast('Demande créée ✓');
+  closeModal('modal-interim');
+  await loadInterimaires();
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
