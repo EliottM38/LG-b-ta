@@ -1685,7 +1685,6 @@ function exportJpeg(id){
         <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
         <div class="pdf-logo-texts">
           <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
-          <div class="pdf-logo-sub">Opérateur de transport · Alliance TransportManager.net</div>
         </div>
       </div>
       <div class="pdf-ref-block">
@@ -1703,7 +1702,7 @@ function exportJpeg(id){
     <div class="pdf-body">
       <div class="pdf-stitle">Informations membre</div>
       <div class="pdf-fields">
-        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo in-game</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div>
+        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div>
         <div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div>
         <div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div>
         <div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div>
@@ -1724,8 +1723,7 @@ function exportJpeg(id){
       ${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}
     </div>
     <div class="pdf-footer">
-      <span>Lutèce Group · Alliance TransportManager.net · Document officiel</span>
-      <span>Généré le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span>
+      <span>Créée le ${fd(tod())} · Devis #${String(d.id).padStart(3,'0')}</span>
     </div>
   </div>`;
 
@@ -1781,11 +1779,10 @@ function exportInterimJpeg(id) {
         <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
         <div class="pdf-logo-texts">
           <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
-          <div class="pdf-logo-sub">Opérateur de transport · Alliance TransportManager.net</div>
         </div>
       </div>
       <div class="pdf-ref-block">
-        <div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div>
+        <div class="pdf-ref-num">Devis #${String(d.id).padStart(3,'0')}</div>
         <div class="pdf-ref-label">${pole}</div>
         <div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div>
       </div>
@@ -1799,7 +1796,7 @@ function exportInterimJpeg(id) {
     <div class="pdf-body">
       <div class="pdf-stitle">Informations membre</div>
       <div class="pdf-fields">
-        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo in-game</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div>
+        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div>
         <div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div>
         <div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div>
         <div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div>
@@ -1824,8 +1821,7 @@ function exportInterimJpeg(id) {
       ${d.notes ? `<div class="pdf-stitle" style="margin-top:20px">Notes & Détails de mission</div><div class="pdf-notes-box">${d.notes}</div>` : ''}
     </div>
     <div class="pdf-footer">
-      <span>Lutèce Group · Alliance TransportManager.net · Document officiel</span>
-      <span>Généré le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span>
+      <span>Créée le ${fd(tod())} · Devis #${String(d.id).padStart(3,'0')}</span>
     </div>
   </div>`;
 
