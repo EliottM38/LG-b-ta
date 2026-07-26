@@ -2890,7 +2890,6 @@ async function loadConfigUI() {
 // ============================================================
 // MODIFIER FACTURE
 // ============================================================
-let editFactureId = null;
 
 function openEditFacture(id) {
   const d = factures.find(x => x.id === id); if (!d) return;
@@ -2930,7 +2929,6 @@ function openEditFacture(id) {
 // MODIFIER INTÉRIMAIRE
 // ============================================================
 let editInterimId = null;
-
 function openEditInterim(id) {
   const d = interimaires.find(x => x.id === id); if (!d) return;
   editInterimId = id;
