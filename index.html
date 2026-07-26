@@ -1811,634 +1811,69 @@ function exportJpeg(id){
   const sc=d.statut==='Accepté'?{bg:'#dcfce7',cl:'#166534'}:d.statut==='Refusé'?{bg:'#fee2e2',cl:'#991b1b'}:d.statut==='Livré'?{bg:'#ede9fe',cl:'#4c1d95'}:{bg:'#fef3c7',cl:'#92400e'};
   const badge=d.forfait==='Ultimate'?'<span class="pdf-badge ult">Ultimate</span>':'<span class="pdf-badge std">Standard</span>';
 
-  // Récupérer les lignes (nouveau format) ou créer une ligne depuis l'ancien format
-  let lignes = null;
-  try { lignes = d.lignes ? JSON.parse(d.lignes) : null; } catch(e) {}
-  if (!lignes || !lignes.length) {
-    // Ancien format — créer une ligne synthétique
-    lignes = [{
-      type:         d.type_vehicule || '—',
-      type_key:     d.type_key || 'standard',
-      modele:       d.modele || '',
-      nb:           d.nb_vehicules || 1,
-      nbUnites:     d.nb_unites || 1,
-      numerosParc:  d.numeros_parc || '',
-      prixUnitaire: d.prix_unitaire || 0,
-      gratuits:     d.gratuit ? (d.nb_vehicules || 1) : 0,
-      sousTotal:    d.total || 0,
-    }];
+  let lignes=null;
+  try{lignes=d.lignes?JSON.parse(d.lignes):null;}catch(e){}
+  if(!lignes||!lignes.length){
+    lignes=[{type:d.type_vehicule||'—',type_key:d.type_key||'standard',modele:d.modele||'',nb:d.nb_vehicules||1,nbUnites:d.nb_unites||1,numerosParc:d.numeros_parc||'',prixUnitaire:d.prix_unitaire||0,gratuits:d.gratuit?(d.nb_vehicules||1):0,sousTotal:d.total||0}];
   }
+  const tRows=lignes.map(l=>`<tr class="${l.sousTotal===0?'hl':''}"><td><strong>${l.type||'—'}</strong>${l.modele?' ('+l.modele+')':''}</td><td>${l.prixUnitaire>0?fe(l.prixUnitaire)+' × '+(l.nbUnites||1)+' '+(d.duree_label||'sem.'):'—'}</td><td>${l.nb||1} véh.${l.gratuits>0?' ('+l.gratuits+' gratuit(s))':''}</td><td>${l.numerosParc||'—'}</td><td><strong>${l.sousTotal===0?'Gratuit':fe(l.sousTotal)}</strong></td></tr>`).join('');
+  const resumeVeh=lignes.map(l=>`${l.nb||1} × ${l.type||'—'}`).join(', ');
 
-  const tRows = lignes.map(l => `
-    <tr class="${l.sousTotal===0?'hl':''}">
-      <td><strong>${l.type||'—'}</strong>${l.modele?' ('+l.modele+')':''}</td>
-      <td>${l.prixUnitaire>0?fe(l.prixUnitaire)+' × '+(l.nbUnites||1)+' '+(d.duree_label||'sem.'):'—'}</td>
-      <td>${l.nb||1} véh.${l.gratuits>0?' ('+l.gratuits+' gratuit(s))':''}</td>
-      <td>${l.numerosParc||'—'}</td>
-      <td><strong>${l.sousTotal===0?'Gratuit':fe(l.sousTotal)}</strong></td>
-    </tr>`
-  ).join('');
+  const content=`<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Facture #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">Contrat de location de véhicules</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de location</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de location</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Bus déjà loués</div><div class="pdf-field-val">${d.bus_deja_loues||0} véhicule(s)</div></div></div><div class="pdf-stitle">Détail des véhicules loués</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>N° Parc</th><th>Sous-total</th></tr></thead><tbody>${tRows}</tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">Durée : ${d.duree_label||'semaine'} · ${resumeVeh}</div>${d.gratuit||lignes.every(l=>l.sousTotal===0)?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit||lignes.every(l=>l.sousTotal===0)?'0 €':fe(d.total||0)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span></div></div>`;
 
+  // Créer un conteneur temporaire VISIBLE dans le body
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'position:fixed;top:0;left:0;z-index:-9999;background:#fff;padding:0;margin:0;';
+  tmp.innerHTML = content;
+  document.body.appendChild(tmp);
 
-  const resumeVeh = lignes.map(l=>`${l.nb||1} × ${l.type||'—'}`).join(', ');
-
-  document.getElementById('pdf-content').innerHTML=`<div class="pdf">
-    <div class="pdf-header">
-      <div class="pdf-logo-wrap">
-        <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
-        <div class="pdf-logo-texts">
-          <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
-        </div>
-      </div>
-      <div class="pdf-ref-block">
-        <div class="pdf-ref-num">Facture #${String(d.id).padStart(3,'0')}</div>
-        <div class="pdf-ref-label">Contrat de location de véhicules</div>
-        <div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div>
-      </div>
-    </div>
-    <div class="pdf-bar">
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div>
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div>
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de location</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div>
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de location</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div>
-    </div>
-    <div class="pdf-body">
-      <div class="pdf-stitle">Informations membre</div>
-      <div class="pdf-fields">
-        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Bus déjà loués</div><div class="pdf-field-val">${d.bus_deja_loues||0} véhicule(s)</div></div>
-      </div>
-      <div class="pdf-stitle">Détail des véhicules loués</div>
-      <table class="pdf-table">
-        <thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>N° Parc</th><th>Sous-total</th></tr></thead>
-        <tbody>${tRows}</tbody>
-      </table>
-      <div class="pdf-total">
-        <div class="pdf-total-left">
-          <div class="ptl">Durée : ${d.duree_label||'semaine'} · ${resumeVeh}</div>
-          ${d.gratuit||lignes.every(l=>l.sousTotal===0)?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}
-        </div>
-        <div class="pdf-total-amount">${d.gratuit||lignes.every(l=>l.sousTotal===0)?'0 €':fe(d.total||0)}</div>
-      </div>
-      ${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}
-    </div>
-    <div class="pdf-footer">
-      <span>Créée le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span>
-    </div>
-  </div>`;
-
-  // Attendre que le DOM soit rendu puis capturer
-  requestAnimationFrame(() => setTimeout(() => {
-    const pdfEl = document.getElementById('pdf-content');
-    const zone   = document.getElementById('pdf-zone');
-    // Rendre visible temporairement pour html2canvas
-    zone.style.position = 'static';
-    zone.style.left      = '0';
-    zone.style.visibility = 'visible';
-    pdfEl.style.width    = '900px';
-    pdfEl.style.display  = 'block';
-
-    html2canvas(pdfEl, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      allowTaint: true,
-      foreignObjectRendering: false,
-      imageTimeout: 20000,
-      onclone: (doc) => {
-        doc.getElementById('pdf-zone').style.position = 'static';
-      }
-    }).then(canvas => {
-      zone.style.position  = 'fixed';
-      zone.style.left      = '-9999px';
-      zone.style.visibility = 'hidden';
-      pdfEl.style.width    = '800px';
-      const url = canvas.toDataURL('image/jpeg', 0.95);
-      const a   = document.createElement('a');
-      a.download = `facture-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
-      a.href = url;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }).catch(e => {
-      alert('Erreur export JPEG : ' + e.message);
-    });
-  }, 300));
+  requestAnimationFrame(()=>setTimeout(()=>{
+    html2canvas(tmp,{
+      scale:2,useCORS:true,backgroundColor:'#ffffff',
+      logging:false,allowTaint:true,foreignObjectRendering:false,
+      imageTimeout:20000
+    }).then(canvas=>{
+      document.body.removeChild(tmp);
+      const url=canvas.toDataURL('image/jpeg',0.95);
+      if(!url||url.length<1000){alert('Erreur: image vide, réessayez.');return;}
+      const a=document.createElement('a');
+      a.download=`facture-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
+      a.href=url;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+    }).catch(e=>{document.body.removeChild(tmp);alert('Erreur export: '+e.message);});
+  },300));
 }
 
-function exportInterimJpeg(id) {
-  const d = interimaires.find(x => x.id === id); if (!d) return;
-  const sc = d.statut === 'Accepté' ? { bg:'#dcfce7', cl:'#166534' } : d.statut === 'Refusé' ? { bg:'#fee2e2', cl:'#991b1b' } : { bg:'#fef3c7', cl:'#92400e' };
-  const pole = d.pole === 'conduite' ? 'Pôle Conduite — Conducteurs' : 'Pôle Maintenance — Mécaniciens';
-  const badge = d.forfait === 'Ultimate' ? '<span class="pdf-badge ult">Ultimate</span>' : '<span class="pdf-badge std">Standard</span>';
-  const tarifDetail = d.pole === 'conduite'
-    ? `<tr><td>Par jour</td><td>${fe(d.forfait==='Ultimate'&&d.nb_personnes<=30?0:d.forfait==='Ultimate'?75:150)}</td><td>${d.nb_personnes}</td><td>${d.duree_key==='jour'?(d.gratuit?'<strong>GRATUIT</strong>':'<strong>'+fe(d.prix_unitaire*d.nb_personnes)+'</strong>'):'—'}</td></tr>
-       <tr><td>Par semaine</td><td>${fe(d.forfait==='Ultimate'&&d.nb_personnes<=30?0:d.forfait==='Ultimate'?500:800)}</td><td>${d.nb_personnes}</td><td>${d.duree_key==='semaine'?(d.gratuit?'<strong>GRATUIT</strong>':'<strong>'+fe(d.prix_unitaire*d.nb_personnes)+'</strong>'):'—'}</td></tr>`
-    : `<tr class="hl"><td>Par jour</td><td>${fe(d.prix_unitaire)}</td><td>${d.nb_personnes}</td><td><strong>${d.gratuit?'GRATUIT':fe(d.total)}</strong></td></tr>`;
+function exportInterimJpeg(id){
+  const d=interimaires.find(x=>x.id===id);if(!d)return;
+  const sc=d.statut==='Accepté'?{bg:'#dcfce7',cl:'#166534'}:d.statut==='Refusé'?{bg:'#fee2e2',cl:'#991b1b'}:{bg:'#fef3c7',cl:'#92400e'};
+  const pole=d.pole==='conduite'?'Pôle Conduite — Conducteurs':'Pôle Maintenance — Mécaniciens';
+  const badge=d.forfait==='Ultimate'?'<span class="pdf-badge ult">Ultimate</span>':'<span class="pdf-badge std">Standard</span>';
 
-  document.getElementById('pdf-content').innerHTML = `<div class="pdf">
-    <div class="pdf-header">
-      <div class="pdf-logo-wrap">
-        <img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group">
-        <div class="pdf-logo-texts">
-          <div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div>
-        </div>
-      </div>
-      <div class="pdf-ref-block">
-        <div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div>
-        <div class="pdf-ref-label">${pole}</div>
-        <div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div>
-      </div>
-    </div>
-    <div class="pdf-bar">
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div>
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement ? fd(d.date_traitement) : 'En attente'}</div></div>
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de mission</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div>
-      <div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de mission</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div>
-    </div>
-    <div class="pdf-body">
-      <div class="pdf-stitle">Informations membre</div>
-      <div class="pdf-fields">
-        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div>
-      </div>
-      <div class="pdf-stitle">Détail de la mission</div>
-      <div class="pdf-fields">
-        <div class="pdf-field"><div class="pdf-field-lbl">Type de personnel</div><div class="pdf-field-val">${pole}</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Nombre de personnes</div><div class="pdf-field-val">${d.nb_personnes} personne(s)</div></div>
-        <div class="pdf-field"><div class="pdf-field-lbl">Période</div><div class="pdf-field-val">${fd(d.date_debut)} → ${fd(d.date_fin)}</div></div>
-        ${d.prioritaire ? '<div class="pdf-field"><div class="pdf-field-lbl">Priorité</div><div class="pdf-field-val" style="color:#166534">★ Prise en charge sous 72h</div></div>' : ''}
-      </div>
-      <div class="pdf-stitle">Tarification</div>
-      <table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>N° Parc</th><th>Sous-total</th></tr></thead>
-      <tbody>${tarifDetail}</tbody></table>
-      <div class="pdf-total">
-        <div class="pdf-total-left">
-          <div class="ptl">Personnel : ${pole}</div>
-          ${d.gratuit ? '<div class="ptg">Forfait Ultimate — Gratuité appliquée (≤ 30 conducteurs)</div>' : ''}
-        </div>
-        <div class="pdf-total-amount">${d.gratuit ? '0 €' : fe(d.total)}</div>
-      </div>
-      ${d.notes ? `<div class="pdf-stitle" style="margin-top:20px">Notes & Détails de mission</div><div class="pdf-notes-box">${d.notes}</div>` : ''}
-    </div>
-    <div class="pdf-footer">
-      <span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span>
-    </div>
-  </div>`;
+  const content=`<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">${pole}</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de mission</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de mission</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div></div><div class="pdf-stitle">Détail de la mission</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Type de personnel</div><div class="pdf-field-val">${pole}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Nombre de personnes</div><div class="pdf-field-val">${d.nb_personnes} personne(s)</div></div><div class="pdf-field"><div class="pdf-field-lbl">Durée</div><div class="pdf-field-val">${d.nb_unites||1} ${d.duree_key==='semaine'?'semaine(s)':'jour(s)'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Période</div><div class="pdf-field-val">${fd(d.date_debut)} → ${fd(d.date_fin)}</div></div>${d.prioritaire?'<div class="pdf-field"><div class="pdf-field-lbl">Priorité</div><div class="pdf-field-val" style="color:#166534">★ Prise en charge sous 72h</div></div>':''}</div><div class="pdf-stitle">Tarification</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>Sous-total</th></tr></thead><tbody><tr class="${d.gratuit?'hl':''}"><td>${pole}</td><td>${d.gratuit?'Gratuit':fe(d.prix_unitaire)}</td><td>${d.nb_personnes} × ${d.nb_unites||1} ${d.duree_key==='semaine'?'sem.':'j.'}</td><td><strong>${d.gratuit?'Gratuit':fe(d.total)}</strong></td></tr></tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">${pole}</div>${d.gratuit?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit?'0 €':fe(d.total)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span></div></div>`;
 
-  requestAnimationFrame(() => setTimeout(() => {
-    const pdfEl2 = document.getElementById('pdf-content');
-    const zone2   = document.getElementById('pdf-zone');
-    zone2.style.position  = 'static';
-    zone2.style.left       = '0';
-    zone2.style.visibility = 'visible';
-    pdfEl2.style.width    = '900px';
-    pdfEl2.style.display  = 'block';
+  const tmp=document.createElement('div');
+  tmp.style.cssText='position:fixed;top:0;left:0;z-index:-9999;background:#fff;padding:0;margin:0;';
+  tmp.innerHTML=content;
+  document.body.appendChild(tmp);
 
-    html2canvas(pdfEl2, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      allowTaint: true,
-      foreignObjectRendering: false,
-      imageTimeout: 20000,
-    }).then(canvas => {
-      zone2.style.position  = 'fixed';
-      zone2.style.left       = '-9999px';
-      zone2.style.visibility = 'hidden';
-      pdfEl2.style.width    = '800px';
-      const url = canvas.toDataURL('image/jpeg', 0.95);
-      const a   = document.createElement('a');
-      a.download = `interim-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
-      a.href = url;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }).catch(e => {
-      alert('Erreur export JPEG : ' + e.message);
-    });
-  }, 300));
+  requestAnimationFrame(()=>setTimeout(()=>{
+    html2canvas(tmp,{
+      scale:2,useCORS:true,backgroundColor:'#ffffff',
+      logging:false,allowTaint:true,foreignObjectRendering:false,
+      imageTimeout:20000
+    }).then(canvas=>{
+      document.body.removeChild(tmp);
+      const url=canvas.toDataURL('image/jpeg',0.95);
+      if(!url||url.length<1000){alert('Erreur: image vide, réessayez.');return;}
+      const a=document.createElement('a');
+      a.download=`interim-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
+      a.href=url;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+    }).catch(e=>{document.body.removeChild(tmp);alert('Erreur export: '+e.message);});
+  },300));
 }
 
-
-// ============================================================
-// PROFIL — Changement identifiants
-// ============================================================
-// ============================================================
-// GOOGLE FORMS — Lecture CSV publique
-// ============================================================
-// URLs CSV publiées directement (pas de CORS)
-
-// Clé Supabase pour stocker les statuts des réponses
-// Variables sélection SAL & Pôle
-let salSelectMode  = false;
-let poleSelectMode = false;
-let salSelected    = new Set();
-let poleSelected   = new Set();
-
-let salStatuts  = {};
-let poleStatuts = {};
-
-// Lire les statuts sauvegardés dans Supabase
-
-// Notes staff — chargées en même temps que les statuts
-let salNotes  = {};
-let poleNotes = {};
-
-async function saveNote(formType, rowKey) {
-  // Chercher la textarea avec id sécurisé
-  const safeKey = rowKey.replace(/[^a-zA-Z0-9]/g,'_');
-  const ta = document.getElementById('note-'+formType+'-'+safeKey);
-  if (!ta) { toast('Erreur: zone de texte introuvable'); return; }
-  const notes  = ta.value.trim();
-  const statut = formType==='sal'?(salStatuts[rowKey]||'En attente'):(poleStatuts[rowKey]||'En attente');
-  const {error} = await sb.from('form_statuts').upsert(
-    { form_type: formType, row_key: rowKey, statut, notes, updated_at: new Date().toISOString() },
-    { onConflict: 'form_type,row_key' }
-  );
-  if(error){ toast('Erreur sauvegarde : '+error.message); return; }
-  if(formType==='sal')  salNotes[rowKey]  = notes;
-  if(formType==='pole') poleNotes[rowKey] = notes;
-  toast('Note sauvegardée ✓');
-}
-
-
-
-async function setStatut(formType, rowKey, statut) {
-  await sb.from('form_statuts').upsert(
-    { form_type: formType, row_key: rowKey, statut, updated_at: new Date().toISOString() },
-    { onConflict: 'form_type,row_key' }
-  );
-  if(formType==='sal')  { salStatuts[rowKey]  = statut; renderSAL(window._salRows||[]); }
-  if(formType==='pole') { poleStatuts[rowKey] = statut; filterPole(); }
-  toast('Statut mis à jour ✓');
-}
-
-
-async function loadStatutsAndNotes() {
-  const{data}=await sb.from('form_statuts').select('*');
-  if(data){
-    data.forEach(r=>{
-      if(r.form_type==='sal') { salStatuts[r.row_key]=r.statut; salNotes[r.row_key]=r.notes||''; }
-      if(r.form_type==='pole'){ poleStatuts[r.row_key]=r.statut; poleNotes[r.row_key]=r.notes||''; }
-    });
-  }
-}
-
-function handleSALClick(el){
-  const key=el.getAttribute('data-skey');
-  if(!key)return;
-  toggleSALItem(key); updateSALCount(); renderSAL(window._salRows||[]);
-}
-function handlePoleClick(el){
-  const key=el.getAttribute('data-pkey');
-  if(!key)return;
-  togglePoleItem(key); updatePoleCount(); filterPole();
-}
-
-
-// ============================================================
-// CSV PARSING
-// ============================================================
-function parseCSVLine(line) {
-  if (!line) return [];
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else { cur += c; }
-  }
-  result.push(cur);
-  return result;
-}
-
-function parseCSV(text) {
-  if (!text || typeof text !== 'string') return [];
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  const rawHeaders = parseCSVLine(lines[0]);
-  const headers = rawHeaders.map(h => h != null ? String(h).trim() : '');
-  return lines.slice(1).filter(l => l && l.trim()).map(l => {
-    const vals = parseCSVLine(l);
-    const obj = { _raw: {} };
-    headers.forEach((key, i) => {
-      try {
-        const raw = vals[i];
-        const val = (raw != null) ? String(raw).trim() : '';
-        obj._raw[i] = { key: key || '', val };
-        if (key) {
-          if (val !== '' && (obj[key] === undefined || obj[key] === '')) obj[key] = val;
-          else if (obj[key] === undefined) obj[key] = '';
-        }
-      } catch(e) {}
-    });
-    return obj;
-  });
-}
-
-function getCol(r) {
-  const names = Array.prototype.slice.call(arguments, 1);
-  for (let ni = 0; ni < names.length; ni++) {
-    const name = names[ni];
-    if (!name) continue;
-    const nameTrim = String(name).trim();
-    if (r && r._raw) {
-      const entries = Object.values(r._raw);
-      for (let i = 0; i < entries.length; i++) {
-        const e = entries[i];
-        if (e && e.key && String(e.key).trim() === nameTrim && e.val) return String(e.val);
-      }
-    }
-    if (r) {
-      const v = r[name];
-      if (v != null && String(v).trim() !== '') return String(v).trim();
-      const keys = Object.keys(r).filter(k => k !== '_raw');
-      for (let i = 0; i < keys.length; i++) {
-        if (keys[i].trim() === nameTrim) {
-          const v2 = r[keys[i]];
-          if (v2 != null && String(v2).trim() !== '') return String(v2).trim();
-        }
-      }
-    }
-  }
-  return '';
-}
-
-function getAllCols(r, name) {
-  if (!r || !name) return '';
-  const nameTrim = String(name).trim();
-  const results = [];
-  if (r._raw) {
-    const entries = Object.values(r._raw);
-    for (let i = 0; i < entries.length; i++) {
-      try {
-        const e = entries[i];
-        if (!e) continue;
-        const k = e.key ? String(e.key).trim() : '';
-        const v = e.val ? String(e.val).trim() : '';
-        if (k === nameTrim && v && !results.includes(v)) results.push(v);
-      } catch(ex) {}
-    }
-    if (results.length) return results.join(' / ');
-  }
-  const keys = Object.keys(r).filter(k => k !== '_raw');
-  for (let i = 0; i < keys.length; i++) {
-    try {
-      if (keys[i].trim() === nameTrim) {
-        const v = r[keys[i]];
-        if (v != null) {
-          const vs = String(v).trim();
-          if (vs && !results.includes(vs)) results.push(vs);
-        }
-      }
-    } catch(ex) {}
-  }
-  return results.join(' / ');
-}
-
-const GAS_PROXY = 'https://script.google.com/macros/s/AKfycbzHrvgKDmK-TXZ7UFQWdkiepPwKZ0whGzkirBJMOnIVanIxC1LJIhRO4NwXZ0HoGCfI/exec';
-let SAL_CSV_URL  = '';
-let POLE_CSV_URL = '';
-
-async function fetchCSV(url) {
-  try {
-    const res = await fetch(GAS_PROXY + '?url=' + encodeURIComponent(url), { cache: 'no-store' });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 10 && !text.includes('<!DOCTYPE') && !text.includes('<html')) return text;
-    }
-  } catch(e) {}
-  try {
-    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), { cache: 'no-store' });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 10 && !text.includes('<!DOCTYPE')) return text;
-    }
-  } catch(e) {}
-  throw new Error('Chargement impossible');
-}
-
-// ============================================================
-// OBJECTIFS
-// ============================================================
-let objectifs = [];
-let objCurrentYear  = new Date().getFullYear();
-let objCurrentMonth = new Date().getMonth() + 1;
-let editObjId = null;
-
-const MOIS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const CAT_COLORS = { membres:'#dbeafe', location:'#d1fae5', exploitation:'#fef3c7', finances:'#ede9fe', autre:'#f1f0ea' };
-const CAT_TEXT   = { membres:'#1e40af', location:'#065f46', exploitation:'#92400e', finances:'#4c1d95', autre:'#555' };
-const PRIO_COLORS = { normale:'#f1f0ea', haute:'#fef3c7', critique:'#fee2e2' };
-const PRIO_TEXT   = { normale:'#555', haute:'#92400e', critique:'#991b1b' };
-
-function changeMonth(delta) {
-  objCurrentMonth += delta;
-  if (objCurrentMonth > 12) { objCurrentMonth = 1; objCurrentYear++; }
-  if (objCurrentMonth < 1)  { objCurrentMonth = 12; objCurrentYear--; }
-  loadObjectifs();
-}
-function objMonthKey() { return objCurrentYear + '-' + String(objCurrentMonth).padStart(2,'0'); }
-
-async function loadObjectifs() {
-  document.getElementById('obj-month-label').textContent = MOIS_FR[objCurrentMonth-1] + ' ' + objCurrentYear;
-  const{data}=await sb.from('objectifs').select('*').eq('mois',objMonthKey()).order('created_at');
-  objectifs=data||[]; renderObjectifs();
-}
-
-function renderObjectifs() {
-  const total=objectifs.length;
-  const atteints=objectifs.filter(o=>o.atteint).length;
-  const pct=total?Math.round(atteints/total*100):0;
-  document.getElementById('obj-total').textContent    = total;
-  document.getElementById('obj-atteints').textContent = atteints;
-  document.getElementById('obj-encours').textContent  = total-atteints;
-  document.getElementById('obj-pct').textContent      = pct+'%';
-  const canEdit=['president','vice_president'].includes(currentUser.role)&&!isReadOnly();
-  const cont=document.getElementById('liste-objectifs');
-  if(!objectifs.length){cont.innerHTML='<div class="empty">'+(canEdit?'Aucun objectif. Cliquez sur "+ Ajouter".':'Aucun objectif ce mois.')+'</div>';return;}
-  cont.innerHTML=objectifs.map(o=>{
-    const catBg=CAT_COLORS[o.categorie]||'#f1f0ea';
-    const catCl=CAT_TEXT[o.categorie]||'#555';
-    const prioBg=PRIO_COLORS[o.priorite]||'#f1f0ea';
-    const prioCl=PRIO_TEXT[o.priorite]||'#555';
-    return`<div class="fact-card" style="border-left:4px solid ${o.atteint?'#3B6D11':'#d8d8d8'}">
-      <div style="display:flex;align-items:flex-start;gap:12px">
-        ${canEdit?`<div onclick="toggleObjectif(${o.id},${o.atteint})" style="width:24px;height:24px;border-radius:6px;border:2px solid ${o.atteint?'#3B6D11':'#d8d8d8'};background:${o.atteint?'#3B6D11':'#fff'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px">${o.atteint?'<span style="color:#fff;font-weight:700">✓</span>':''}</div>`:`<div style="width:24px;height:24px;border-radius:6px;border:2px solid ${o.atteint?'#3B6D11':'#d8d8d8'};background:${o.atteint?'#3B6D11':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">${o.atteint?'<span style="color:#fff;font-weight:700">✓</span>':''}</div>`}
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-            <span style="font-weight:700;font-size:15px;color:#0a1f5c;${o.atteint?'text-decoration:line-through;color:#888':''}">${o.titre}</span>
-            <span class="badge" style="background:${catBg};color:${catCl}">${o.categorie}</span>
-            ${o.priorite!=='normale'?`<span class="badge" style="background:${prioBg};color:${prioCl}">${o.priorite}</span>`:''}
-            ${o.atteint?'<span class="badge b-actif">Atteint ✓</span>':''}
-          </div>
-          ${o.description?`<div style="font-size:13px;color:#666;line-height:1.5">${o.description}</div>`:''}
-          ${o.atteint&&o.date_atteint?`<div style="font-size:11px;color:#888;margin-top:4px">Atteint le ${fd(o.date_atteint)}</div>`:''}
-        </div>
-        ${canEdit?`<div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-sm" onclick="openEditObjectif(${o.id})">✏</button><button class="btn btn-sm btn-danger" onclick="deleteObjectif(${o.id})">✕</button></div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openAddObjectif(){
-  editObjId=null;
-  document.getElementById('obj-modal-title').textContent='Ajouter un objectif';
-  document.getElementById('obj-titre').value='';
-  document.getElementById('obj-desc').value='';
-  document.getElementById('obj-categorie').value='membres';
-  document.getElementById('obj-priorite').value='normale';
-  document.getElementById('modal-objectif').classList.add('open');
-}
-function openEditObjectif(id){
-  const o=objectifs.find(x=>x.id===id);if(!o)return;
-  editObjId=id;
-  document.getElementById('obj-modal-title').textContent="Modifier l'objectif";
-  document.getElementById('obj-titre').value=o.titre||'';
-  document.getElementById('obj-desc').value=o.description||'';
-  document.getElementById('obj-categorie').value=o.categorie||'autre';
-  document.getElementById('obj-priorite').value=o.priorite||'normale';
-  document.getElementById('modal-objectif').classList.add('open');
-}
-async function saveObjectif(){
-  const titre=document.getElementById('obj-titre').value.trim();
-  if(!titre){alert('Le titre est obligatoire.');return;}
-  const data={titre,description:document.getElementById('obj-desc').value.trim(),categorie:document.getElementById('obj-categorie').value,priorite:document.getElementById('obj-priorite').value,mois:objMonthKey(),atteint:false};
-  if(editObjId){await sb.from('objectifs').update(data).eq('id',editObjId);}
-  else{await sb.from('objectifs').insert({...data,created_by:currentUser.id});}
-  toast('Objectif enregistré ✓');closeModal('modal-objectif');await loadObjectifs();
-}
-async function toggleObjectif(id,current){
-  const upd={atteint:!current};
-  if(!current)upd.date_atteint=tod();else upd.date_atteint=null;
-  await sb.from('objectifs').update(upd).eq('id',id);
-  await loadObjectifs();
-  toast(!current?'Objectif atteint ! ✓':'Objectif remis en cours');
-}
-async function deleteObjectif(id){
-  if(!confirm('Supprimer cet objectif ?'))return;
-  await sb.from('objectifs').delete().eq('id',id);
-  toast('Objectif supprimé');await loadObjectifs();
-}
-function exportObjectifsPDF(){
-  const{jsPDF}=window.jspdf;
-  const doc=new jsPDF();
-  const moisLabel=MOIS_FR[objCurrentMonth-1]+' '+objCurrentYear;
-  doc.setFillColor(10,31,92);doc.rect(0,0,210,30,'F');
-  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont(undefined,'bold');
-  doc.text('Lutèce Group — Objectifs',14,12);
-  doc.setFontSize(12);doc.setFont(undefined,'normal');doc.text(moisLabel,14,22);
-  const total=objectifs.length,atteints=objectifs.filter(o=>o.atteint).length;
-  const pct=total?Math.round(atteints/total*100):0;
-  doc.setTextColor(0,0,0);doc.setFontSize(11);
-  doc.text('Total : '+total+'   Atteints : '+atteints+'   Progression : '+pct+'%',14,40);
-  const rows=objectifs.map(o=>[o.atteint?'✓':'○',o.titre,o.categorie,o.priorite,o.atteint?(o.date_atteint?fd(o.date_atteint):'Oui'):'Non',o.description||'']);
-  doc.autoTable({startY:46,head:[['Statut','Objectif','Catégorie','Priorité','Atteint','Description']],body:rows,styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:[10,31,92],textColor:255,fontStyle:'bold'}});
-  doc.setFontSize(9);doc.setTextColor(150,150,150);
-  doc.text('Lutèce Group · Généré le '+fd(tod()),14,doc.internal.pageSize.height-8);
-  doc.save('objectifs-LG-'+objMonthKey()+'.pdf');
-}
-
-// ============================================================
-// HISTORIQUE
-// ============================================================
-let historique = [];
-async function loadHistorique(){
-  const{data}=await sb.from('historique').select('*').order('created_at',{ascending:false}).limit(200);
-  historique=data||[];renderHistorique();
-}
-function renderHistorique(){
-  const q=(document.getElementById('hist-search').value||'').toLowerCase();
-  const ft=document.getElementById('hist-type').value;
-  const list=historique.filter(h=>(!q||(h.description||'').toLowerCase().includes(q)||(h.membre_pseudo||'').toLowerCase().includes(q))&&(!ft||h.type===ft));
-  const cont=document.getElementById('liste-historique');
-  if(!list.length){cont.innerHTML='<div class="empty">Aucune action trouvée.</div>';return;}
-  const typeColors={membre_ajout:'#d1fae5',membre_modif:'#dbeafe',membre_suppression:'#fee2e2',facture:'#fef3c7',interim:'#ede9fe'};
-  const typeText={membre_ajout:'#065f46',membre_modif:'#1e40af',membre_suppression:'#991b1b',facture:'#92400e',interim:'#4c1d95'};
-  const typeLabel={membre_ajout:'Ajout membre',membre_modif:'Modification membre',membre_suppression:'Suppression membre',facture:'Facture',interim:'Intérimaires'};
-  cont.innerHTML=list.map(h=>{
-    const bg=typeColors[h.type]||'#f1f0ea';
-    const cl=typeText[h.type]||'#555';
-    const lbl=typeLabel[h.type]||h.type;
-    return`<div class="fact-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div><span class="badge" style="background:${bg};color:${cl}">${lbl}</span>${h.membre_pseudo?`<span style="font-weight:700;color:#0a1f5c;margin-left:8px">${h.membre_pseudo}</span>`:''}</div>
-        <span style="font-size:12px;color:#aaa">${h.created_at?new Date(h.created_at).toLocaleString('fr-FR'):'—'} · par ${h.staff_nom||'—'}</span>
-      </div>
-      <div style="font-size:13px;color:#555;margin-top:6px;line-height:1.6">${h.description||'—'}</div>
-      ${h.note?`<div style="background:#f0f7ff;border-left:3px solid #0a1f5c;padding:8px 12px;border-radius:0 6px 6px 0;font-size:13px;color:#0a1f5c;margin-top:8px">${h.note}</div>`:''}
-      <div class="fact-actions">
-        ${!isReadOnly()?`<button class="btn btn-sm" onclick="openEditHist(${h.id},'${(h.note||'').replace(/'/g,"\\'")}')">✏ Modifier la note</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-function openEditHist(id,note){
-  document.getElementById('hist-edit-id').value=id;
-  document.getElementById('hist-edit-note').value=note;
-  document.getElementById('modal-edit-hist').classList.add('open');
-}
-async function saveHistNote(){
-  const id=parseInt(document.getElementById('hist-edit-id').value);
-  const note=document.getElementById('hist-edit-note').value.trim();
-  await sb.from('historique').update({note}).eq('id',id);
-  toast('Note enregistrée ✓');closeModal('modal-edit-hist');await loadHistorique();
-}
-async function logAction(type,membrePseudo,description){
-  await sb.from('historique').insert({type,membre_pseudo:membrePseudo||'',description,staff_nom:currentUser.nom_affiche||currentUser.username,note:''});
-}
-
-// ============================================================
-// BADGE DEMANDES EN COURS
-// ============================================================
-function membreHasPendingRequest(pseudo){
-  if(!pseudo)return false;
-  const lp=pseudo.toLowerCase();
-  const salP=(window._salRows||[]).some(r=>(r['Pseudo jeu']||'').toLowerCase()===lp&&(salStatuts[r['Timestamp']]||'En attente')==='En attente');
-  const poleP=poleData.some(r=>(r['Pseudo jeu']||'').toLowerCase()===lp&&(poleStatuts[r['Timestamp']]||'En attente')==='En attente');
-  return salP||poleP;
-}
-function getPendingTypes(pseudo){
-  if(!pseudo)return[];
-  const lp=pseudo.toLowerCase();
-  const types=[];
-  if((window._salRows||[]).some(r=>(r['Pseudo jeu']||'').toLowerCase()===lp&&(salStatuts[r['Timestamp']]||'En attente')==='En attente'))types.push('sal');
-  if(poleData.some(r=>(r['Pseudo jeu']||'').toLowerCase()===lp&&(poleStatuts[r['Timestamp']]||'En attente')==='En attente'))types.push('pole');
-  return types;
-}
-function goToPendingRequest(pseudo,event){
-  event.stopPropagation();
-  const types=getPendingTypes(pseudo);
-  if(!types.length)return;
-  const target=types.includes('sal')?'sal':'pole';
-  const navBtn=document.getElementById('nav-'+target);
-  if(navBtn){
-    showPage(target,navBtn);
-    setTimeout(()=>{
-      const cards=document.querySelectorAll('#liste-'+target+' .fact-card');
-      for(const card of cards){
-        if(card.textContent.toLowerCase().includes(pseudo.toLowerCase())){
-          card.scrollIntoView({behavior:'smooth',block:'center'});
-          card.style.outline='2px solid #0a1f5c';
-          setTimeout(()=>card.style.outline='',2000);break;
-        }
-      }
-    },800);
-  }
-}
-
-// ============================================================
-// PROFIL
-// ============================================================
 function openProfil(){
   const roleLabels={president:'Président',vice_president:'Vice-Président',gestionnaire_parc:'Gestionnaire de parc',comptable:'Comptable',staff_tm:'Staff TM'};
   document.getElementById('p-role-display').value=roleLabels[currentUser.role]||currentUser.role;
