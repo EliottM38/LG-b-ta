@@ -925,20 +925,6 @@ let poleData = [];
 // ============================================================
 // CONFIG DYNAMIQUE (URLs GForms stockées dans Supabase)
 // ============================================================
-async function loadAppConfig() {
-  try {
-    const { data } = await sb.from('app_config').select('*');
-    if (data) {
-      data.forEach(row => {
-        if (row.key === 'sal_csv_url')  SAL_CSV_URL  = row.value;
-        if (row.key === 'pole_csv_url') POLE_CSV_URL = row.value;
-      });
-    }
-  } catch(e) {
-    console.warn('Config non chargée:', e.message);
-  }
-}
-
 function isReadOnly() { return currentUser && currentUser.role === 'staff_tm'; }
 function tod() { return new Date().toISOString().slice(0,10); }
 function fd(d) { if(!d)return'—'; const[y,m,j]=(d||'').split('-'); return j+'/'+m+'/'+y; }
@@ -2785,53 +2771,6 @@ async function sbSafe(fn, context='') {
 
 
 
-async function saveAppConfig() {
-  let salUrl  = document.getElementById('cfg-sal-url').value.trim();
-  let poleUrl = document.getElementById('cfg-pole-url').value.trim();
-  // Convertir automatiquement pubhtml -> pub?output=csv
-  salUrl  = salUrl.replace('/pubhtml', '/pub?output=csv').replace('pubhtml?', 'pub?output=csv&');
-  poleUrl = poleUrl.replace('/pubhtml', '/pub?output=csv').replace('pubhtml?', 'pub?output=csv&');
-  if (!salUrl.includes('output=csv'))  salUrl  += (salUrl.includes('?')  ? '&' : '?') + 'output=csv';
-  if (!poleUrl.includes('output=csv')) poleUrl += (poleUrl.includes('?') ? '&' : '?') + 'output=csv';
-  const res     = document.getElementById('cfg-result');
-  if (!salUrl || !poleUrl) { res.textContent = 'Les deux liens sont obligatoires.'; res.style.color='#991b1b'; return; }
-  try {
-    // Supprimer puis insérer pour garantir la mise à jour
-    await sb.from('app_config').delete().eq('key', 'sal_csv_url');
-    await sb.from('app_config').delete().eq('key', 'pole_csv_url');
-    const r1 = await sb.from('app_config').insert({key:'sal_csv_url',  value:salUrl});
-    const r2 = await sb.from('app_config').insert({key:'pole_csv_url', value:poleUrl});
-    if (r1.error || r2.error) {
-      res.textContent = 'Erreur : ' + (r1.error?.message || r2.error?.message);
-      res.style.color = '#991b1b';
-      return;
-    }
-    SAL_CSV_URL  = salUrl;
-    POLE_CSV_URL = poleUrl;
-    res.textContent = '✅ Liens sauvegardés avec succès !';
-    res.style.color = '#166534';
-  } catch(e) {
-    res.textContent = 'Erreur : ' + e.message;
-    res.style.color = '#991b1b';
-  }
-}
-
-async function loadConfigUI() {
-  if (!currentUser || currentUser.role !== 'president') return;
-  // Afficher d'abord la carte
-  const card = document.getElementById('card-config');
-  if (card) card.style.display = '';
-  // Puis charger les valeurs
-  try {
-    await loadAppConfig();
-  } catch(e) {}
-  const salEl  = document.getElementById('cfg-sal-url');
-  const poleEl = document.getElementById('cfg-pole-url');
-  if (salEl)  salEl.value  = SAL_CSV_URL  || '';
-  if (poleEl) poleEl.value = POLE_CSV_URL || '';
-}
-
-
 // ============================================================
 // CONFIG GFORMS — URLs stockées dans Supabase
 // ============================================================
@@ -2928,7 +2867,6 @@ function openEditFacture(id) {
 // ============================================================
 // MODIFIER INTÉRIMAIRE
 // ============================================================
-let editInterimId = null;
 function openEditInterim(id) {
   const d = interimaires.find(x => x.id === id); if (!d) return;
   editInterimId = id;
