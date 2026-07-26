@@ -677,7 +677,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <!-- MODAL FACTURE -->
 <div class="modal-bg" id="modal-facture">
 <div class="modal" style="max-width:640px">
-  <h2>Nouvelle facture de location</h2>
+  <h2 id="d-modal-title">Nouvelle facture de location</h2>
   <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">* Champs obligatoires</p>
 
   <div class="sep">Membre</div>
@@ -701,7 +701,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="field"><label>Date de fin *</label><input type="date" id="d-date-fin"></div>
   </div>
   <div class="field"><label>Durée de facturation</label>
-    <select id="d-duree" onchange="calcAllLines()">
+    <select id="d-duree" onchange="calcAllLines();calcDateFinFacture()">
       <option value="semaine">Par semaine</option>
       <option value="mois">Par mois</option>
     </select>
@@ -842,7 +842,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <!-- MODAL INTÉRIMAIRES -->
 <div class="modal-bg" id="modal-interim">
 <div class="modal">
-  <h2>Nouvelle demande d'intérimaires</h2>
+  <h2 id="i-modal-title">Nouvelle demande d'intérimaires</h2>
   <p style="font-size:12px;color:#aaa;margin-bottom:14px">* Champs obligatoires</p>
 
   <div class="sep">Membre</div>
@@ -854,7 +854,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
   <div class="sep">Type d'intérimaires</div>
   <div class="field"><label>Pôle *</label>
-    <select id="i-pole" onchange="calcInterim()">
+    <select id="i-pole" onchange="calcInterim();calcDateFinInterim()">
       <option value="conduite">Pôle Conduite — Conducteurs</option>
       <option value="maintenance">Pôle Maintenance — Mécaniciens</option>
     </select>
@@ -868,7 +868,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     </div>
   </div>
   <div class="field" id="i-nb-unites-wrap"><label>Nb de semaines (Conduite uniquement)</label>
-    <input type="number" id="i-nb-unites" value="1" min="1" oninput="calcInterim()" placeholder="ex: 2">
+    <input type="number" id="i-nb-unites" oninput="calcInterim();calcDateFinInterim()" value="1" min="1" oninput="calcInterim()" placeholder="ex: 2">
   </div>
 
   <div class="sep">Période</div>
@@ -1240,8 +1240,10 @@ const TLABEL = { minibus:'Minibus', midibus:'Midibus', standard:'Standard', arti
 const DLABEL = { semaine:'semaine', mois:'mois' };
 const ULTIMATE_GRATUIT = 25; // nb véhicules gratuits tous types confondus
 
-let lignesVehicules = []; // [{id, type, modele, nb, nbUnites, numerosParc}]
+let lignesVehicules = [];
 let ligneCounter = 0;
+let editFactureId = null;
+let editInterimId = null;
 
 function onMembreChange() {
   const membreEl = document.getElementById('d-membre');
@@ -1403,7 +1405,9 @@ function openAddFacture() {
     const dn = document.getElementById('d-notes');
     if (!dd||!df||!du||!ds||!dn) { alert('Erreur: champs manquants dans le modal facture'); return; }
     dd.value = tod();
+    dd.min = tod();
     df.value = '';
+    df.min = tod();
     du.value = 'semaine';
     ds.value = 'En attente';
     dn.value = '';
@@ -1420,6 +1424,8 @@ async function saveFacture() {
   const mid = parseInt(document.getElementById('d-membre').value);
   const m   = membres.find(x => x.id === mid);
   if (!m) { alert('Sélectionnez un membre.'); return; }
+  // Si modification, récupérer l'ancienne facture
+  const isEdit = !!editFactureId;
   const dd = document.getElementById('d-date-debut').value;
   const df = document.getElementById('d-date-fin').value;
   if (!dd || !df) { alert('Les dates sont obligatoires.'); return; }
@@ -1464,15 +1470,22 @@ async function saveFacture() {
     date_creation: tod(), created_by: currentUser.id,
   };
 
-  await sb.from('factures').insert(rec);
-  // Mettre à jour bus_loues du membre
-  const newBusLoues = busDejaLoues + totalVeh;
-  await sb.from('membres').update({ bus_loues: newBusLoues }).eq('id', mid);
-  const mIdx = membres.findIndex(x=>x.id===mid);
-  if (mIdx !== -1) membres[mIdx].bus_loues = newBusLoues;
-
-  await logAction('facture', m.pseudo, `Facture créée : ${totalVeh} véh. (${lignesSave.map(l=>l.type+' ×'+l.nb).join(', ')}) — ${fe(total)}`);
-  toast('Facture créée ✓');
+  if (isEdit) {
+    const {error:errF} = await sb.from('factures').update(rec).eq('id', editFactureId);
+    if (errF) { alert('Erreur modification : ' + errF.message); return; }
+    await logAction('facture', m.pseudo, `Facture #${String(editFactureId).padStart(3,'0')} modifiée — ${fe(total)}`);
+    toast('Facture modifiée ✓');
+    editFactureId = null;
+  } else {
+    const {error:errF} = await sb.from('factures').insert(rec);
+    if (errF) { alert('Erreur création : ' + errF.message); return; }
+    const newBusLoues = busDejaLoues + totalVeh;
+    await sb.from('membres').update({ bus_loues: newBusLoues }).eq('id', mid);
+    const mIdx = membres.findIndex(x=>x.id===mid);
+    if (mIdx !== -1) membres[mIdx].bus_loues = newBusLoues;
+    await logAction('facture', m.pseudo, `Facture créée : ${totalVeh} véh. (${lignesSave.map(l=>l.type+' ×'+l.nb).join(', ')}) — ${fe(total)}`);
+    toast('Facture créée ✓');
+  }
   closeModal('modal-facture');
   await loadFactures();
   renderMembres();
@@ -1531,7 +1544,8 @@ function renderFactures(){
           <option ${d.statut==='Accepté'?'selected':''}>Accepté</option>
           <option ${d.statut==='Livré'?'selected':''}>Livré</option>
           <option ${d.statut==='Refusé'?'selected':''}>Refusé</option>
-        </select>`:''}
+        </select>
+        <button class="btn btn-sm" onclick="openEditFacture(${d.id})">✏ Modifier</button>`:''}
         <button class="btn btn-sm btn-export" onclick="exportJpeg(${d.id})">⬇ JPEG</button>
         ${canDelete&&!isReadOnly()?`<button class="btn btn-sm btn-danger" onclick="deleteFacture(${d.id})">Suppr.</button>`:''}
       </div>
@@ -1578,7 +1592,9 @@ function openAddInterim(){
     const notes=document.getElementById('i-notes');
     if(!dd||!df||!pole||!nb||!nbu||!stat||!notes){alert('Erreur: champs manquants dans le modal intérimaires');return;}
     dd.value=tod();
+    dd.min=tod();
     df.value='';
+    df.min=tod();
     pole.value='conduite';
     nb.value='1';
     nbu.value='1';
@@ -1695,9 +1711,19 @@ async function saveInterim(){
     created_by:currentUser.id,
   };
   
-  await sb.from('interimaires').insert(rec);
-  await logAction('interim',m.pseudo,`Demande d'intérimaires : ${nb} personne(s) ${pole==='conduite'?'(conducteurs)':'(mécaniciens)'} — ${fe(total)}`);
-  toast('Demande créée ✓');
+  const isEditI = !!editInterimId;
+  if (isEditI) {
+    const {error:errI} = await sb.from('interimaires').update(rec).eq('id', editInterimId);
+    if(errI){ alert('Erreur modification : ' + errI.message); return; }
+    await logAction('interim',m.pseudo,`Demande #${String(editInterimId).padStart(3,'0')} modifiée`);
+    toast('Demande modifiée ✓');
+    editInterimId = null;
+  } else {
+    const {error:errI} = await sb.from('interimaires').insert(rec);
+    if(errI){ alert('Erreur création : ' + errI.message); return; }
+    await logAction('interim',m.pseudo,`Demande d'intérimaires : ${nb} personne(s) ${pole==='conduite'?'(conducteurs)':'(mécaniciens)'} — ${fe(total)}`);
+    toast('Demande créée ✓');
+  }
   closeModal('modal-interim');
   await loadInterimaires();
 }
@@ -1739,6 +1765,7 @@ function renderInterimaires() {
           <option ${d.statut==='Accepté'?'selected':''}>Accepté</option>
           <option ${d.statut==='Refusé'?'selected':''}>Refusé</option>
         </select>
+        <button class="btn btn-sm" onclick="openEditInterim(${d.id})">✏ Modifier</button>
         <button class="btn btn-sm btn-export" onclick="exportInterimJpeg(${d.id})">⬇ JPEG</button>`:''}
         ${canDelete&&!isReadOnly()?`<button class="btn btn-sm btn-danger" onclick="deleteInterim(${d.id})">Suppr.</button>`:''}
       </div>
@@ -1877,16 +1904,44 @@ function exportJpeg(id){
     </div>
   </div>`;
 
-  setTimeout(()=>{
-    const pdfEl=document.getElementById('pdf-content');
-    pdfEl.style.width='1600px';
-    html2canvas(pdfEl,{scale:6,useCORS:true,backgroundColor:'#ffffff',width:1600,logging:false,imageTimeout:0,letterRendering:true,allowTaint:false}).then(canvas=>{
-      pdfEl.style.width='800px';
-      const a=document.createElement('a');
-      a.download=`facture-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
-      a.href=canvas.toDataURL('image/jpeg',1.0);a.click();
+  // Attendre que le DOM soit rendu puis capturer
+  requestAnimationFrame(() => setTimeout(() => {
+    const pdfEl = document.getElementById('pdf-content');
+    const zone   = document.getElementById('pdf-zone');
+    // Rendre visible temporairement pour html2canvas
+    zone.style.position = 'static';
+    zone.style.left      = '0';
+    zone.style.visibility = 'visible';
+    pdfEl.style.width    = '900px';
+    pdfEl.style.display  = 'block';
+
+    html2canvas(pdfEl, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      foreignObjectRendering: false,
+      imageTimeout: 20000,
+      onclone: (doc) => {
+        doc.getElementById('pdf-zone').style.position = 'static';
+      }
+    }).then(canvas => {
+      zone.style.position  = 'fixed';
+      zone.style.left      = '-9999px';
+      zone.style.visibility = 'hidden';
+      pdfEl.style.width    = '800px';
+      const url = canvas.toDataURL('image/jpeg', 0.95);
+      const a   = document.createElement('a');
+      a.download = `facture-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }).catch(e => {
+      alert('Erreur export JPEG : ' + e.message);
     });
-  },500);
+  }, 300));
 }
 
 function exportInterimJpeg(id) {
@@ -1951,26 +2006,39 @@ function exportInterimJpeg(id) {
     </div>
   </div>`;
 
-  setTimeout(() => {
+  requestAnimationFrame(() => setTimeout(() => {
     const pdfEl2 = document.getElementById('pdf-content');
-    pdfEl2.style.width = '1200px';
+    const zone2   = document.getElementById('pdf-zone');
+    zone2.style.position  = 'static';
+    zone2.style.left       = '0';
+    zone2.style.visibility = 'visible';
+    pdfEl2.style.width    = '900px';
+    pdfEl2.style.display  = 'block';
+
     html2canvas(pdfEl2, {
-      scale: 4,
+      scale: 3,
       useCORS: true,
       backgroundColor: '#ffffff',
-      width: 1200,
       logging: false,
-      imageTimeout: 0,
-      removeContainer: true,
-      letterRendering: true,
+      allowTaint: true,
+      foreignObjectRendering: false,
+      imageTimeout: 20000,
     }).then(canvas => {
-      pdfEl2.style.width = '800px';
-      const a = document.createElement('a');
+      zone2.style.position  = 'fixed';
+      zone2.style.left       = '-9999px';
+      zone2.style.visibility = 'hidden';
+      pdfEl2.style.width    = '800px';
+      const url = canvas.toDataURL('image/jpeg', 0.95);
+      const a   = document.createElement('a');
       a.download = `interim-LG-${String(d.id).padStart(3,'0')}-${d.membre_pseudo}.jpg`;
-      a.href = canvas.toDataURL('image/jpeg', 1.0);
+      a.href = url;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+    }).catch(e => {
+      alert('Erreur export JPEG : ' + e.message);
     });
-  }, 300);
+  }, 300));
 }
 
 
@@ -2816,6 +2884,110 @@ async function loadConfigUI() {
   if (p) p.value = POLE_CSV_URL || '';
   const card = document.getElementById('card-config');
   if (card) card.style.display = '';
+}
+
+
+// ============================================================
+// MODIFIER FACTURE
+// ============================================================
+let editFactureId = null;
+
+function openEditFacture(id) {
+  const d = factures.find(x => x.id === id); if (!d) return;
+  editFactureId = id;
+  const sel = document.getElementById('d-membre');
+  sel.innerHTML = membres.map(m => `<option value="${m.id}"${m.id===d.membre_id?' selected':''}>${m.pseudo}${m.entreprise?' — '+m.entreprise:''}</option>`).join('');
+  document.getElementById('d-modal-title').textContent = 'Modifier la facture #' + String(d.id).padStart(3,'0');
+
+  // Reconstruire les lignes
+  lignesVehicules = [];
+  ligneCounter = 0;
+  try {
+    const lignes = d.lignes ? JSON.parse(d.lignes) : null;
+    if (lignes && lignes.length) {
+      lignes.forEach(l => {
+        lignesVehicules.push({ id: ++ligneCounter, type: l.type_key||'standard', modele: l.modele||'', nb: l.nb||1, nbUnites: l.nbUnites||1, numerosParc: l.numerosParc||'' });
+      });
+    }
+  } catch(e) {}
+  if (!lignesVehicules.length) addLigneVehicule();
+
+  document.getElementById('d-date-debut').value = d.date_debut || '';
+  document.getElementById('d-date-debut').min = tod();
+  document.getElementById('d-date-fin').value   = d.date_fin   || '';
+  document.getElementById('d-date-fin').min = tod();
+  document.getElementById('d-duree').value       = d.duree_key  || 'semaine';
+  document.getElementById('d-statut').value      = d.statut     || 'En attente';
+  document.getElementById('d-notes').value       = d.notes      || '';
+  document.getElementById('d-bus-deja').value    = d.bus_deja_loues || 0;
+
+  renderLignes();
+  onMembreChange();
+  document.getElementById('modal-facture').classList.add('open');
+}
+
+// ============================================================
+// MODIFIER INTÉRIMAIRE
+// ============================================================
+let editInterimId = null;
+
+function openEditInterim(id) {
+  const d = interimaires.find(x => x.id === id); if (!d) return;
+  editInterimId = id;
+
+  const sel = document.getElementById('i-membre');
+  sel.innerHTML = membres.map(m => `<option value="${m.id}"${m.id===d.membre_id?' selected':''}>${m.pseudo}${m.entreprise?' — '+m.entreprise:''}</option>`).join('');
+
+  document.getElementById('i-modal-title').textContent = 'Modifier la demande #' + String(d.id).padStart(3,'0');
+  document.getElementById('i-pole').value    = d.pole        || 'conduite';
+  document.getElementById('i-nb').value      = d.nb_personnes|| 1;
+  document.getElementById('i-nb-unites').value = d.nb_unites || 1;
+  document.getElementById('i-date-debut').value = d.date_debut || '';
+  document.getElementById('i-date-debut').min   = tod();
+  document.getElementById('i-date-fin').value   = d.date_fin   || '';
+  document.getElementById('i-date-fin').min     = tod();
+  document.getElementById('i-statut').value  = d.statut      || 'En attente';
+  document.getElementById('i-notes').value   = d.notes       || '';
+
+  onInterimMembreChange();
+  calcInterim();
+  document.getElementById('modal-interim').classList.add('open');
+}
+
+
+// ============================================================
+// CALCUL DATE DE FIN AUTOMATIQUE
+// ============================================================
+function calcDateFin(dateDebutId, dateFinId, dureeKey, nbUnites) {
+  const dd = document.getElementById(dateDebutId).value;
+  if (!dd) return;
+  const debut = new Date(dd);
+  if (isNaN(debut.getTime())) return;
+  let fin = new Date(debut);
+  const n = parseInt(nbUnites) || 1;
+  if (dureeKey === 'semaine') {
+    fin.setDate(fin.getDate() + n * 7);
+  } else if (dureeKey === 'mois') {
+    fin.setMonth(fin.getMonth() + n);
+  } else if (dureeKey === 'jour') {
+    fin.setDate(fin.getDate() + n);
+  }
+  // Reculer d'un jour (fin = dernier jour inclus)
+  fin.setDate(fin.getDate() - 1);
+  document.getElementById(dateFinId).value = fin.toISOString().split('T')[0];
+}
+
+function calcDateFinFacture() {
+  const duree = document.getElementById('d-duree').value;
+  const nb = parseInt(document.getElementById('d-nb-unites')?.value) || 1;
+  calcDateFin('d-date-debut', 'd-date-fin', duree, nb);
+}
+
+function calcDateFinInterim() {
+  const pole = document.getElementById('i-pole').value;
+  const nb = parseInt(document.getElementById('i-nb-unites').value) || 1;
+  const duree = pole === 'conduite' ? 'semaine' : 'jour';
+  calcDateFin('i-date-debut', 'i-date-fin', duree, nb);
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
