@@ -2712,21 +2712,23 @@ function getAllCols(r, name) {
 
 async function fetchCSV(url) {
   if (!url) throw new Error('URL vide — configurez les liens GForms dans Accès Staff');
+  // Essai 1 : proxy GAS
   try {
     const res = await fetch(GAS_PROXY + '?url=' + encodeURIComponent(url), { cache: 'no-store' });
     if (res.ok) {
       const text = await res.text();
       if (text && text.length > 10 && !text.includes('<!DOCTYPE') && !text.includes('<html')) return text;
     }
-  } catch(e) {}
+  } catch(e) { console.warn('GAS proxy failed:', e.message); }
+  // Essai 2 : accès direct (fonctionne si le sheet est public)
   try {
-    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), { cache: 'no-store' });
+    const res = await fetch(url, { cache: 'no-store' });
     if (res.ok) {
       const text = await res.text();
       if (text && text.length > 10 && !text.includes('<!DOCTYPE')) return text;
     }
-  } catch(e) {}
-  throw new Error('Chargement impossible');
+  } catch(e) { console.warn('Direct fetch failed:', e.message); }
+  throw new Error('Chargement impossible — vérifiez que le Google Sheet est bien publié en CSV');
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
