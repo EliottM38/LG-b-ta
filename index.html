@@ -2631,6 +2631,104 @@ async function saveHistNote() {
   await loadHistorique();
 }
 
+
+// ============================================================
+// CSV PARSING & FETCH
+// ============================================================
+function parseCSVLine(line) {
+  if (!line) return [];
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function parseCSV(text) {
+  if (!text || typeof text !== 'string') return [];
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const rawHeaders = parseCSVLine(lines[0]);
+  const headers = rawHeaders.map(h => h != null ? String(h).trim() : '');
+  return lines.slice(1).filter(l => l && l.trim()).map(l => {
+    const vals = parseCSVLine(l);
+    const obj = { _raw: {} };
+    headers.forEach((key, i) => {
+      const raw = vals[i];
+      const val = (raw != null) ? String(raw).trim() : '';
+      obj._raw[i] = { key: key || '', val };
+      if (key) {
+        if (val !== '' && obj[key] === undefined) obj[key] = val;
+        else if (obj[key] === undefined) obj[key] = '';
+      }
+    });
+    return obj;
+  });
+}
+
+function getCol(r) {
+  const names = Array.prototype.slice.call(arguments, 1);
+  for (let ni = 0; ni < names.length; ni++) {
+    const name = names[ni];
+    if (!name) continue;
+    const nameTrim = String(name).trim();
+    if (r && r._raw) {
+      const entries = Object.values(r._raw);
+      for (let i = 0; i < entries.length; i++) {
+        const e = entries[i];
+        if (e && e.key && String(e.key).trim() === nameTrim && e.val) return String(e.val);
+      }
+    }
+    if (r) {
+      const v = r[name];
+      if (v != null && String(v).trim() !== '') return String(v).trim();
+    }
+  }
+  return '';
+}
+
+function getAllCols(r, name) {
+  if (!r || !name) return '';
+  const nameTrim = String(name).trim();
+  const results = [];
+  if (r._raw) {
+    const entries = Object.values(r._raw);
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      if (!e) continue;
+      const k = e.key ? String(e.key).trim() : '';
+      const v = e.val ? String(e.val).trim() : '';
+      if (k === nameTrim && v && !results.includes(v)) results.push(v);
+    }
+    if (results.length) return results.join(' / ');
+  }
+  return '';
+}
+
+async function fetchCSV(url) {
+  if (!url) throw new Error('URL vide — configurez les liens GForms dans Accès Staff');
+  try {
+    const res = await fetch(GAS_PROXY + '?url=' + encodeURIComponent(url), { cache: 'no-store' });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 10 && !text.includes('<!DOCTYPE') && !text.includes('<html')) return text;
+    }
+  } catch(e) {}
+  try {
+    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), { cache: 'no-store' });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 10 && !text.includes('<!DOCTYPE')) return text;
+    }
+  } catch(e) {}
+  throw new Error('Chargement impossible');
+}
+
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
 // ============================================================
