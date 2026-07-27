@@ -1061,6 +1061,7 @@ async function loadMembres(){
 }
 
 function renderMembres(){
+  if (!currentUser) return;
   const q=(document.getElementById('search').value||'').toLowerCase();
   const ff=document.getElementById('f-forfait').value;
   const fs=document.getElementById('f-statut').value;
@@ -1684,7 +1685,6 @@ async function saveInterim(){
     nb_personnes:nb,
     nb_unites:nbu,
     duree_key:durKey,
-    duree_label:durLabel,
     prix_unitaire:pu,
     total,
     gratuit,
@@ -2359,6 +2359,24 @@ function calcDateFinInterim() {
   const nb = parseInt(document.getElementById('i-nb-unites').value) || 1;
   const duree = pole === 'conduite' ? 'semaine' : 'jour';
   calcDateFin('i-date-debut', 'i-date-fin', duree, nb);
+}
+
+
+// ============================================================
+// HISTORIQUE — logAction
+// ============================================================
+async function logAction(type, membrePseudo, description) {
+  try {
+    await sb.from('historique').insert({
+      type,
+      membre_pseudo: membrePseudo || '',
+      description,
+      staff_nom: currentUser.nom_affiche || currentUser.username,
+      note: ''
+    });
+  } catch(e) {
+    console.warn('logAction error:', e.message);
+  }
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
