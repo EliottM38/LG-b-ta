@@ -565,7 +565,8 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="card-header"><span class="card-title">📡 Données disponibles</span></div>
     <div style="padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border-light)">
       <button class="btn btn-sm" onclick="loadTMEndpoint('membres')" id="tm-tab-membres">👥 Membres</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules')" id="tm-tab-vehicules">🚌 Véhicules</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules')" id="tm-tab-vehicules">🚌 Véhicules location</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules_global')" id="tm-tab-vehicules_global">🚌 Tous véhicules</button>
       <button class="btn btn-sm" onclick="loadTMEndpoint('compta')" id="tm-tab-compta">💰 Comptabilité</button>
       <button class="btn btn-sm" onclick="loadTMEndpoint('salaries')" id="tm-tab-salaries">👷 Salariés</button>
     </div>
@@ -1205,6 +1206,42 @@ function showPage(id,btn){
 async function loadMembres(){
   const{data}=await sb.from('membres').select('*').order('id',{ascending:false});
   membres=data||[]; renderMembres();
+  // Auto-sync TM si clé configurée (silencieux)
+  if(getTMKey()) syncTMMembresAuto();
+}
+
+async function syncTMMembresAuto() {
+  try {
+    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance?limit=1000', {
+      headers: { 'Authorization': 'Bearer ' + getTMKey(), 'Accept': 'application/json' }
+    });
+    if (!res.ok) return;
+    const raw = await res.json();
+    const tm_membres = Array.isArray(raw) ? raw : (raw.data || raw.membres || raw.membres_alliance || []);
+    if (!tm_membres.length) return;
+    // Mettre à jour silencieusement chaque membre
+    for (const tm of tm_membres) {
+      const pseudo = tm.pseudo || tm.username || tm.name || '';
+      if (!pseudo) continue;
+      const existing = membres.find(m => (m.pseudo||'').toLowerCase() === pseudo.toLowerCase());
+      if (!existing) continue;
+      const upd = {};
+      if (tm.entreprise || tm.company)  upd.entreprise = tm.entreprise || tm.company || existing.entreprise;
+      if (tm.niveau     || tm.level)    upd.niveau     = String(tm.niveau || tm.level || existing.niveau);
+      if (tm.forfait    || tm.plan)     upd.forfait    = tm.forfait    || tm.plan    || existing.forfait;
+      if (!Object.keys(upd).length) continue;
+      // Vérifier si update nécessaire
+      const changed = Object.entries(upd).some(([k,v]) => existing[k] !== v);
+      if (!changed) continue;
+      await sb.from('membres').update(upd).eq('id', existing.id);
+      const idx = membres.findIndex(m => m.id === existing.id);
+      if (idx !== -1) membres[idx] = { ...membres[idx], ...upd };
+    }
+    renderMembres();
+    console.log('✅ Membres synchronisés depuis TM');
+  } catch(e) {
+    console.warn('Sync TM silencieux échoué:', e.message);
+  }
 }
 
 function renderMembres(){
@@ -1922,10 +1959,19 @@ function renderStaff(){
       <td>${s.nom_affiche||'—'}</td>
       <td><span class="role-badge role-${s.role}">${r?.label||s.role}</span></td>
       <td><span class="badge ${s.actif?'b-actif':'b-inactif'}">${s.actif?'Actif':'Inactif'}</span></td>
-      <td>${isSelf?'<em style="color:#aaa;font-size:12px">Votre compte</em>':`<button class="btn btn-sm btn-danger" onclick="toggleStaff('${s.id}',${s.actif})">
-        ${s.actif?'Désactiver':'Réactiver'}</button>`}</td>
+      <td style="display:flex;gap:6px;align-items:center">
+        ${isSelf
+          ? '<em style="color:#aaa;font-size:12px">Votre compte</em>'
+          : `<button class="btn btn-sm btn-danger" onclick="toggleStaff('${s.id}',${s.actif})">${s.actif?'Désactiver':'Réactiver'}</button>
+             ${currentUser.role==='president' ? `<button class="btn btn-sm btn-danger" onclick="deleteStaff('${s.id}','${s.username}')" title="Supprimer définitivement">🗑</button>` : ''}`
+        }
+      </td>
     </tr>`;
   }).join('');
+  // Afficher tarifs et config pour VP et Président
+  const cfgCard = document.getElementById('card-config');
+  if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
+  loadTarifsUI();
 }
 
 function openAddStaff(){document.getElementById('modal-staff').classList.add('open');}
@@ -3214,10 +3260,11 @@ async function syncOneMember(tm) {
 
 // ── Endpoints disponibles ──────────────────────────────────────────────
 const TM_ENDPOINTS = {
-  membres:   { url: '/api/v1/membres_alliance&limit=1000', label: 'Membres alliance' },
+  membres:   { url: '/api/v1/membres_alliance?limit=1000', label: 'Membres alliance' },
   vehicules: { url: '/api/v1/vehicules?parc=location&limit=1000', label: 'Véhicules en location' },
-  compta:    { url: '/api/v1/compta&limit=1000', label: 'Comptabilité' },
-  salaries:  { url: '/api/v1/salaries&limit=1000', label: 'Salariés' },
+  vehicules_global: { url: '/api/v1/vehicules?parc=global&limit=1000', label: 'Tous les véhicules' },
+  compta:    { url: '/api/v1/compta?limit=1000', label: 'Comptabilité' },
+  salaries:  { url: '/api/v1/salaries?limit=1000', label: 'Salariés' },
 };
 
 let tmCurrentEndpoint = null;
