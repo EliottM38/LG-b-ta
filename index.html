@@ -573,9 +573,13 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <!-- Recherche membre -->
     <div id="tm-search-wrap" style="padding:12px 20px 0;display:none">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-        <input id="tm-member-search" placeholder="Rechercher un membre (pseudo)..."
-          style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px"
-          oninput="filterTMData()">
+        <div style="position:relative;flex:1">
+          <input id="tm-member-search" placeholder="Rechercher un membre (pseudo)..."
+            style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;box-sizing:border-box"
+            oninput="filterTMData();showTMSuggestions()"
+            autocomplete="off">
+          <div id="tm-suggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:0 0 9px 9px;z-index:100;display:none;max-height:200px;overflow-y:auto"></div>
+        </div>
         <button class="btn btn-sm" onclick="document.getElementById('tm-member-search').value='';filterTMData()">✕</button>
       </div>
       <div id="tm-member-result" style="margin-bottom:8px"></div>
@@ -705,6 +709,86 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px"> Sauvegarder</button>
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
+
+  <!-- Tarifs modifiables — VP et Président uniquement -->
+  <div class="card" id="card-tarifs" style="margin-top:24px;display:none">
+    <div class="card-header"><span class="card-title">💰 Tarifs — Location & Intérimaires</span></div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Modifiez les tarifs ici. Ils sont stockés en base de données et appliqués immédiatement.</p>
+
+      <div class="pdf-stitle" style="margin-bottom:10px">🚌 Location de véhicules (€)</div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Minibus / sem.</label><input type="number" id="t-minibus-s" class="tarif-input"></div>
+        <div class="field"><label>Minibus / mois</label><input type="number" id="t-minibus-m" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Midibus / sem.</label><input type="number" id="t-midibus-s" class="tarif-input"></div>
+        <div class="field"><label>Midibus / mois</label><input type="number" id="t-midibus-m" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Standard / sem.</label><input type="number" id="t-standard-s" class="tarif-input"></div>
+        <div class="field"><label>Standard / mois</label><input type="number" id="t-standard-m" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Articulé / sem.</label><input type="number" id="t-articule-s" class="tarif-input"></div>
+        <div class="field"><label>Articulé / mois</label><input type="number" id="t-articule-m" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Car longue distance / sem.</label><input type="number" id="t-carle-s" class="tarif-input"></div>
+        <div class="field"><label>Car longue distance / mois</label><input type="number" id="t-carle-m" class="tarif-input"></div>
+      </div>
+      <div class="field" style="margin-bottom:12px"><label>Véhicules gratuits Ultimate (nb max)</label><input type="number" id="t-ultimate-gratuit" class="tarif-input"></div>
+
+      <div class="pdf-stitle" style="margin:16px 0 10px">👷 Intérimaires (€)</div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Conducteur Standard / sem.</label><input type="number" id="t-cond-std-s" class="tarif-input"></div>
+        <div class="field"><label>Conducteur Ultimate / sem.</label><input type="number" id="t-cond-ult-s" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Mécanicien Standard / jour</label><input type="number" id="t-meca-std-j" class="tarif-input"></div>
+        <div class="field"><label>Mécanicien Ultimate / jour</label><input type="number" id="t-meca-ult-j" class="tarif-input"></div>
+      </div>
+      <div class="field" style="margin-bottom:16px"><label>Intérimaires gratuits Ultimate (nb max)</label><input type="number" id="t-interim-gratuit" class="tarif-input"></div>
+
+      <div class="pdf-stitle" style="margin:16px 0 10px">🔧 Remboursements Pôle SAL (€)</div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>CT (Contrôle technique)</label><input type="number" id="t-ct" class="tarif-input"></div>
+        <div class="field"><label>Révision</label><input type="number" id="t-revision" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>FCO (Formation continue)</label><input type="number" id="t-fco" class="tarif-input"></div>
+      </div>
+      <div class="pdf-stitle" style="margin:10px 0 6px;font-size:12px">Rénovations intérieures (€/véhicule)</div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Remise en état affichages</label><input type="number" id="t-renov-affichages" class="tarif-input"></div>
+        <div class="field"><label>Remise en état barres maintien</label><input type="number" id="t-renov-barres" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Réparation sellerie</label><input type="number" id="t-renov-sellerie" class="tarif-input"></div>
+        <div class="field"><label>Remise en état du sol</label><input type="number" id="t-renov-sol" class="tarif-input"></div>
+      </div>
+      <div class="pdf-stitle" style="margin:10px 0 6px;font-size:12px">Rénovations techniques (€/véhicule)</div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Rénovation légère</label><input type="number" id="t-renov-legere" class="tarif-input"></div>
+        <div class="field"><label>Rénovation importante</label><input type="number" id="t-renov-importante" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Rénovation majeure</label><input type="number" id="t-renov-majeure" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Pose d'options</label><input type="number" id="t-options" class="tarif-input"></div>
+        <div class="field"><label>Adhésion Daimler Gold</label><input type="number" id="t-daimler" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Adhésion VDIStar</label><input type="number" id="t-vdistar" class="tarif-input"></div>
+        <div class="field"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveTarifs()" style="margin-top:8px">💾 Sauvegarder les tarifs</button>
+      <div id="tarifs-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
 
@@ -862,6 +946,30 @@ tr:hover td{background:rgba(13,31,78,.02)}
 </div>
 </div>
 
+
+<!-- MODAL AJOUT STAFF -->
+<div class="modal-bg" id="modal-add-staff">
+<div class="modal">
+  <h2 id="staff-modal-title">Ajouter un compte staff</h2>
+  <div class="field"><label>Identifiant *</label><input id="s-username" placeholder="identifiant de connexion" style="width:100%"></div>
+  <div class="field"><label>Nom affiché *</label><input id="s-nom" placeholder="Nom affiché dans l'app" style="width:100%"></div>
+  <div class="field"><label>Mot de passe *</label><input type="password" id="s-password" placeholder="Minimum 6 caractères" style="width:100%"></div>
+  <div class="field"><label>Rôle *</label>
+    <select id="s-role" style="width:100%">
+      <option id="opt-president" style="display:none" value="president">Président</option>
+      <option value="vice_president">Vice-Président</option>
+      <option value="gestionnaire_parc">Gestionnaire de parc</option>
+      <option value="comptable">Comptable</option>
+      <option value="staff_tm">Staff TM (lecture seule)</option>
+    </select>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-add-staff')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveNewStaff()">Créer le compte</button>
+  </div>
+</div>
+</div>
+
 <!-- MODAL OBJECTIF -->
 <div class="modal-bg" id="modal-objectif">
 <div class="modal">
@@ -974,85 +1082,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <button class="btn btn-primary" onclick="saveInterim()">Créer la demande</button>
   </div>
 </div>
-
-  <!-- Tarifs modifiables — VP et Président uniquement -->
-  <div class="card" id="card-tarifs" style="margin-top:24px;display:none">
-    <div class="card-header"><span class="card-title">💰 Tarifs — Location & Intérimaires</span></div>
-    <div style="padding:20px">
-      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Modifiez les tarifs ici. Ils sont stockés en base de données et appliqués immédiatement.</p>
-
-      <div class="pdf-stitle" style="margin-bottom:10px">🚌 Location de véhicules (€)</div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Minibus / sem.</label><input type="number" id="t-minibus-s" class="tarif-input"></div>
-        <div class="field"><label>Minibus / mois</label><input type="number" id="t-minibus-m" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Midibus / sem.</label><input type="number" id="t-midibus-s" class="tarif-input"></div>
-        <div class="field"><label>Midibus / mois</label><input type="number" id="t-midibus-m" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Standard / sem.</label><input type="number" id="t-standard-s" class="tarif-input"></div>
-        <div class="field"><label>Standard / mois</label><input type="number" id="t-standard-m" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Articulé / sem.</label><input type="number" id="t-articule-s" class="tarif-input"></div>
-        <div class="field"><label>Articulé / mois</label><input type="number" id="t-articule-m" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Car longue distance / sem.</label><input type="number" id="t-carle-s" class="tarif-input"></div>
-        <div class="field"><label>Car longue distance / mois</label><input type="number" id="t-carle-m" class="tarif-input"></div>
-      </div>
-      <div class="field" style="margin-bottom:12px"><label>Véhicules gratuits Ultimate (nb max)</label><input type="number" id="t-ultimate-gratuit" class="tarif-input"></div>
-
-      <div class="pdf-stitle" style="margin:16px 0 10px">👷 Intérimaires (€)</div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Conducteur Standard / sem.</label><input type="number" id="t-cond-std-s" class="tarif-input"></div>
-        <div class="field"><label>Conducteur Ultimate / sem.</label><input type="number" id="t-cond-ult-s" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Mécanicien Standard / jour</label><input type="number" id="t-meca-std-j" class="tarif-input"></div>
-        <div class="field"><label>Mécanicien Ultimate / jour</label><input type="number" id="t-meca-ult-j" class="tarif-input"></div>
-      </div>
-      <div class="field" style="margin-bottom:16px"><label>Intérimaires gratuits Ultimate (nb max)</label><input type="number" id="t-interim-gratuit" class="tarif-input"></div>
-
-      <div class="pdf-stitle" style="margin:16px 0 10px">🔧 Remboursements Pôle SAL (€)</div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>CT (Contrôle technique)</label><input type="number" id="t-ct" class="tarif-input"></div>
-        <div class="field"><label>Révision</label><input type="number" id="t-revision" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>FCO (Formation continue)</label><input type="number" id="t-fco" class="tarif-input"></div>
-      </div>
-      <div class="pdf-stitle" style="margin:10px 0 6px;font-size:12px">Rénovations intérieures (€/véhicule)</div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Remise en état affichages</label><input type="number" id="t-renov-affichages" class="tarif-input"></div>
-        <div class="field"><label>Remise en état barres maintien</label><input type="number" id="t-renov-barres" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Réparation sellerie</label><input type="number" id="t-renov-sellerie" class="tarif-input"></div>
-        <div class="field"><label>Remise en état du sol</label><input type="number" id="t-renov-sol" class="tarif-input"></div>
-      </div>
-      <div class="pdf-stitle" style="margin:10px 0 6px;font-size:12px">Rénovations techniques (€/véhicule)</div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Rénovation légère</label><input type="number" id="t-renov-legere" class="tarif-input"></div>
-        <div class="field"><label>Rénovation importante</label><input type="number" id="t-renov-importante" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Rénovation majeure</label><input type="number" id="t-renov-majeure" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Pose d'options</label><input type="number" id="t-options" class="tarif-input"></div>
-        <div class="field"><label>Adhésion Daimler Gold</label><input type="number" id="t-daimler" class="tarif-input"></div>
-      </div>
-      <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>Adhésion VDIStar</label><input type="number" id="t-vdistar" class="tarif-input"></div>
-        <div class="field"></div>
-      </div>
-
-      <button class="btn btn-primary" onclick="saveTarifs()" style="margin-top:8px">💾 Sauvegarder les tarifs</button>
-      <div id="tarifs-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
-    </div>
-  </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1171,7 +1200,7 @@ async function startApp(){
   document.getElementById('nav-objectifs').style.display=perms.objectifs?'':'none';
   document.getElementById('nav-historique').style.display=perms.historique?'':'none';
   document.getElementById('nav-rgpd').style.display='';
-  if(['president','vice_president'].includes(currentUser.role)) document.getElementById('nav-tm').style.display='';
+  if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)) document.getElementById('nav-tm').style.display='';
   // Afficher config GForms pour les présidents
   const cfgCard = document.getElementById('card-config');
   if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
@@ -2971,9 +3000,9 @@ let TARIFS = { ...TARIFS_DEFAULT };
 
 async function loadTarifs() {
   try {
-    const { data } = await sb.from('app_config').select('*').eq('key', 'tarifs').limit(1);
-    if (data && data.length && data[0].value) {
-      TARIFS = { ...TARIFS_DEFAULT, ...JSON.parse(data[0].value) };
+    const { data } = await sb.from('tarifs').select('*');
+    if (data && data.length) {
+      data.forEach(row => { TARIFS[row.key] = parseFloat(row.value) || 0; });
     }
   } catch(e) { console.warn('Tarifs non chargés:', e.message); }
 }
@@ -2993,8 +3022,10 @@ async function saveTarifs() {
   });
   TARIFS = newTarifs;
   try {
-    await sb.from('app_config').delete().eq('key', 'tarifs');
-    await sb.from('app_config').insert({ key: 'tarifs', value: JSON.stringify(newTarifs) });
+    // Upsert chaque tarif dans la table dédiée
+    for (const [key, value] of Object.entries(newTarifs)) {
+      await sb.from('tarifs').upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    }
     const res = document.getElementById('tarifs-result');
     res.textContent = '✅ Tarifs sauvegardés !';
     res.style.color = '#166534';
@@ -3515,6 +3546,59 @@ function filterTMData() {
 function showTMSearch(show) {
   const wrap = document.getElementById('tm-search-wrap');
   if (wrap) wrap.style.display = show ? '' : 'none';
+}
+
+
+function showTMSuggestions() {
+  const q = (document.getElementById('tm-member-search').value || '').toLowerCase().trim();
+  const box = document.getElementById('tm-suggestions');
+  if (!box) return;
+  if (!q || q.length < 1) { box.style.display = 'none'; return; }
+
+  // Chercher dans les membres Supabase
+  const matches = membres
+    .filter(m => (m.pseudo||'').toLowerCase().startsWith(q))
+    .slice(0, 8);
+
+  if (!matches.length) { box.style.display = 'none'; return; }
+
+  box.style.display = '';
+  box.innerHTML = matches.map(m =>
+    `<div onclick="selectTMSuggestion('${m.pseudo.replace(/'/g,"\'")}') "
+      style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border-light)"
+      onmouseover="this.style.background='var(--off-white)'"
+      onmouseout="this.style.background=''">${m.pseudo} <span style="color:var(--text-muted);font-size:12px">${m.entreprise||''}</span>
+    </div>`
+  ).join('');
+}
+
+function selectTMSuggestion(pseudo) {
+  const input = document.getElementById('tm-member-search');
+  const box   = document.getElementById('tm-suggestions');
+  if (input) input.value = pseudo;
+  if (box)   box.style.display = 'none';
+  filterTMData();
+}
+
+
+async function saveNewStaff() {
+  const username = document.getElementById('s-username').value.trim();
+  const nom      = document.getElementById('s-nom').value.trim();
+  const password = document.getElementById('s-password').value;
+  const role     = document.getElementById('s-role').value;
+  if (!username || !nom || !password) { alert('Tous les champs sont obligatoires.'); return; }
+  if (password.length < 6) { alert('Minimum 6 caractères pour le mot de passe.'); return; }
+  // Vérifier doublon
+  const { data: existing } = await sb.from('staff').select('id').eq('username', username).limit(1);
+  if (existing && existing.length) { alert('Cet identifiant est déjà utilisé.'); return; }
+  const { error } = await sb.from('staff').insert({
+    username, password_hash: password, role, nom_affiche: nom, actif: true
+  });
+  if (error) { alert('Erreur : ' + error.message); return; }
+  toast('Compte créé ✓');
+  closeModal('modal-add-staff');
+  await loadStaff();
+  renderStaff();
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
