@@ -3199,7 +3199,7 @@ function renderTMMembers(data) {
 async function syncOneMember(tm) {
   // Chercher le membre dans Supabase par pseudo
   const existing = membres.find(m => (m.pseudo||'').toLowerCase() === (tm.pseudo||'').toLowerCase());
-  if (!existing) { toast('Membre non trouvé dans l'Espace Staff — ajoutez-le d'abord'); return; }
+  if (!existing) { toast('Membre non trouvé dans l\'Espace Staff — ajoutez-le d\'abord'); return; }
   const upd = {};
   if (tm.entreprise && tm.entreprise !== '—') upd.entreprise = tm.entreprise;
   if (tm.niveau     && tm.niveau     !== '—') upd.niveau     = tm.niveau;
