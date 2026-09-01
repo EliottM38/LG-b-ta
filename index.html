@@ -1337,10 +1337,9 @@ function renderMembres(){
       </td>
     </tr>`;
   }).join('');
-  // Config GForms
+  // Config GForms visible uniquement depuis Accès Staff
   const cfgCard = document.getElementById('card-config');
   if (cfgCard && currentUser) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
-  loadTarifsUI();
 }
 
 function openAddMembre(){
