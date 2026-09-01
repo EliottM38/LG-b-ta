@@ -570,6 +570,16 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <button class="btn btn-sm" onclick="loadTMEndpoint('compta')" id="tm-tab-compta">💰 Comptabilité</button>
       <button class="btn btn-sm" onclick="loadTMEndpoint('salaries')" id="tm-tab-salaries">👷 Salariés</button>
     </div>
+    <!-- Recherche membre -->
+    <div id="tm-search-wrap" style="padding:12px 20px 0;display:none">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <input id="tm-member-search" placeholder="Rechercher un membre (pseudo)..."
+          style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px"
+          oninput="filterTMData()">
+        <button class="btn btn-sm" onclick="document.getElementById('tm-member-search').value='';filterTMData()">✕</button>
+      </div>
+      <div id="tm-member-result" style="margin-bottom:8px"></div>
+    </div>
     <div id="tm-data-container" style="padding:16px 20px">
       <div class="empty">Sélectionnez un endpoint pour charger les données</div>
     </div>
@@ -1219,26 +1229,37 @@ async function syncTMMembresAuto() {
     const raw = await res.json();
     const tm_membres = Array.isArray(raw) ? raw : (raw.data || raw.membres || raw.membres_alliance || []);
     if (!tm_membres.length) return;
-    // Mettre à jour silencieusement chaque membre
+    const changements = [];
     for (const tm of tm_membres) {
       const pseudo = tm.pseudo || tm.username || tm.name || '';
       if (!pseudo) continue;
       const existing = membres.find(m => (m.pseudo||'').toLowerCase() === pseudo.toLowerCase());
       if (!existing) continue;
       const upd = {};
-      if (tm.entreprise || tm.company)  upd.entreprise = tm.entreprise || tm.company || existing.entreprise;
-      if (tm.niveau     || tm.level)    upd.niveau     = String(tm.niveau || tm.level || existing.niveau);
-      if (tm.forfait    || tm.plan)     upd.forfait    = tm.forfait    || tm.plan    || existing.forfait;
+      const nouvelleEntreprise = tm.entreprise || tm.company || tm.nom_entreprise || '';
+      const nouveauNiveau      = tm.niveau     || tm.level  || '';
+      if (nouvelleEntreprise && nouvelleEntreprise !== existing.entreprise) upd.entreprise = nouvelleEntreprise;
+      if (nouveauNiveau      && String(nouveauNiveau) !== String(existing.niveau)) upd.niveau = String(nouveauNiveau);
       if (!Object.keys(upd).length) continue;
-      // Vérifier si update nécessaire
-      const changed = Object.entries(upd).some(([k,v]) => existing[k] !== v);
-      if (!changed) continue;
+      // Préparer notification changement
+      const msgs = [];
+      if (upd.entreprise) msgs.push('entreprise : "' + existing.entreprise + '" → "' + upd.entreprise + '"');
+      if (upd.niveau)     msgs.push('niveau : ' + existing.niveau + ' → ' + upd.niveau);
+      changements.push({ pseudo, msgs });
       await sb.from('membres').update(upd).eq('id', existing.id);
       const idx = membres.findIndex(m => m.id === existing.id);
       if (idx !== -1) membres[idx] = { ...membres[idx], ...upd };
     }
     renderMembres();
-    console.log('✅ Membres synchronisés depuis TM');
+    // Afficher les changements détectés
+    if (changements.length) {
+      const msg = changements.map(c => '• ' + c.pseudo + ' : ' + c.msgs.join(', ')).join('\n');
+      setTimeout(() => {
+        if (confirm('🔄 ' + changements.length + ' changement(s) détecté(s) depuis TM :\n\n' + msg + '\n\nVoir les membres mis à jour ?')) {
+          showPage('membres', document.getElementById('nav-membres'));
+        }
+      }, 1000);
+    }
   } catch(e) {
     console.warn('Sync TM silencieux échoué:', e.message);
   }
@@ -2986,7 +3007,8 @@ async function saveTarifs() {
 function loadTarifsUI() {
   if (!currentUser || !['president','vice_president'].includes(currentUser.role)) return;
   const card = document.getElementById('card-tarifs');
-  if (card) card.style.display = '';
+  if (!card) return;
+  card.style.display = '';
   const map = {
     'minibus-s':'minibus_s','minibus-m':'minibus_m',
     'midibus-s':'midibus_s','midibus-m':'midibus_m',
@@ -3016,6 +3038,10 @@ function loadTarifsUI() {
 async function deleteStaff(id, username) {
   if (currentUser.role !== 'president') { toast('Accès refusé'); return; }
   if (!confirm('Supprimer définitivement le compte "' + username + '" ? Cette action est irréversible.')) return;
+  // Dissocier les FK avant suppression
+  await sb.from('factures').update({ created_by: null }).eq('created_by', id);
+  await sb.from('interimaires').update({ created_by: null }).eq('created_by', id);
+  await sb.from('objectifs').update({ created_by: null }).eq('created_by', id);
   const { error } = await sb.from('staff').delete().eq('id', id);
   if (error) { alert('Erreur : ' + error.message); return; }
   toast('Compte supprimé ✓');
@@ -3296,9 +3322,22 @@ async function loadTMEndpoint(name) {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status + ' — clé invalide ou accès refusé');
     const raw = await res.json();
-    tmCurrentData = Array.isArray(raw) ? raw : (raw.data || raw.membres || raw.membres_alliance || raw.vehicules || raw.salaries || raw.entries || []);
+    // Chercher les données dans toutes les structures possibles
+  if (Array.isArray(raw)) {
+    tmCurrentData = raw;
+  } else {
+    // Prendre la première valeur tableau trouvée
+    const arrKey = Object.keys(raw).find(k => Array.isArray(raw[k]));
+    tmCurrentData = arrKey ? raw[arrKey] : (raw.data || []);
+    // Si toujours vide, essayer de wrap l'objet dans un tableau
+    if (!tmCurrentData.length && typeof raw === 'object' && !Array.isArray(raw)) {
+      tmCurrentData = [raw];
+    }
+  }
     document.getElementById('tm-status-dot').style.background = '#166534';
     document.getElementById('tm-status-text').textContent = '✅ ' + tmCurrentData.length + ' résultat(s) · ' + ep.label;
+    // Afficher barre de recherche pour véhicules et salariés
+    showTMSearch(['vehicules','vehicules_global','salaries'].includes(name));
     renderTMData(name, tmCurrentData);
   } catch(e) {
     document.getElementById('tm-status-dot').style.background = '#991b1b';
@@ -3417,6 +3456,65 @@ async function syncTMToSupabase() {
     document.getElementById('tm-status-text').textContent = '❌ ' + e.message;
     alert('Erreur : ' + e.message);
   }
+}
+
+
+// ── Recherche membre dans les données TM ──────────────────────────────
+function filterTMData() {
+  const q = (document.getElementById('tm-member-search').value || '').toLowerCase().trim();
+  const resultEl = document.getElementById('tm-member-result');
+
+  if (!q || !tmCurrentData.length) {
+    if (resultEl) resultEl.innerHTML = '';
+    renderTMData(tmCurrentEndpoint, tmCurrentData);
+    return;
+  }
+
+  // Chercher le membre
+  const filtered = tmCurrentData.filter(row => {
+    return Object.values(row).some(v =>
+      v != null && String(v).toLowerCase().includes(q)
+    );
+  });
+
+  if (resultEl) {
+    if (filtered.length) {
+      // Si véhicules — afficher résumé spécial
+      if (tmCurrentEndpoint === 'vehicules' || tmCurrentEndpoint === 'vehicules_global') {
+        const total = filtered.length;
+        const types = {};
+        filtered.forEach(v => {
+          const t = v.type || v.categorie || v.modele || 'Inconnu';
+          types[t] = (types[t] || 0) + 1;
+        });
+        resultEl.innerHTML = `<div style="background:#dcfce7;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:8px">
+          🚌 <strong>${total} véhicule(s)</strong> en location pour ce membre
+          ${Object.entries(types).map(([t,n]) => `<br>&nbsp;&nbsp;• ${t} : ${n}`).join('')}
+        </div>`;
+      } else if (tmCurrentEndpoint === 'salaries') {
+        const conducteurs  = filtered.filter(s => s.poste === 1 || (s.poste||'').toString().toLowerCase().includes('conducteur')).length;
+        const mecaniciens  = filtered.filter(s => s.poste === 2 || (s.poste||'').toString().toLowerCase().includes('mécanic')).length;
+        resultEl.innerHTML = `<div style="background:#dbeafe;border-radius:8px;padding:10px 14px;font-size:13px;color:#1e40af;margin-bottom:8px">
+          👷 <strong>${filtered.length} salarié(s)</strong> pour ce membre
+          ${conducteurs ? '<br>&nbsp;&nbsp;• Conducteurs : ' + conducteurs : ''}
+          ${mecaniciens ? '<br>&nbsp;&nbsp;• Mécaniciens : ' + mecaniciens : ''}
+        </div>`;
+      } else {
+        resultEl.innerHTML = `<div style="background:#dbeafe;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e40af;margin-bottom:8px">
+          ${filtered.length} résultat(s) trouvé(s)
+        </div>`;
+      }
+    } else {
+      resultEl.innerHTML = '<div style="color:#991b1b;font-size:13px;margin-bottom:8px">Aucun résultat</div>';
+    }
+  }
+  renderTMData(tmCurrentEndpoint, filtered);
+}
+
+// Afficher la barre de recherche pour véhicules et salariés
+function showTMSearch(show) {
+  const wrap = document.getElementById('tm-search-wrap');
+  if (wrap) wrap.style.display = show ? '' : 'none';
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
