@@ -316,6 +316,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 .notif-dot.red{background:#991b1b}.notif-dot.amber{background:#854F0B}.notif-dot.blue{background:#185FA5}.notif-dot.green{background:#166534}
 
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
@@ -349,7 +350,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <button id="nav-pole" onclick="showPage('pole',this)">Exploitation & Financement</button>
   <button id="nav-objectifs" onclick="showPage('objectifs',this)">Objectifs</button>
   <button id="nav-historique" onclick="showPage('historique',this)">Historique</button>
-  <button id="nav-tm" onclick="showPage('tm',this)" style="display:none">🚌 TM</button>
+  <button id="nav-tm" onclick="showPage('tm',this)" style="display:none"><i class="fa-solid fa-bus"></i> TM</button>
   <button id="nav-rgpd" onclick="showPage('rgpd',this)">RGPD</button>
   <button id="nav-acces" onclick="showPage('acces',this)">Accès staff</button>
   <div class="nav-right">
@@ -421,7 +422,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-sal">
   <div class="page-header">
     <h1>Signalements SAL</h1>
-    <button class="btn" onclick="loadSAL()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">↻ Actualiser</button>
+    <button class="btn" onclick="loadSAL()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">Actualiser</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-label">Signalements totaux</div><div class="stat-value blue" id="sal-total">—</div></div>
@@ -445,7 +446,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-pole">
   <div class="page-header">
     <h1>Pôle Exploitation & Financement</h1>
-    <button class="btn" onclick="loadPole()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">↻ Actualiser</button>
+    <button class="btn" onclick="loadPole()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">Actualiser</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-label">Demandes totales</div><div class="stat-value blue" id="pole-total">—</div></div>
@@ -526,18 +527,18 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <!-- PAGE API TM -->
 <div class="page" id="page-tm">
   <div class="page-header">
-    <h1>🚌 Suivi des membres TM</h1>
+    <h1>Suivi des membres TM</h1>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="loadTMMembers()">↻ Actualiser depuis TM</button>
+      <button class="btn btn-primary" onclick="loadTMMembers()">Actualiser</button>
     </div>
   </div>
 
   <!-- Config clé API -->
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><span class="card-title">⚙️ Clé API Transport Manager</span></div>
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-key"></i> Clé API Transport Manager</span></div>
     <div style="padding:16px 20px">
       <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:14px">
-        ⚠️ <strong>Réglementation TM :</strong> Cette clé est strictement personnelle. Les données retournées par l'API ne doivent pas être transmises à des services IA tiers.
+        <strong>⚠ Réglementation TM :</strong> Cette clé est strictement personnelle. Les données retournées par l'API ne doivent pas être transmises à des services IA tiers.
       </div>
       <div style="display:flex;gap:10px;align-items:flex-end">
         <div class="field" style="flex:1;margin:0">
@@ -545,8 +546,8 @@ tr:hover td{background:rgba(13,31,78,.02)}
           <input type="password" id="tm-api-key-input" placeholder="Votre clé API Alliance" style="width:100%">
           <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Stockée localement dans votre navigateur uniquement</div>
         </div>
-        <button class="btn btn-primary" onclick="saveTMKey()">💾 Sauvegarder</button>
-        <button class="btn" onclick="testTMKey()">🔍 Tester</button>
+        <button class="btn btn-primary" onclick="saveTMKey()"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
+        <button class="btn" onclick="testTMKey()"><i class="fa-solid fa-magnifying-glass"></i> Tester</button>
       </div>
       <div id="tm-key-result" style="margin-top:10px;font-size:13px"></div>
     </div>
@@ -562,13 +563,13 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
   <!-- Onglets endpoints -->
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><span class="card-title">📡 Données disponibles</span></div>
+    <div class="card-header"><span class="card-title">Données disponibles</span></div>
     <div style="padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border-light)">
-      <button class="btn btn-sm" onclick="loadTMEndpoint('membres')" id="tm-tab-membres">👥 Membres</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules')" id="tm-tab-vehicules">🚌 Véhicules location</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules_global')" id="tm-tab-vehicules_global">🚌 Tous véhicules</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('compta')" id="tm-tab-compta">💰 Comptabilité</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('salaries')" id="tm-tab-salaries">👷 Salariés</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('membres')" id="tm-tab-membres" data-gdp-hidden="true"><i class="fa-solid fa-users"></i> Membres</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules')" id="tm-tab-vehicules"><i class="fa-solid fa-bus"></i> Véhicules location</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules_global')" id="tm-tab-vehicules_global" data-gdp-hidden="true">Véhicules Hors Loc</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('compta')" id="tm-tab-compta" data-gdp-hidden="true"><i class="fa-solid fa-coins"></i> Comptabilité</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('salaries')" id="tm-tab-salaries" data-gdp-hidden="true"><i class="fa-solid fa-hard-hat"></i> Salariés</button>
     </div>
     <!-- Recherche membre -->
     <div id="tm-search-wrap" style="padding:12px 20px 0;display:none">
@@ -580,7 +581,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
             autocomplete="off">
           <div id="tm-suggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:0 0 9px 9px;z-index:100;display:none;max-height:200px;overflow-y:auto"></div>
         </div>
-        <button class="btn btn-sm" onclick="document.getElementById('tm-member-search').value='';filterTMData()">✕</button>
+        <button class="btn btn-sm" onclick="document.getElementById('tm-member-search').value='';filterTMData()">×</button>
       </div>
       <div id="tm-member-result" style="margin-bottom:8px"></div>
     </div>
@@ -592,8 +593,8 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <!-- Membres — sync -->
   <div class="card" id="tm-membres-card" style="display:none">
     <div class="card-header">
-      <span class="card-title">👥 Membres — Synchronisation</span>
-      <button class="btn btn-sm btn-primary" onclick="syncTMToSupabase()">⬇ Tout synchroniser</button>
+      <span class="card-title"><i class="fa-solid fa-users"></i> Membres — Synchronisation</span>
+      <button class="btn btn-sm btn-primary" onclick="syncTMToSupabase()">Tout synchroniser</button>
     </div>
     <div id="tm-membres-list" style="padding:8px 0"></div>
   </div>
@@ -626,7 +627,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
 
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><span class="card-title">🗑 Droit à l'oubli — Suppression des données d'un membre</span></div>
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-trash"></i> Droit à l'oubli — Suppression des données d'un membre</span></div>
     <div style="padding:20px">
       <p style="font-size:13px;color:var(--text-sec);margin-bottom:14px">Sélectionnez un membre pour supprimer <strong>toutes ses données</strong> (fiche membre, factures, intérimaires) conformément à l'Art. 17 RGPD.</p>
       <div class="row2">
@@ -637,7 +638,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
           </select>
         </div>
         <div style="display:flex;align-items:flex-end">
-          <button class="btn btn-danger" onclick="exercerDroitOubli()" style="width:100%">🗑 Supprimer toutes les données</button>
+          <button class="btn btn-danger" onclick="exercerDroitOubli()" style="width:100%"><i class="fa-solid fa-trash"></i> Supprimer toutes les données</button>
         </div>
       </div>
       <div id="rgpd-result" style="margin-top:12px;display:none"></div>
@@ -686,7 +687,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn btn-primary" onclick="saveAppConfig()"> Sauvegarder</button>
-        <button class="btn" onclick="loadConfigUI()">↻ Recharger</button>
+        <button class="btn" onclick="loadConfigUI()">Recharger</button>
       </div>
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
@@ -711,15 +712,13 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
-
-
   <!-- Tarifs modifiables — VP et Président uniquement -->
   <div class="card" id="card-tarifs" style="margin-top:24px;display:none">
-    <div class="card-header"><span class="card-title">💰 Tarifs — Location & Intérimaires</span></div>
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-tag"></i> Tarifs — Location & Intérimaires</span></div>
     <div style="padding:20px">
       <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Modifiez les tarifs ici. Ils sont stockés en base de données et appliqués immédiatement.</p>
 
-      <div class="pdf-stitle" style="margin-bottom:10px">🚌 Location de véhicules (€)</div>
+      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-bus"></i> Location de véhicules (€)</div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Minibus / sem.</label><input type="number" id="t-minibus-s" class="tarif-input"></div>
         <div class="field"><label>Minibus / mois</label><input type="number" id="t-minibus-m" class="tarif-input"></div>
@@ -742,7 +741,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <div class="field" style="margin-bottom:12px"><label>Véhicules gratuits Ultimate (nb max)</label><input type="number" id="t-ultimate-gratuit" class="tarif-input"></div>
 
-      <div class="pdf-stitle" style="margin:16px 0 10px">👷 Intérimaires (€)</div>
+      <div class="pdf-stitle" style="margin:16px 0 10px"><i class="fa-solid fa-hard-hat"></i> Intérimaires (€)</div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Conducteur Standard / sem.</label><input type="number" id="t-cond-std-s" class="tarif-input"></div>
         <div class="field"><label>Conducteur Ultimate / sem.</label><input type="number" id="t-cond-ult-s" class="tarif-input"></div>
@@ -753,7 +752,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <div class="field" style="margin-bottom:16px"><label>Intérimaires gratuits Ultimate (nb max)</label><input type="number" id="t-interim-gratuit" class="tarif-input"></div>
 
-      <div class="pdf-stitle" style="margin:16px 0 10px">🔧 Remboursements Pôle SAL (€)</div>
+      <div class="pdf-stitle" style="margin:16px 0 10px"><i class="fa-solid fa-wrench"></i> Remboursements Pôle SAL (€)</div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>CT (Contrôle technique)</label><input type="number" id="t-ct" class="tarif-input"></div>
         <div class="field"><label>Révision</label><input type="number" id="t-revision" class="tarif-input"></div>
@@ -787,301 +786,11 @@ tr:hover td{background:rgba(13,31,78,.02)}
         <div class="field"></div>
       </div>
 
-      <button class="btn btn-primary" onclick="saveTarifs()" style="margin-top:8px">💾 Sauvegarder les tarifs</button>
+      <button class="btn btn-primary" onclick="saveTarifs()" style="margin-top:8px"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder les tarifs</button>
       <div id="tarifs-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
 
-</div>
-
-</div><!-- /app -->
-
-<!-- MODAL MEMBRE -->
-<div class="modal-bg" id="modal-membre">
-<div class="modal">
-  <h2 id="mm-title">Ajouter un membre</h2>
-  <p style="font-size:12px;color:#aaa;margin-bottom:14px">* Champs obligatoires</p>
-  <div class="sep">Identité</div>
-  <div class="row2">
-    <div class="field"><label>Pseudo jeu *</label><input id="m-pseudo"></div>
-    <div class="field"><label>Pseudo forum</label><input id="m-pseudo-forum"></div>
-  </div>
-  <div class="row2">
-    <div class="field"><label>Entreprise</label><input id="m-entreprise"></div>
-    <div class="field"><label>Niveau</label><input id="m-niveau" placeholder="N1, N2, N3..."></div>
-  </div>
-  <div class="sep">Alliance</div>
-  <div class="row2">
-    <div class="field"><label>Forfait</label><select id="m-forfait"><option>Standard</option><option>Ultimate</option></select></div>
-    <div class="field"><label>Statut</label><select id="m-statut"><option>Actif</option><option>Inactif</option><option>Alerte</option></select></div>
-  </div>
-  <div class="row2">
-    <div class="field"><label>Bus déjà loués</label><input type="number" id="m-bus-loues" min="0" placeholder="0"></div>
-    <div class="field"><label>Référent</label><input id="m-referent"></div>
-  </div>
-  <div class="sep">Finances</div>
-  <div class="row2">
-    <div class="field"><label>Solde bancaire (€)</label><input type="number" id="m-solde"></div>
-    <div class="field"><label>Date d'entrée</label><input type="date" id="m-date"></div>
-  </div>
-  <div class="field"><label>Notes / Projets</label><textarea id="m-notes"></textarea></div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-membre')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveMembre()">Enregistrer</button>
-  </div>
-</div>
-</div>
-
-<!-- MODAL FACTURE -->
-<div class="modal-bg" id="modal-facture">
-<div class="modal" style="max-width:640px">
-  <h2 id="d-modal-title">Nouvelle facture de location</h2>
-  <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">* Champs obligatoires</p>
-
-  <div class="sep">Membre</div>
-  <div class="field"><label>Membre *</label><select id="d-membre" onchange="onMembreChange()"></select></div>
-  <div class="row3">
-    <div class="field"><label>Pseudo forum</label><input id="d-pseudo-forum" readonly style="background:#f8f8f5"></div>
-    <div class="field"><label>Niveau</label><input id="d-niveau" readonly style="background:#f8f8f5"></div>
-    <div class="field"><label>Forfait</label><input id="d-forfait-display" readonly style="background:#f8f8f5;color:#0a1f5c;font-weight:700"></div>
-  </div>
-  <div class="field"><label>Bus déjà loués (avant cette facture)</label>
-    <input type="number" id="d-bus-deja" min="0" value="0" oninput="calcAllLines()">
-  </div>
-
-  <div class="sep">Véhicules</div>
-  <div id="lignes-vehicules"></div>
-  <button class="btn" style="width:100%;margin-top:8px;border-style:dashed" onclick="addLigneVehicule()">+ Ajouter un type de véhicule</button>
-
-  <div class="sep">Période</div>
-  <div class="row2">
-    <div class="field"><label>Date de début *</label><input type="date" id="d-date-debut"></div>
-    <div class="field"><label>Date de fin *</label><input type="date" id="d-date-fin"></div>
-  </div>
-  <div class="field"><label>Durée de facturation</label>
-    <select id="d-duree" onchange="calcAllLines();calcDateFinFacture()">
-      <option value="semaine">Par semaine</option>
-      <option value="mois">Par mois</option>
-    </select>
-  </div>
-
-  <div id="fact-recap" style="background:linear-gradient(135deg,rgba(13,31,78,.04),rgba(184,146,42,.06));border-radius:12px;padding:14px 16px;margin:12px 0;border:1px solid rgba(13,31,78,.1);font-size:13px;line-height:2.2;color:var(--navy)"></div>
-
-  <div class="sep">Statut & Notes</div>
-  <div class="field"><label>Statut</label>
-    <select id="d-statut"><option>En attente</option><option>Accepté</option><option>Refusé</option></select>
-  </div>
-  <div class="field"><label>Notes / Conditions</label><textarea id="d-notes"></textarea></div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-facture')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveFacture()">Créer la facture</button>
-  </div>
-</div>
-</div>
-
-<!-- MODAL STAFF -->
-<div class="modal-bg" id="modal-staff">
-<div class="modal">
-  <h2 id="ms-title">Ajouter un compte staff</h2>
-  <div class="field"><label>Identifiant *</label><input id="st-user" placeholder="ex: vicepres"></div>
-  <div class="field"><label>Nom affiché *</label><input id="st-nom" placeholder="ex: Vice-Président LG"></div>
-  <div class="field"><label>Mot de passe *</label><input type="password" id="st-pass" placeholder="Minimum 6 caractères"></div>
-  <div class="field"><label>Rôle *</label>
-    <select id="st-role">
-      <option value="president" id="opt-president" style="display:none">Président</option>
-      <option value="vice_president">Vice-Président</option>
-      <option value="gestionnaire_parc">Gestionnaire de parc</option>
-      <option value="comptable">Comptable</option>
-      <option value="staff_tm">Staff TM (lecture seule)</option>
-    </select>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-staff')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveStaff()">Créer le compte</button>
-  </div>
-</div>
-</div>
-
-
-
-<!-- MODAL PROFIL -->
-<div class="modal-bg" id="modal-profil">
-<div class="modal">
-  <h2>Mon profil</h2>
-  <p style="font-size:12px;color:#aaa;margin-bottom:16px">Modifiez vos identifiants de connexion</p>
-
-  <div class="sep">Informations actuelles</div>
-  <div class="field">
-    <label>Rôle</label>
-    <input id="p-role-display" readonly style="background:#f8f8f5;color:#0a1f5c;font-weight:700">
-  </div>
-
-  <div class="sep">Modifier l'identifiant</div>
-  <div class="field">
-    <label>Nouvel identifiant</label>
-    <input id="p-username" placeholder="Laisser vide pour ne pas changer">
-  </div>
-
-  <div class="sep">Modifier le mot de passe</div>
-  <div class="field">
-    <label>Mot de passe actuel *</label>
-    <input type="password" id="p-pass-actuel" placeholder="Requis pour toute modification">
-  </div>
-  <div class="field">
-    <label>Nouveau mot de passe</label>
-    <input type="password" id="p-pass-new" placeholder="Laisser vide pour ne pas changer">
-  </div>
-  <div class="field">
-    <label>Confirmer le nouveau mot de passe</label>
-    <input type="password" id="p-pass-confirm" placeholder="Répétez le nouveau mot de passe">
-  </div>
-
-  <div id="p-err" style="background:#fee2e2;color:#991b1b;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;display:none"></div>
-  <div id="p-ok"  style="background:#dcfce7;color:#166534;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;display:none"></div>
-
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-profil')">Fermer</button>
-    <button class="btn btn-primary" onclick="saveProfil()">Enregistrer</button>
-  </div>
-</div>
-</div>
-
-
-<!-- MODAL AJOUT STAFF -->
-<div class="modal-bg" id="modal-add-staff">
-<div class="modal">
-  <h2 id="staff-modal-title">Ajouter un compte staff</h2>
-  <div class="field"><label>Identifiant *</label><input id="s-username" placeholder="identifiant de connexion" style="width:100%"></div>
-  <div class="field"><label>Nom affiché *</label><input id="s-nom" placeholder="Nom affiché dans l'app" style="width:100%"></div>
-  <div class="field"><label>Mot de passe *</label><input type="password" id="s-password" placeholder="Minimum 6 caractères" style="width:100%"></div>
-  <div class="field"><label>Rôle *</label>
-    <select id="s-role" style="width:100%">
-      <option id="opt-president" style="display:none" value="president">Président</option>
-      <option value="vice_president">Vice-Président</option>
-      <option value="gestionnaire_parc">Gestionnaire de parc</option>
-      <option value="comptable">Comptable</option>
-      <option value="staff_tm">Staff TM (lecture seule)</option>
-    </select>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-add-staff')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveNewStaff()">Créer le compte</button>
-  </div>
-</div>
-</div>
-
-<!-- MODAL OBJECTIF -->
-<div class="modal-bg" id="modal-objectif">
-<div class="modal">
-  <h2 id="obj-modal-title">Ajouter un objectif</h2>
-  <div class="field"><label>Titre de l'objectif *</label>
-    <input id="obj-titre" placeholder="ex: Atteindre 10 membres actifs">
-  </div>
-  <div class="field"><label>Description / détails</label>
-    <textarea id="obj-desc" placeholder="Décrivez l'objectif en détail..."></textarea>
-  </div>
-  <div class="row2">
-    <div class="field"><label>Catégorie</label>
-      <select id="obj-categorie">
-        <option value="membres">Membres</option>
-        <option value="location">Location</option>
-        <option value="exploitation">Exploitation</option>
-        <option value="finances">Finances</option>
-        <option value="autre">Autre</option>
-      </select>
-    </div>
-    <div class="field"><label>Priorité</label>
-      <select id="obj-priorite">
-        <option value="normale">Normale</option>
-        <option value="haute">Haute</option>
-        <option value="critique">Critique</option>
-      </select>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-objectif')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveObjectif()">Enregistrer</button>
-  </div>
-</div>
-</div>
-
-<!-- MODAL EDIT HISTORIQUE -->
-<div class="modal-bg" id="modal-edit-hist">
-<div class="modal">
-  <h2>Modifier l'entrée d'historique</h2>
-  <div class="field"><label>Note / commentaire</label>
-    <textarea id="hist-edit-note" style="min-height:80px" placeholder="Ajoutez un commentaire..."></textarea>
-  </div>
-  <input type="hidden" id="hist-edit-id">
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-edit-hist')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveHistNote()">Enregistrer</button>
-  </div>
-</div>
-</div>
-
-
-<!-- MODAL FICHE MEMBRE (lecture seule) -->
-<!-- MODAL INTÉRIMAIRES -->
-<div class="modal-bg" id="modal-interim">
-<div class="modal">
-  <h2 id="i-modal-title">Nouvelle demande d'intérimaires</h2>
-  <p style="font-size:12px;color:#aaa;margin-bottom:14px">* Champs obligatoires</p>
-
-  <div class="sep">Membre</div>
-  <div class="field"><label>Membre *</label><select id="i-membre" onchange="onInterimMembreChange()"></select></div>
-  <div class="row2">
-    <div class="field"><label>Pseudo forum</label><input id="i-pseudo-forum" readonly style="background:#f8f8f5"></div>
-    <div class="field"><label>Forfait</label><input id="i-forfait-display" readonly style="background:#f8f8f5;color:#0a1f5c;font-weight:700"></div>
-  </div>
-
-  <div class="sep">Type d'intérimaires</div>
-  <div class="field"><label>Pôle *</label>
-    <select id="i-pole" onchange="calcInterim();calcDateFinInterim()">
-      <option value="conduite">Pôle Conduite — Conducteurs</option>
-      <option value="maintenance">Pôle Maintenance — Mécaniciens</option>
-    </select>
-  </div>
-  <div class="row2">
-    <div class="field"><label>Nombre de personnes *</label><input type="number" id="i-nb" value="1" min="1" oninput="calcInterim()"></div>
-    <div class="field"><label>Durée (Conduite uniquement)</label>
-      <select id="i-duree" onchange="calcInterim()">
-        <option value="semaine">Par semaine</option>
-      </select>
-    </div>
-  </div>
-  <div class="field" id="i-nb-unites-wrap"><label>Nb de semaines (Conduite uniquement)</label>
-    <input type="number" id="i-nb-unites" oninput="calcInterim();calcDateFinInterim()" value="1" min="1" oninput="calcInterim()" placeholder="ex: 2">
-  </div>
-
-  <div class="sep">Période</div>
-  <div class="row2">
-    <div class="field"><label>Date de début *</label><input type="date" id="i-date-debut"></div>
-    <div class="field"><label>Date de fin *</label><input type="date" id="i-date-fin"></div>
-  </div>
-
-  <div class="tarif-box" id="i-tarif-box">
-    <div>Pôle : <strong id="i-pole-label">—</strong></div>
-    <div>Tarif unitaire : <strong id="i-pu">—</strong></div>
-    <div>Quantité : <span id="i-nb-label">—</span> personne(s)</div>
-    <div style="margin-top:4px;font-size:15px">Total : <strong id="i-total-calc">—</strong></div>
-    <div id="i-prioritaire-label" style="margin-top:4px;font-size:12px;color:#166534;font-weight:700;display:none">
-      ★ Client prioritaire — Prise en charge garantie sous 72h
-    </div>
-  </div>
-
-  <div class="sep">Statut & Notes</div>
-  <div class="field"><label>Statut</label>
-    <select id="i-statut"><option>En attente</option><option>Accepté</option><option>Refusé</option></select>
-  </div>
-  <div class="field"><label>Notes / Détails de la mission</label>
-    <textarea id="i-notes" placeholder="Lignes concernées, type d'options à poser..."></textarea>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-interim')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveInterim()">Créer la demande</button>
-  </div>
-</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1200,6 +909,11 @@ async function startApp(){
   document.getElementById('nav-objectifs').style.display=perms.objectifs?'':'none';
   document.getElementById('nav-historique').style.display=perms.historique?'':'none';
   document.getElementById('nav-rgpd').style.display='';
+  // Nav historique masqué pour GDP
+  if(currentUser.role==='gestionnaire_parc'){
+    const nh=document.getElementById('nav-historique');
+    if(nh) nh.style.display='none';
+  }
   if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)) document.getElementById('nav-tm').style.display='';
   // Afficher config GForms pour les présidents
   const cfgCard = document.getElementById('card-config');
@@ -1284,7 +998,7 @@ async function syncTMMembresAuto() {
     if (changements.length) {
       const msg = changements.map(c => '• ' + c.pseudo + ' : ' + c.msgs.join(', ')).join('\n');
       setTimeout(() => {
-        if (confirm('🔄 ' + changements.length + ' changement(s) détecté(s) depuis TM :\n\n' + msg + '\n\nVoir les membres mis à jour ?')) {
+        if (confirm('' + changements.length + ' changement(s) détecté(s) depuis TM :\n\n' + msg + '\n\nVoir les membres mis à jour ?')) {
           showPage('membres', document.getElementById('nav-membres'));
         }
       }, 1000);
@@ -1412,7 +1126,7 @@ async function saveMembre(){
   const action=wasAdd?'membre_ajout':'membre_modif';
   const desc=wasAdd?`Ajout du membre ${data.pseudo}`:`Modification de ${data.pseudo}`;
   await logAction(action,data.pseudo,desc);
-  toast('Membre enregistré ✓');
+  toast('Membre enregistré');
   closeModal('modal-membre');
   await loadMembres();
 
@@ -1518,7 +1232,7 @@ function renderLignes() {
     <div style="background:var(--off-white);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--border-light)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-weight:700;font-size:13px;color:var(--navy)">Ligne véhicule</span>
-        ${lignesVehicules.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="removeLigne(${l.id})">✕ Supprimer</button>` : ''}
+        ${lignesVehicules.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="removeLigne(${l.id})">× Supprimer</button>` : ''}
       </div>
       <div class="row2">
         <div class="field"><label>Type *</label>
@@ -1602,7 +1316,7 @@ function calcAllLines() {
   </div>`;
 
   if (isUlt && busDejaLoues < ULTIMATE_GRATUIT) {
-    recap += `<div style="font-size:11px;color:var(--success);margin-top:6px">★ Forfait Ultimate — ${gratuits} véhicule(s) gratuit(s) sur ${ULTIMATE_GRATUIT - busDejaLoues} restants</div>`;
+    recap += `<div style="font-size:11px;color:var(--success);margin-top:6px"><i class="fa-solid fa-star"></i> Forfait Ultimate — ${gratuits} véhicule(s) gratuit(s) sur ${ULTIMATE_GRATUIT - busDejaLoues} restants</div>`;
   }
 
   const recapEl = document.getElementById('fact-recap');
@@ -1695,7 +1409,7 @@ async function saveFacture() {
     const {error:errF} = await sb.from('factures').update(rec).eq('id', editFactureId);
     if (errF) { alert('Erreur modification : ' + errF.message); return; }
     await logAction('facture', m.pseudo, `Facture #${String(editFactureId).padStart(3,'0')} modifiée — ${fe(total)}`);
-    toast('Facture modifiée ✓');
+    toast('Facture modifiée');
     editFactureId = null;
   } else {
     const {error:errF} = await sb.from('factures').insert(rec);
@@ -1705,7 +1419,7 @@ async function saveFacture() {
     const mIdx = membres.findIndex(x=>x.id===mid);
     if (mIdx !== -1) membres[mIdx].bus_loues = newBusLoues;
     await logAction('facture', m.pseudo, `Facture créée : ${totalVeh} véh. (${lignesSave.map(l=>l.type+' ×'+l.nb).join(', ')}) — ${fe(total)}`);
-    toast('Facture créée ✓');
+    toast('Facture créée');
   }
   closeModal('modal-facture');
   await loadFactures();
@@ -1766,8 +1480,8 @@ function renderFactures(){
           <option ${d.statut==='Livré'?'selected':''}>Livré</option>
           <option ${d.statut==='Refusé'?'selected':''}>Refusé</option>
         </select>
-        <button class="btn btn-sm" onclick="openEditFacture(${d.id})">✏ Modifier</button>`:''}
-        <button class="btn btn-sm btn-export" onclick="exportJpeg(${d.id})">⬇ JPEG</button>
+        <button class="btn btn-sm" onclick="openEditFacture(${d.id})">Modifier</button>`:''}
+        <button class="btn btn-sm btn-export" onclick="exportJpeg(${d.id})">JPEG</button>
         ${canDelete&&!isReadOnly()?`<button class="btn btn-sm btn-danger" onclick="deleteFacture(${d.id})">Suppr.</button>`:''}
       </div>
     </div>`;
@@ -1936,13 +1650,13 @@ async function saveInterim(){
     const {error:errI} = await sb.from('interimaires').update(rec).eq('id', editInterimId);
     if(errI){ alert('Erreur modification : ' + errI.message); return; }
     await logAction('interim',m.pseudo,`Demande #${String(editInterimId).padStart(3,'0')} modifiée`);
-    toast('Demande modifiée ✓');
+    toast('Demande modifiée');
     editInterimId = null;
   } else {
     const {error:errI} = await sb.from('interimaires').insert(rec);
     if(errI){ alert('Erreur création : ' + errI.message); return; }
     await logAction('interim',m.pseudo,`Demande d'intérimaires : ${nb} personne(s) ${pole==='conduite'?'(conducteurs)':'(mécaniciens)'} — ${fe(total)}`);
-    toast('Demande créée ✓');
+    toast('Demande créée');
   }
   closeModal('modal-interim');
   await loadInterimaires();
@@ -1969,7 +1683,7 @@ function renderInterimaires() {
       <div style="margin-top:4px">
         <span class="badge ${sb2}">${d.statut}</span>
         ${d.gratuit?'<span class="badge b-ultimate" style="margin-left:6px">Gratuit Ultimate</span>':''}
-        ${d.prioritaire?'<span class="badge b-actif" style="margin-left:6px">★ Prioritaire 72h</span>':''}
+        ${d.prioritaire?'<span class="badge b-actif" style="margin-left:6px"><i class="fa-solid fa-star"></i> Prioritaire 72h</span>':''}
       </div>
       <div class="fact-meta">Créée le ${fd(d.date_creation)}${d.date_traitement?' · Traitée le '+fd(d.date_traitement):''}</div>
       <div class="fact-body">
@@ -1985,8 +1699,8 @@ function renderInterimaires() {
           <option ${d.statut==='Accepté'?'selected':''}>Accepté</option>
           <option ${d.statut==='Refusé'?'selected':''}>Refusé</option>
         </select>
-        <button class="btn btn-sm" onclick="openEditInterim(${d.id})">✏ Modifier</button>
-        <button class="btn btn-sm btn-export" onclick="exportInterimJpeg(${d.id})">⬇ JPEG</button>`:''}
+        <button class="btn btn-sm" onclick="openEditInterim(${d.id})">Modifier</button>
+        <button class="btn btn-sm btn-export" onclick="exportInterimJpeg(${d.id})">JPEG</button>`:''}
         ${canDelete&&!isReadOnly()?`<button class="btn btn-sm btn-danger" onclick="deleteInterim(${d.id})">Suppr.</button>`:''}
       </div>
     </div>`;
@@ -2012,7 +1726,7 @@ function renderStaff(){
         ${isSelf
           ? '<em style="color:#aaa;font-size:12px">Votre compte</em>'
           : `<button class="btn btn-sm btn-danger" onclick="toggleStaff('${s.id}',${s.actif})">${s.actif?'Désactiver':'Réactiver'}</button>
-             ${currentUser.role==='president' ? `<button class="btn btn-sm btn-danger" onclick="deleteStaff('${s.id}','${s.username}')" title="Supprimer définitivement">🗑</button>` : ''}`
+             ${currentUser.role==='president' ? `<button class="btn btn-sm btn-danger" onclick="deleteStaff('${s.id}','${s.username}')" title="Supprimer définitivement"><i class="fa-solid fa-trash"></i></button>` : ''}`
         }
       </td>
     </tr>`;
@@ -2034,7 +1748,7 @@ async function saveStaff(){
   if(pass.length<6){alert('Mot de passe : minimum 6 caractères.');return;}
   const{error}=await sb.from('staff').insert({username:user,password_hash:pass,role,nom_affiche:nom,actif:true});
   if(error){alert('Erreur : '+error.message);return;}
-  toast('Compte créé ✓');
+  toast('Compte créé');
   closeModal('modal-staff');
   await loadStaff();
   renderStaff();
@@ -2093,7 +1807,7 @@ function exportInterimJpeg(id){
   const pole=d.pole==='conduite'?'Pôle Conduite — Conducteurs':'Pôle Maintenance — Mécaniciens';
   const badge=d.forfait==='Ultimate'?'<span class="pdf-badge ult">Ultimate</span>':'<span class="pdf-badge std">Standard</span>';
 
-  const content=`<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">${pole}</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de mission</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de mission</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div></div><div class="pdf-stitle">Détail de la mission</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Type de personnel</div><div class="pdf-field-val">${pole}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Nombre de personnes</div><div class="pdf-field-val">${d.nb_personnes} personne(s)</div></div><div class="pdf-field"><div class="pdf-field-lbl">Durée</div><div class="pdf-field-val">${d.nb_unites||1} ${d.duree_key==='semaine'?'semaine(s)':'jour(s)'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Période</div><div class="pdf-field-val">${fd(d.date_debut)} → ${fd(d.date_fin)}</div></div>${d.prioritaire?'<div class="pdf-field"><div class="pdf-field-lbl">Priorité</div><div class="pdf-field-val" style="color:#166534">★ Prise en charge sous 72h</div></div>':''}</div><div class="pdf-stitle">Tarification</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>Sous-total</th></tr></thead><tbody><tr class="${d.gratuit?'hl':''}"><td>${pole}</td><td>${d.gratuit?'Gratuit':fe(d.prix_unitaire)}</td><td>${d.nb_personnes} × ${d.nb_unites||1} ${d.duree_key==='semaine'?'sem.':'j.'}</td><td><strong>${d.gratuit?'Gratuit':fe(d.total)}</strong></td></tr></tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">${pole}</div>${d.gratuit?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit?'0 €':fe(d.total)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span></div></div>`;
+  const content=`<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">${pole}</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de mission</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de mission</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div></div><div class="pdf-stitle">Détail de la mission</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Type de personnel</div><div class="pdf-field-val">${pole}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Nombre de personnes</div><div class="pdf-field-val">${d.nb_personnes} personne(s)</div></div><div class="pdf-field"><div class="pdf-field-lbl">Durée</div><div class="pdf-field-val">${d.nb_unites||1} ${d.duree_key==='semaine'?'semaine(s)':'jour(s)'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Période</div><div class="pdf-field-val">${fd(d.date_debut)} → ${fd(d.date_fin)}</div></div>${d.prioritaire?'<div class="pdf-field"><div class="pdf-field-lbl">Priorité</div><div class="pdf-field-val" style="color:#166534"><i class="fa-solid fa-bolt"></i> Prise en charge sous 72h</div></div>':''}</div><div class="pdf-stitle">Tarification</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>Sous-total</th></tr></thead><tbody><tr class="${d.gratuit?'hl':''}"><td>${pole}</td><td>${d.gratuit?'Gratuit':fe(d.prix_unitaire)}</td><td>${d.nb_personnes} × ${d.nb_unites||1} ${d.duree_key==='semaine'?'sem.':'j.'}</td><td><strong>${d.gratuit?'Gratuit':fe(d.total)}</strong></td></tr></tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">${pole}</div>${d.gratuit?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit?'0 €':fe(d.total)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span></div></div>`;
 
   const tmp=document.createElement('div');
   tmp.style.cssText='position:fixed;top:0;left:0;z-index:-9999;background:#fff;padding:0;margin:0;';
@@ -2237,7 +1951,7 @@ function renderSAL(rows){
         ${isReadOnly()?`<div style="padding:8px 10px;background:var(--off-white);border-radius:7px;font-size:13px;min-height:40px">${salNotes[key]||'<em style="color:#ccc">Aucune note</em>'}</div>`:`<textarea id="note-sal-${safeKey}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px" placeholder="Ajouter une note..." onblur="saveNote('sal','${key}')">${salNotes[key]||''}</textarea><div style="font-size:11px;color:var(--text-muted);margin-top:3px">Sauvegarde automatique au clic en dehors</div>`}
       </div>
       <div class="fact-actions">
-        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('sal','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='Traité'?'selected':''}>Traité</option><option ${statut==='En cours'?'selected':''}>En cours</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('sal','${key}')">💾 Sauvegarder note</button>`:''}
+        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('sal','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='Traité'?'selected':''}>Traité</option><option ${statut==='En cours'?'selected':''}>En cours</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('sal','${key}')"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder note</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -2307,7 +2021,7 @@ function filterPole(){
         ${isReadOnly()?`<div style="padding:8px 10px;background:var(--off-white);border-radius:7px;font-size:13px;min-height:40px">${poleNotes[key]||'<em style="color:#ccc">Aucune note</em>'}</div>`:`<textarea id="note-pole-${safeKey}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px" placeholder="Ajouter une note..." onblur="saveNote('pole','${key}')">${poleNotes[key]||''}</textarea><div style="font-size:11px;color:var(--text-muted);margin-top:3px">Sauvegarde automatique au clic en dehors</div>`}
       </div>
       <div class="fact-actions">
-        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('pole','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='En cours'?'selected':''}>En cours</option><option ${statut==='Traité'?'selected':''}>Traité</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('pole','${key}')">💾 Sauvegarder note</button>`:''}
+        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('pole','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='En cours'?'selected':''}>En cours</option><option ${statut==='Traité'?'selected':''}>Traité</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('pole','${key}')"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder note</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -2402,7 +2116,7 @@ function showError(msg, details='', level='error') {
   if (!bar) return;
 
   const id = 'err-' + (++errCounter);
-  const icon = level==='error' ? '🔴' : level==='warn' ? '🟡' : 'ℹ️';
+  const icon = level==='error' ? '<i class="fa-solid fa-circle" style="color:#991b1b"></i>' : level==='warn' ? '<i class="fa-solid fa-circle" style="color:#f59e0b"></i>' : '<i class="fa-solid fa-circle-info" style="color:#185FA5"></i>';
   const title = level==='error' ? 'Erreur' : level==='warn' ? 'Avertissement' : 'Info';
 
   const div = document.createElement('div');
@@ -2414,7 +2128,7 @@ function showError(msg, details='', level='error') {
       <div class="err-toast-title">${title}</div>
       <div class="err-toast-msg">${msg}${details?'<br><code style="font-size:11px;color:#888">'+details+'</code>':''}</div>
     </div>
-    <button class="err-toast-close" onclick="document.getElementById('${id}').remove()">✕</button>
+    <button class="err-toast-close" onclick="document.getElementById('${id}').remove()">×</button>
   `;
   bar.appendChild(div);
 
@@ -2662,7 +2376,7 @@ async function saveNote(formType, key) {
     { form_type: formType, row_key: key, statut: (formType === 'sal' ? salStatuts[key] : poleStatuts[key]) || 'En attente', notes: note, updated_at: new Date().toISOString() },
     { onConflict: 'form_type,row_key' }
   );
-  toast('Note sauvegardée ✓');
+  toast('Note sauvegardée');
 }
 
 // ============================================================
@@ -2766,7 +2480,7 @@ function renderObjectifs() {
           ${o.description ? `<div style="font-size:13px;color:#666;line-height:1.5">${o.description}</div>` : ''}
           ${o.atteint && o.date_atteint ? `<div style="font-size:11px;color:#888;margin-top:4px">Atteint le ${fd(o.date_atteint)}</div>` : ''}
         </div>
-        ${canEdit ? `<div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-sm" onclick="openEditObjectif(${o.id})">✏</button><button class="btn btn-sm btn-danger" onclick="deleteObjectif(${o.id})">✕</button></div>` : ''}
+        ${canEdit ? `<div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-sm" onclick="openEditObjectif(${o.id})">Modifier</button><button class="btn btn-sm btn-danger" onclick="deleteObjectif(${o.id})">×</button></div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -2799,7 +2513,7 @@ async function saveObjectif() {
   const data = { titre, description: document.getElementById('obj-desc').value.trim(), categorie: document.getElementById('obj-categorie').value, priorite: document.getElementById('obj-priorite').value, mois: objMonthKey(), atteint: false };
   if (editObjId) { await sb.from('objectifs').update(data).eq('id', editObjId); }
   else { await sb.from('objectifs').insert({ ...data, created_by: currentUser.id }); }
-  toast('Objectif enregistré ✓');
+  toast('Objectif enregistré');
   closeModal('modal-objectif');
   await loadObjectifs();
 }
@@ -2809,7 +2523,7 @@ async function toggleObjectif(id, current) {
   if (!current) upd.date_atteint = tod(); else upd.date_atteint = null;
   await sb.from('objectifs').update(upd).eq('id', id);
   await loadObjectifs();
-  toast(!current ? 'Objectif atteint ! ✓' : 'Objectif remis en cours');
+  toast(!current ? 'Objectif atteint !' : 'Objectif remis en cours');
 }
 
 async function deleteObjectif(id) {
@@ -2854,7 +2568,7 @@ function renderHistorique() {
       <div style="font-size:13px;color:#555;margin-top:6px;line-height:1.6">${h.description||'—'}</div>
       ${h.note ? `<div style="background:#f0f7ff;border-left:3px solid #0a1f5c;padding:8px 12px;border-radius:0 6px 6px 0;font-size:13px;color:#0a1f5c;margin-top:8px">${h.note}</div>` : ''}
       <div class="fact-actions">
-        ${!isReadOnly() ? `<button class="btn btn-sm" onclick="openEditHist(${h.id},'${(h.note||'').replace(/'/g,"\'")}')">✏ Modifier la note</button>` : ''}
+        ${!isReadOnly() ? `<button class="btn btn-sm" onclick="openEditHist(${h.id},'${(h.note||'').replace(/'/g,"\'")}')">Modifier la note</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -2870,7 +2584,7 @@ async function saveHistNote() {
   const id   = parseInt(document.getElementById('hist-edit-id').value);
   const note = document.getElementById('hist-edit-note').value.trim();
   await sb.from('historique').update({ note }).eq('id', id);
-  toast('Note enregistrée ✓');
+  toast('Note enregistrée');
   closeModal('modal-edit-hist');
   await loadHistorique();
 }
@@ -3026,7 +2740,7 @@ async function saveTarifs() {
       await sb.from('tarifs').upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
     }
     const res = document.getElementById('tarifs-result');
-    res.textContent = '✅ Tarifs sauvegardés !';
+    res.textContent = 'Tarifs sauvegardés !';
     res.style.color = '#166534';
   } catch(e) {
     document.getElementById('tarifs-result').textContent = 'Erreur : ' + e.message;
@@ -3074,7 +2788,7 @@ async function deleteStaff(id, username) {
   await sb.from('objectifs').update({ created_by: null }).eq('created_by', id);
   const { error } = await sb.from('staff').delete().eq('id', id);
   if (error) { alert('Erreur : ' + error.message); return; }
-  toast('Compte supprimé ✓');
+  toast('Compte supprimé');
   await loadStaff();
   renderStaff();
 }
@@ -3192,7 +2906,7 @@ function getMontantBadge(row) {
   const calc = calcMontantRemboursement(row);
   if (!calc) return '';
   return `<div style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:6px 12px;margin-top:8px">
-    <span style="font-size:13px;color:#166534">💰 <strong>${calc.qte} × ${fe(calc.tarifUnit)}</strong> = <strong style="font-size:15px">${fe(calc.total)}</strong></span>
+    <span style="font-size:13px;color:#166534"><strong>${calc.qte} × ${fe(calc.tarifUnit)}</strong> = <strong style="font-size:15px">${fe(calc.total)}</strong></span>
     <span style="font-size:11px;color:#166534;opacity:.7">${calc.service}</span>
   </div>`;
 }
@@ -3209,7 +2923,7 @@ function saveTMKey() {
   const key = document.getElementById('tm-api-key-input').value.trim();
   if (!key) { document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">Clé vide.</span>'; return; }
   localStorage.setItem('tm_alliance_api_key', key);
-  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534">✅ Clé sauvegardée localement.</span>';
+  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534">✓ Clé sauvegardée localement.</span>';
 }
 
 async function testTMKey() {
@@ -3221,12 +2935,12 @@ async function testTMKey() {
       headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
     });
     if (res.ok) {
-      document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534">✅ Connexion réussie !</span>';
+      document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534">✓ Connexion réussie !</span>';
     } else {
-      document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">❌ Erreur ' + res.status + ' — clé invalide ou accès refusé</span>';
+      document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">✗ Erreur ' + res.status + ' — clé invalide ou accès refusé</span>';
     }
   } catch(e) {
-    document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">❌ Erreur réseau : ' + e.message + '</span>';
+    document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">✗ Erreur réseau : ' + e.message + '</span>';
   }
 }
 
@@ -3235,7 +2949,16 @@ function loadTMPage() {
   const input = document.getElementById('tm-api-key-input');
   if (input && key) input.value = '••••••••';
   document.getElementById('tm-status-card').style.display = '';
-  if (key) loadTMMembers();
+  // Masquer certains onglets pour GDP
+  if(currentUser && currentUser.role === 'gestionnaire_parc'){
+    document.querySelectorAll('[data-gdp-hidden]').forEach(el => el.style.display='none');
+    // Masquer la section config clé et membres sync
+    const cfgTM = document.querySelector('#page-tm .card');
+    // Charger directement les véhicules
+    if(key) loadTMEndpoint('vehicules');
+  } else {
+    if (key) loadTMMembers();
+  }
 }
 
 async function loadTMMembers() {
@@ -3255,11 +2978,11 @@ async function loadTMMembers() {
     const data = await res.json();
     const membres_tm = Array.isArray(data) ? data : (data.membres || data.members || data.data || []);
     document.getElementById('tm-status-dot').style.background = '#166534';
-    document.getElementById('tm-status-text').textContent = '✅ ' + membres_tm.length + ' membre(s) — Dernière MAJ : ' + new Date().toLocaleTimeString('fr-FR');
+    document.getElementById('tm-status-text').textContent = '✓ ' + membres_tm.length + ' membre(s) — Dernière MAJ : ' + new Date().toLocaleTimeString('fr-FR');
     renderTMMembers(membres_tm);
   } catch(e) {
     document.getElementById('tm-status-dot').style.background = '#991b1b';
-    document.getElementById('tm-status-text').textContent = '❌ ' + e.message;
+    document.getElementById('tm-status-text').textContent = '✗ ' + e.message;
   }
 }
 
@@ -3291,7 +3014,7 @@ function renderTMMembers(data) {
         <td style="padding:10px 14px">${niveau}</td>
         <td style="padding:10px 14px"><span class="badge b-${forfait.toLowerCase().includes('ultimate')?'ultimate':'standard'}">${forfait}</span></td>
         <td style="padding:10px 14px"><span class="badge b-actif">${statut}</span></td>
-        <td style="padding:10px 14px"><button class="btn btn-sm" onclick="syncOneMember(${JSON.stringify({pseudo,entreprise,niveau,forfait})})">↓ Sync</button></td>
+        <td style="padding:10px 14px"><button class="btn btn-sm" onclick="syncOneMember(${JSON.stringify({pseudo,entreprise,niveau,forfait})})">Sync</button></td>
       </tr>`;
     }).join('')}
     </tbody>
@@ -3318,7 +3041,7 @@ async function syncOneMember(tm) {
 const TM_ENDPOINTS = {
   membres:   { url: '/api/v1/membres_alliance?limit=1000', label: 'Membres alliance' },
   vehicules: { url: '/api/v1/vehicules?parc=location&limit=1000', label: 'Véhicules en location' },
-  vehicules_global: { url: '/api/v1/vehicules?parc=global&limit=1000', label: 'Tous les véhicules' },
+  vehicules_global: { url: '/api/v1/vehicules?parc=actif&limit=1000', label: 'Véhicules Hors Loc' },
   compta:    { url: '/api/v1/compta?limit=1000', label: 'Comptabilité' },
   salaries:  { url: '/api/v1/salaries?limit=1000', label: 'Salariés' },
 };
@@ -3365,13 +3088,13 @@ async function loadTMEndpoint(name) {
     }
   }
     document.getElementById('tm-status-dot').style.background = '#166534';
-    document.getElementById('tm-status-text').textContent = '✅ ' + tmCurrentData.length + ' résultat(s) · ' + ep.label;
+    document.getElementById('tm-status-text').textContent = '✓ ' + tmCurrentData.length + ' résultat(s) · ' + ep.label;
     // Afficher barre de recherche pour véhicules et salariés
     showTMSearch(['vehicules','vehicules_global','salaries'].includes(name));
     renderTMData(name, tmCurrentData);
   } catch(e) {
     document.getElementById('tm-status-dot').style.background = '#991b1b';
-    document.getElementById('tm-status-text').textContent = '❌ ' + e.message;
+    document.getElementById('tm-status-text').textContent = '✗ ' + e.message;
     container.innerHTML = '<div class="empty" style="color:#991b1b">Erreur : ' + e.message + '</div>';
   }
 }
@@ -3383,7 +3106,7 @@ function renderTMData(name, data) {
   if (name === 'membres') {
     document.getElementById('tm-membres-card').style.display = '';
     renderTMMembers(data);
-    container.innerHTML = '<div style="font-size:13px;color:var(--text-sec)">✅ ' + data.length + ' membre(s) chargé(s). Voir le tableau ci-dessous pour synchroniser.</div>';
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-sec)">✓ ' + data.length + ' membre(s) chargé(s). Voir le tableau ci-dessous pour synchroniser.</div>';
     return;
   }
 
@@ -3411,7 +3134,7 @@ function renderTMData(name, data) {
 
   // Si véhicules : proposer de vérifier les locations en cours
   if (name === 'vehicules') {
-    container.innerHTML += `<div style="margin-top:12px"><button class="btn btn-sm btn-primary" onclick="checkLocationsEnCours()">🔍 Vérifier locations en cours</button></div>`;
+    container.innerHTML += `<div style="margin-top:12px"><button class="btn btn-sm btn-primary" onclick="checkLocationsEnCours()"><i class="fa-solid fa-magnifying-glass"></i> Vérifier locations en cours</button></div>`;
   }
 }
 
@@ -3479,11 +3202,11 @@ async function syncTMToSupabase() {
       }
     }
     await loadMembres();
-    document.getElementById('tm-status-text').textContent = '✅ ' + updated + ' membre(s) mis à jour';
+    document.getElementById('tm-status-text').textContent = '✓ ' + updated + ' membre(s) mis à jour';
     toast(updated + ' membre(s) synchronisé(s) ✓');
     renderTMMembers(membres_tm);
   } catch(e) {
-    document.getElementById('tm-status-text').textContent = '❌ ' + e.message;
+    document.getElementById('tm-status-text').textContent = '✗ ' + e.message;
     alert('Erreur : ' + e.message);
   }
 }
@@ -3525,7 +3248,7 @@ function filterTMData() {
         const conducteurs  = filtered.filter(s => s.poste === 1 || (s.poste||'').toString().toLowerCase().includes('conducteur')).length;
         const mecaniciens  = filtered.filter(s => s.poste === 2 || (s.poste||'').toString().toLowerCase().includes('mécanic')).length;
         resultEl.innerHTML = `<div style="background:#dbeafe;border-radius:8px;padding:10px 14px;font-size:13px;color:#1e40af;margin-bottom:8px">
-          👷 <strong>${filtered.length} salarié(s)</strong> pour ce membre
+          <i class="fa-solid fa-hard-hat"></i> <strong>${filtered.length} salarié(s)</strong> pour ce membre
           ${conducteurs ? '<br>&nbsp;&nbsp;• Conducteurs : ' + conducteurs : ''}
           ${mecaniciens ? '<br>&nbsp;&nbsp;• Mécaniciens : ' + mecaniciens : ''}
         </div>`;
@@ -3594,7 +3317,7 @@ async function saveNewStaff() {
     username, password_hash: password, role, nom_affiche: nom, actif: true
   });
   if (error) { alert('Erreur : ' + error.message); return; }
-  toast('Compte créé ✓');
+  toast('Compte créé');
   closeModal('modal-add-staff');
   await loadStaff();
   renderStaff();
