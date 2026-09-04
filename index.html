@@ -422,7 +422,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-sal">
   <div class="page-header">
     <h1>Signalements SAL</h1>
-    <button class="btn" onclick="loadSAL()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">Actualiser</button>
+    <button class="btn" onclick="loadSAL()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">↻ Actualiser</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-label">Signalements totaux</div><div class="stat-value blue" id="sal-total">—</div></div>
@@ -446,7 +446,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-pole">
   <div class="page-header">
     <h1>Pôle Exploitation & Financement</h1>
-    <button class="btn" onclick="loadPole()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">Actualiser</button>
+    <button class="btn" onclick="loadPole()" style="border-color:#bfdbfe;color:#0a1f5c;background:#f0f7ff">↻ Actualiser</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-label">Demandes totales</div><div class="stat-value blue" id="pole-total">—</div></div>
@@ -528,23 +528,18 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-tm">
   <div class="page-header">
     <h1>Suivi des membres TM</h1>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="loadTMMembers()">Actualiser</button>
-    </div>
+    <button class="btn btn-primary" onclick="loadTMEndpoint(tmCurrentEndpoint||'vehicules')">Actualiser</button>
   </div>
-
-  <!-- Config clé API -->
   <div class="card" style="margin-bottom:16px">
     <div class="card-header"><span class="card-title"><i class="fa-solid fa-key"></i> Clé API Transport Manager</span></div>
     <div style="padding:16px 20px">
       <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:14px">
-        <strong>⚠ Réglementation TM :</strong> Cette clé est strictement personnelle. Les données retournées par l'API ne doivent pas être transmises à des services IA tiers.
+        <strong>Réglementation TM :</strong> Clé strictement personnelle. Ne pas partager.
       </div>
       <div style="display:flex;gap:10px;align-items:flex-end">
         <div class="field" style="flex:1;margin:0">
-          <label>Clé API Alliance (Hub API TM)</label>
+          <label>Clé API Alliance</label>
           <input type="password" id="tm-api-key-input" placeholder="Votre clé API Alliance" style="width:100%">
-          <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Stockée localement dans votre navigateur uniquement</div>
         </div>
         <button class="btn btn-primary" onclick="saveTMKey()"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
         <button class="btn" onclick="testTMKey()"><i class="fa-solid fa-magnifying-glass"></i> Tester</button>
@@ -552,33 +547,27 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <div id="tm-key-result" style="margin-top:10px;font-size:13px"></div>
     </div>
   </div>
-
-  <!-- Statut -->
   <div class="card" id="tm-status-card" style="margin-bottom:16px;display:none">
     <div style="padding:14px 20px;display:flex;align-items:center;gap:10px">
       <span id="tm-status-dot" style="width:10px;height:10px;border-radius:50%;background:#d8d8d8;flex-shrink:0"></span>
       <span id="tm-status-text" style="font-size:13px;color:var(--text-muted)">Non connecté</span>
     </div>
   </div>
-
-  <!-- Onglets endpoints -->
-  <div class="card" style="margin-bottom:16px">
+  <div class="card">
     <div class="card-header"><span class="card-title">Données disponibles</span></div>
     <div style="padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border-light)">
-      <button class="btn btn-sm" onclick="loadTMEndpoint('membres')" id="tm-tab-membres" data-gdp-hidden="true"><i class="fa-solid fa-users"></i> Membres</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules')" id="tm-tab-vehicules"><i class="fa-solid fa-bus"></i> Véhicules location</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('membres')" id="tm-tab-membres" data-gdp-hidden="true">Membres</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules')" id="tm-tab-vehicules">Véhicules location</button>
       <button class="btn btn-sm" onclick="loadTMEndpoint('vehicules_global')" id="tm-tab-vehicules_global" data-gdp-hidden="true">Véhicules Hors Loc</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('compta')" id="tm-tab-compta" data-gdp-hidden="true"><i class="fa-solid fa-coins"></i> Comptabilité</button>
-      <button class="btn btn-sm" onclick="loadTMEndpoint('salaries')" id="tm-tab-salaries" data-gdp-hidden="true"><i class="fa-solid fa-hard-hat"></i> Salariés</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('compta')" id="tm-tab-compta" data-gdp-hidden="true">Comptabilité</button>
+      <button class="btn btn-sm" onclick="loadTMEndpoint('salaries')" id="tm-tab-salaries" data-gdp-hidden="true">Salariés</button>
     </div>
-    <!-- Recherche membre -->
     <div id="tm-search-wrap" style="padding:12px 20px 0;display:none">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
         <div style="position:relative;flex:1">
-          <input id="tm-member-search" placeholder="Rechercher un membre (pseudo)..."
+          <input id="tm-member-search" placeholder="Rechercher un membre..."
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;box-sizing:border-box"
-            oninput="filterTMData();showTMSuggestions()"
-            autocomplete="off">
+            oninput="filterTMData();showTMSuggestions()" autocomplete="off">
           <div id="tm-suggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:0 0 9px 9px;z-index:100;display:none;max-height:200px;overflow-y:auto"></div>
         </div>
         <button class="btn btn-sm" onclick="document.getElementById('tm-member-search').value='';filterTMData()">×</button>
@@ -586,18 +575,10 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <div id="tm-member-result" style="margin-bottom:8px"></div>
     </div>
     <div id="tm-data-container" style="padding:16px 20px">
-      <div class="empty">Sélectionnez un endpoint pour charger les données</div>
+      <div class="empty">Sélectionnez un onglet pour charger les données</div>
     </div>
   </div>
-
-  <!-- Membres — sync -->
-  <div class="card" id="tm-membres-card" style="display:none">
-    <div class="card-header">
-      <span class="card-title"><i class="fa-solid fa-users"></i> Membres — Synchronisation</span>
-      <button class="btn btn-sm btn-primary" onclick="syncTMToSupabase()">Tout synchroniser</button>
-    </div>
-    <div id="tm-membres-list" style="padding:8px 0"></div>
-  </div>
+  <div id="tm-membres-card" style="display:none"><div id="tm-membres-list"></div></div>
 </div>
 
 <!-- PAGE RGPD -->
@@ -627,7 +608,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
 
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><span class="card-title"><i class="fa-solid fa-trash"></i> Droit à l'oubli — Suppression des données d'un membre</span></div>
+    <div class="card-header"><span class="card-title">🗑 Droit à l'oubli — Suppression des données d'un membre</span></div>
     <div style="padding:20px">
       <p style="font-size:13px;color:var(--text-sec);margin-bottom:14px">Sélectionnez un membre pour supprimer <strong>toutes ses données</strong> (fiche membre, factures, intérimaires) conformément à l'Art. 17 RGPD.</p>
       <div class="row2">
@@ -638,7 +619,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
           </select>
         </div>
         <div style="display:flex;align-items:flex-end">
-          <button class="btn btn-danger" onclick="exercerDroitOubli()" style="width:100%"><i class="fa-solid fa-trash"></i> Supprimer toutes les données</button>
+          <button class="btn btn-danger" onclick="exercerDroitOubli()" style="width:100%">🗑 Supprimer toutes les données</button>
         </div>
       </div>
       <div id="rgpd-result" style="margin-top:12px;display:none"></div>
@@ -687,7 +668,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn btn-primary" onclick="saveAppConfig()"> Sauvegarder</button>
-        <button class="btn" onclick="loadConfigUI()">Recharger</button>
+        <button class="btn" onclick="loadConfigUI()">↻ Recharger</button>
       </div>
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
@@ -695,31 +676,23 @@ tr:hover td{background:rgba(13,31,78,.02)}
 
 
 
-<!-- Config GForms — présidents uniquement -->
+  <!-- Config GForms — présidents uniquement -->
   <div class="card" id="card-config" style="margin-top:24px;display:none">
-    <div class="card-header"><span class="card-title"> Liens Google Forms (CSV)</span></div>
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-gear"></i> Liens Google Forms (CSV)</span></div>
     <div style="padding:20px">
-      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données — aucune URL dans le code source.</p>
-      <div class="field">
-        <label>Lien CSV — SAL</label>
-        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
-      </div>
-      <div class="field" style="margin-top:10px">
-        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
-        <input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
-      </div>
-      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px"> Sauvegarder</button>
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données.</p>
+      <div class="field"><label>Lien CSV — SAL</label><input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%"></div>
+      <div class="field" style="margin-top:10px"><label>Lien CSV — Pôle Exploitation &amp; Financement</label><input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%"></div>
+      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
       <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
 
-<!-- Tarifs modifiables — VP et Président uniquement -->
+  <!-- Tarifs modifiables — VP et Président uniquement -->
   <div class="card" id="card-tarifs" style="margin-top:24px;display:none">
     <div class="card-header"><span class="card-title"><i class="fa-solid fa-tag"></i> Tarifs — Location & Intérimaires</span></div>
     <div style="padding:20px">
-      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Modifiez les tarifs ici. Ils sont stockés en base de données et appliqués immédiatement.</p>
-
-      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-bus"></i> Location de véhicules (€)</div>
+      <div class="pdf-stitle" style="margin-bottom:10px">Location de véhicules (€)</div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Minibus / sem.</label><input type="number" id="t-minibus-s" class="tarif-input"></div>
         <div class="field"><label>Minibus / mois</label><input type="number" id="t-minibus-m" class="tarif-input"></div>
@@ -742,7 +715,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <div class="field" style="margin-bottom:12px"><label>Véhicules gratuits Ultimate (nb max)</label><input type="number" id="t-ultimate-gratuit" class="tarif-input"></div>
 
-      <div class="pdf-stitle" style="margin:16px 0 10px"><i class="fa-solid fa-hard-hat"></i> Intérimaires (€)</div>
+      <div class="pdf-stitle" style="margin:16px 0 10px">Intérimaires (€)</div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Conducteur Standard / sem.</label><input type="number" id="t-cond-std-s" class="tarif-input"></div>
         <div class="field"><label>Conducteur Ultimate / sem.</label><input type="number" id="t-cond-ult-s" class="tarif-input"></div>
@@ -753,18 +726,18 @@ tr:hover td{background:rgba(13,31,78,.02)}
       </div>
       <div class="field" style="margin-bottom:16px"><label>Intérimaires gratuits Ultimate (nb max)</label><input type="number" id="t-interim-gratuit" class="tarif-input"></div>
 
-      <div class="pdf-stitle" style="margin:16px 0 10px"><i class="fa-solid fa-wrench"></i> Remboursements Pôle SAL (€)</div>
+      <div class="pdf-stitle" style="margin:16px 0 10px">Remboursements Pôle SAL (€)</div>
       <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>CT (Contrôle technique)</label><input type="number" id="t-ct" class="tarif-input"></div>
+        <div class="field"><label>CT</label><input type="number" id="t-ct" class="tarif-input"></div>
         <div class="field"><label>Révision</label><input type="number" id="t-revision" class="tarif-input"></div>
       </div>
       <div class="row2" style="margin-bottom:8px">
-        <div class="field"><label>FCO (Formation continue)</label><input type="number" id="t-fco" class="tarif-input"></div>
+        <div class="field"><label>FCO</label><input type="number" id="t-fco" class="tarif-input"></div>
       </div>
       <div class="pdf-stitle" style="margin:10px 0 6px;font-size:12px">Rénovations intérieures (€/véhicule)</div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Remise en état affichages</label><input type="number" id="t-renov-affichages" class="tarif-input"></div>
-        <div class="field"><label>Remise en état barres maintien</label><input type="number" id="t-renov-barres" class="tarif-input"></div>
+        <div class="field"><label>Remise en état barres</label><input type="number" id="t-renov-barres" class="tarif-input"></div>
       </div>
       <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Réparation sellerie</label><input type="number" id="t-renov-sellerie" class="tarif-input"></div>
@@ -786,12 +759,319 @@ tr:hover td{background:rgba(13,31,78,.02)}
         <div class="field"><label>Adhésion VDIStar</label><input type="number" id="t-vdistar" class="tarif-input"></div>
         <div class="field"></div>
       </div>
-
       <button class="btn btn-primary" onclick="saveTarifs()" style="margin-top:8px"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder les tarifs</button>
       <div id="tarifs-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
     </div>
   </div>
+</div>
 
+  <!-- Config GForms — présidents uniquement -->
+  <div class="card" id="card-config" style="margin-top:24px;display:none">
+    <div class="card-header"><span class="card-title"> Liens Google Forms (CSV)</span></div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Liens stockés en base de données — aucune URL dans le code source.</p>
+      <div class="field">
+        <label>Lien CSV — SAL</label>
+        <input id="cfg-sal-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Lien CSV — Pôle Exploitation &amp; Financement</label>
+        <input id="cfg-pole-url" placeholder="Collez le lien pubhtml ou CSV" style="width:100%">
+      </div>
+      <button class="btn btn-primary" onclick="saveAppConfig()" style="margin-top:12px"> Sauvegarder</button>
+      <div id="cfg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /app -->
+
+<!-- MODAL MEMBRE -->
+<div class="modal-bg" id="modal-membre">
+<div class="modal">
+  <h2 id="mm-title">Ajouter un membre</h2>
+  <p style="font-size:12px;color:#aaa;margin-bottom:14px">* Champs obligatoires</p>
+  <div class="sep">Identité</div>
+  <div class="row2">
+    <div class="field"><label>Pseudo jeu *</label><input id="m-pseudo"></div>
+    <div class="field"><label>Pseudo forum</label><input id="m-pseudo-forum"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Entreprise</label><input id="m-entreprise"></div>
+    <div class="field"><label>Niveau</label><input id="m-niveau" placeholder="N1, N2, N3..."></div>
+  </div>
+  <div class="sep">Alliance</div>
+  <div class="row2">
+    <div class="field"><label>Forfait</label><select id="m-forfait"><option>Standard</option><option>Ultimate</option></select></div>
+    <div class="field"><label>Statut</label><select id="m-statut"><option>Actif</option><option>Inactif</option><option>Alerte</option></select></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Bus déjà loués</label><input type="number" id="m-bus-loues" min="0" placeholder="0"></div>
+    <div class="field"><label>Référent</label><input id="m-referent"></div>
+  </div>
+  <div class="sep">Finances</div>
+  <div class="row2">
+    <div class="field"><label>Solde bancaire (€)</label><input type="number" id="m-solde"></div>
+    <div class="field"><label>Date d'entrée</label><input type="date" id="m-date"></div>
+  </div>
+  <div class="field"><label>Notes / Projets</label><textarea id="m-notes"></textarea></div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-membre')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveMembre()">Enregistrer</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL FACTURE -->
+<div class="modal-bg" id="modal-facture">
+<div class="modal" style="max-width:640px">
+  <h2 id="d-modal-title">Nouvelle facture de location</h2>
+  <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">* Champs obligatoires</p>
+
+  <div class="sep">Membre</div>
+  <div class="field"><label>Membre *</label><select id="d-membre" onchange="onMembreChange()"></select></div>
+  <div class="row3">
+    <div class="field"><label>Pseudo forum</label><input id="d-pseudo-forum" readonly style="background:#f8f8f5"></div>
+    <div class="field"><label>Niveau</label><input id="d-niveau" readonly style="background:#f8f8f5"></div>
+    <div class="field"><label>Forfait</label><input id="d-forfait-display" readonly style="background:#f8f8f5;color:#0a1f5c;font-weight:700"></div>
+  </div>
+  <div class="field"><label>Bus déjà loués (avant cette facture)</label>
+    <input type="number" id="d-bus-deja" min="0" value="0" oninput="calcAllLines()">
+  </div>
+
+  <div class="sep">Véhicules</div>
+  <div id="lignes-vehicules"></div>
+  <button class="btn" style="width:100%;margin-top:8px;border-style:dashed" onclick="addLigneVehicule()">+ Ajouter un type de véhicule</button>
+
+  <div class="sep">Période</div>
+  <div class="row2">
+    <div class="field"><label>Date de début *</label><input type="date" id="d-date-debut"></div>
+    <div class="field"><label>Date de fin *</label><input type="date" id="d-date-fin"></div>
+  </div>
+  <div class="field"><label>Durée de facturation</label>
+    <select id="d-duree" onchange="calcAllLines();calcDateFinFacture()">
+      <option value="semaine">Par semaine</option>
+      <option value="mois">Par mois</option>
+    </select>
+  </div>
+
+  <div id="fact-recap" style="background:linear-gradient(135deg,rgba(13,31,78,.04),rgba(184,146,42,.06));border-radius:12px;padding:14px 16px;margin:12px 0;border:1px solid rgba(13,31,78,.1);font-size:13px;line-height:2.2;color:var(--navy)"></div>
+
+  <div class="sep">Statut & Notes</div>
+  <div class="field"><label>Statut</label>
+    <select id="d-statut"><option>En attente</option><option>Accepté</option><option>Refusé</option></select>
+  </div>
+  <div class="field"><label>Notes / Conditions</label><textarea id="d-notes"></textarea></div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-facture')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveFacture()">Créer la facture</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL STAFF -->
+<div class="modal-bg" id="modal-staff">
+<div class="modal">
+  <h2 id="ms-title">Ajouter un compte staff</h2>
+  <div class="field"><label>Identifiant *</label><input id="st-user" placeholder="ex: vicepres"></div>
+  <div class="field"><label>Nom affiché *</label><input id="st-nom" placeholder="ex: Vice-Président LG"></div>
+  <div class="field"><label>Mot de passe *</label><input type="password" id="st-pass" placeholder="Minimum 6 caractères"></div>
+  <div class="field"><label>Rôle *</label>
+    <select id="st-role">
+      <option value="vice_president">Vice-Président</option>
+      <option value="gestionnaire_parc">Gestionnaire de parc</option>
+      <option value="comptable">Comptable</option>
+      <option value="staff_tm">Staff TM (lecture seule)</option>
+    </select>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-staff')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveStaff()">Créer le compte</button>
+  </div>
+</div>
+</div>
+
+
+
+<!-- MODAL PROFIL -->
+<div class="modal-bg" id="modal-profil">
+<div class="modal">
+  <h2>Mon profil</h2>
+  <p style="font-size:12px;color:#aaa;margin-bottom:16px">Modifiez vos identifiants de connexion</p>
+
+  <div class="sep">Informations actuelles</div>
+  <div class="field">
+    <label>Rôle</label>
+    <input id="p-role-display" readonly style="background:#f8f8f5;color:#0a1f5c;font-weight:700">
+  </div>
+
+  <div class="sep">Modifier l'identifiant</div>
+  <div class="field">
+    <label>Nouvel identifiant</label>
+    <input id="p-username" placeholder="Laisser vide pour ne pas changer">
+  </div>
+
+  <div class="sep">Modifier le mot de passe</div>
+  <div class="field">
+    <label>Mot de passe actuel *</label>
+    <input type="password" id="p-pass-actuel" placeholder="Requis pour toute modification">
+  </div>
+  <div class="field">
+    <label>Nouveau mot de passe</label>
+    <input type="password" id="p-pass-new" placeholder="Laisser vide pour ne pas changer">
+  </div>
+  <div class="field">
+    <label>Confirmer le nouveau mot de passe</label>
+    <input type="password" id="p-pass-confirm" placeholder="Répétez le nouveau mot de passe">
+  </div>
+
+  <div id="p-err" style="background:#fee2e2;color:#991b1b;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;display:none"></div>
+  <div id="p-ok"  style="background:#dcfce7;color:#166534;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;display:none"></div>
+
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-profil')">Fermer</button>
+    <button class="btn btn-primary" onclick="saveProfil()">Enregistrer</button>
+  </div>
+</div>
+</div>
+
+
+<!-- MODAL AJOUT STAFF -->
+<div class="modal-bg" id="modal-add-staff">
+<div class="modal">
+  <h2>Ajouter un compte staff</h2>
+  <div class="field"><label>Identifiant *</label><input id="s-username" placeholder="identifiant de connexion" style="width:100%"></div>
+  <div class="field"><label>Nom affiché *</label><input id="s-nom" placeholder="Nom affiché dans l'app" style="width:100%"></div>
+  <div class="field"><label>Mot de passe *</label><input type="password" id="s-password" placeholder="Minimum 6 caractères" style="width:100%"></div>
+  <div class="field"><label>Rôle *</label>
+    <select id="s-role" style="width:100%">
+      <option id="opt-president" style="display:none" value="president">Président</option>
+      <option value="vice_president">Vice-Président</option>
+      <option value="gestionnaire_parc">Gestionnaire de parc</option>
+      <option value="comptable">Comptable</option>
+      <option value="staff_tm">Staff TM (lecture seule)</option>
+    </select>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-add-staff')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveNewStaff()">Créer le compte</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL OBJECTIF -->
+<div class="modal-bg" id="modal-objectif">
+<div class="modal">
+  <h2 id="obj-modal-title">Ajouter un objectif</h2>
+  <div class="field"><label>Titre de l'objectif *</label>
+    <input id="obj-titre" placeholder="ex: Atteindre 10 membres actifs">
+  </div>
+  <div class="field"><label>Description / détails</label>
+    <textarea id="obj-desc" placeholder="Décrivez l'objectif en détail..."></textarea>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Catégorie</label>
+      <select id="obj-categorie">
+        <option value="membres">Membres</option>
+        <option value="location">Location</option>
+        <option value="exploitation">Exploitation</option>
+        <option value="finances">Finances</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="field"><label>Priorité</label>
+      <select id="obj-priorite">
+        <option value="normale">Normale</option>
+        <option value="haute">Haute</option>
+        <option value="critique">Critique</option>
+      </select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-objectif')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveObjectif()">Enregistrer</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL EDIT HISTORIQUE -->
+<div class="modal-bg" id="modal-edit-hist">
+<div class="modal">
+  <h2>Modifier l'entrée d'historique</h2>
+  <div class="field"><label>Note / commentaire</label>
+    <textarea id="hist-edit-note" style="min-height:80px" placeholder="Ajoutez un commentaire..."></textarea>
+  </div>
+  <input type="hidden" id="hist-edit-id">
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-edit-hist')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveHistNote()">Enregistrer</button>
+  </div>
+</div>
+</div>
+
+
+<!-- MODAL FICHE MEMBRE (lecture seule) -->
+<!-- MODAL INTÉRIMAIRES -->
+<div class="modal-bg" id="modal-interim">
+<div class="modal">
+  <h2 id="i-modal-title">Nouvelle demande d'intérimaires</h2>
+  <p style="font-size:12px;color:#aaa;margin-bottom:14px">* Champs obligatoires</p>
+
+  <div class="sep">Membre</div>
+  <div class="field"><label>Membre *</label><select id="i-membre" onchange="onInterimMembreChange()"></select></div>
+  <div class="row2">
+    <div class="field"><label>Pseudo forum</label><input id="i-pseudo-forum" readonly style="background:#f8f8f5"></div>
+    <div class="field"><label>Forfait</label><input id="i-forfait-display" readonly style="background:#f8f8f5;color:#0a1f5c;font-weight:700"></div>
+  </div>
+
+  <div class="sep">Type d'intérimaires</div>
+  <div class="field"><label>Pôle *</label>
+    <select id="i-pole" onchange="calcInterim();calcDateFinInterim()">
+      <option value="conduite">Pôle Conduite — Conducteurs</option>
+      <option value="maintenance">Pôle Maintenance — Mécaniciens</option>
+    </select>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Nombre de personnes *</label><input type="number" id="i-nb" value="1" min="1" oninput="calcInterim()"></div>
+    <div class="field"><label>Durée (Conduite uniquement)</label>
+      <select id="i-duree" onchange="calcInterim()">
+        <option value="semaine">Par semaine</option>
+      </select>
+    </div>
+  </div>
+  <div class="field" id="i-nb-unites-wrap"><label>Nb de semaines (Conduite uniquement)</label>
+    <input type="number" id="i-nb-unites" oninput="calcInterim();calcDateFinInterim()" value="1" min="1" oninput="calcInterim()" placeholder="ex: 2">
+  </div>
+
+  <div class="sep">Période</div>
+  <div class="row2">
+    <div class="field"><label>Date de début *</label><input type="date" id="i-date-debut"></div>
+    <div class="field"><label>Date de fin *</label><input type="date" id="i-date-fin"></div>
+  </div>
+
+  <div class="tarif-box" id="i-tarif-box">
+    <div>Pôle : <strong id="i-pole-label">—</strong></div>
+    <div>Tarif unitaire : <strong id="i-pu">—</strong></div>
+    <div>Quantité : <span id="i-nb-label">—</span> personne(s)</div>
+    <div style="margin-top:4px;font-size:15px">Total : <strong id="i-total-calc">—</strong></div>
+    <div id="i-prioritaire-label" style="margin-top:4px;font-size:12px;color:#166534;font-weight:700;display:none">
+      ★ Client prioritaire — Prise en charge garantie sous 72h
+    </div>
+  </div>
+
+  <div class="sep">Statut & Notes</div>
+  <div class="field"><label>Statut</label>
+    <select id="i-statut"><option>En attente</option><option>Accepté</option><option>Refusé</option></select>
+  </div>
+  <div class="field"><label>Notes / Détails de la mission</label>
+    <textarea id="i-notes" placeholder="Lignes concernées, type d'options à poser..."></textarea>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-interim')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveInterim()">Créer la demande</button>
+  </div>
+</div>
 </div>
 
 <!-- TOAST -->
@@ -814,8 +1094,6 @@ let currentUser = null;
 let membres = [], factures = [], staff = [], interimaires = [];
 let editMId = null;
 let poleData = [];
-let salSelectMode=false, poleSelectMode=false;
-let salSelected=new Set(), poleSelected=new Set();
 
 
 // ============================================================
@@ -911,12 +1189,7 @@ async function startApp(){
   document.getElementById('nav-objectifs').style.display=perms.objectifs?'':'none';
   document.getElementById('nav-historique').style.display=perms.historique?'':'none';
   document.getElementById('nav-rgpd').style.display='';
-  // Nav historique masqué pour GDP
-  if(currentUser.role==='gestionnaire_parc'){
-    const nh=document.getElementById('nav-historique');
-    if(nh) nh.style.display='none';
-  }
-  if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)) document.getElementById('nav-tm').style.display='';
+  if(currentUser.role==='gestionnaire_parc'){const nh=document.getElementById('nav-historique');if(nh)nh.style.display='none';}
   // Afficher config GForms pour les présidents
   const cfgCard = document.getElementById('card-config');
   if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
@@ -933,7 +1206,8 @@ async function startApp(){
     showPage('membres',document.getElementById('nav-membres'));
   }
   await loadAppConfig();
-  await Promise.all([loadAppConfig(), loadTarifs()]);
+  await loadAppConfig();
+  await Promise.all([loadAppConfig(),loadTarifs()]);
   await Promise.all([loadMembres(),loadFactures(),loadInterimaires(),loadStaff(),loadStatutsAndNotes()]);
   await loadHistorique();
 }
@@ -961,57 +1235,10 @@ function showPage(id,btn){
 async function loadMembres(){
   const{data}=await sb.from('membres').select('*').order('id',{ascending:false});
   membres=data||[]; renderMembres();
-  // Auto-sync TM si clé configurée (silencieux)
   if(getTMKey()) syncTMMembresAuto();
 }
 
-async function syncTMMembresAuto() {
-  try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance?limit=1000', {
-      headers: { 'Authorization': 'Bearer ' + getTMKey(), 'Accept': 'application/json' }
-    });
-    if (!res.ok) return;
-    const raw = await res.json();
-    const tm_membres = Array.isArray(raw) ? raw : (raw.data || raw.membres || raw.membres_alliance || []);
-    if (!tm_membres.length) return;
-    const changements = [];
-    for (const tm of tm_membres) {
-      const pseudo = tm.pseudo || tm.username || tm.name || '';
-      if (!pseudo) continue;
-      const existing = membres.find(m => (m.pseudo||'').toLowerCase() === pseudo.toLowerCase());
-      if (!existing) continue;
-      const upd = {};
-      const nouvelleEntreprise = tm.entreprise || tm.company || tm.nom_entreprise || '';
-      const nouveauNiveau      = tm.niveau     || tm.level  || '';
-      if (nouvelleEntreprise && nouvelleEntreprise !== existing.entreprise) upd.entreprise = nouvelleEntreprise;
-      if (nouveauNiveau      && String(nouveauNiveau) !== String(existing.niveau)) upd.niveau = String(nouveauNiveau);
-      if (!Object.keys(upd).length) continue;
-      // Préparer notification changement
-      const msgs = [];
-      if (upd.entreprise) msgs.push('entreprise : "' + existing.entreprise + '" → "' + upd.entreprise + '"');
-      if (upd.niveau)     msgs.push('niveau : ' + existing.niveau + ' → ' + upd.niveau);
-      changements.push({ pseudo, msgs });
-      await sb.from('membres').update(upd).eq('id', existing.id);
-      const idx = membres.findIndex(m => m.id === existing.id);
-      if (idx !== -1) membres[idx] = { ...membres[idx], ...upd };
-    }
-    renderMembres();
-    // Afficher les changements détectés
-    if (changements.length) {
-      const msg = changements.map(c => '• ' + c.pseudo + ' : ' + c.msgs.join(', ')).join('\n');
-      setTimeout(() => {
-        if (confirm('' + changements.length + ' changement(s) détecté(s) depuis TM :\n\n' + msg + '\n\nVoir les membres mis à jour ?')) {
-          showPage('membres', document.getElementById('nav-membres'));
-        }
-      }, 1000);
-    }
-  } catch(e) {
-    console.warn('Sync TM silencieux échoué:', e.message);
-  }
-}
-
 function renderMembres(){
-  if (!currentUser) return;
   const q=(document.getElementById('search').value||'').toLowerCase();
   const ff=document.getElementById('f-forfait').value;
   const fs=document.getElementById('f-statut').value;
@@ -1053,9 +1280,10 @@ function renderMembres(){
       </td>
     </tr>`;
   }).join('');
-  // Config GForms visible uniquement depuis Accès Staff
+  // Config GForms
   const cfgCard = document.getElementById('card-config');
   if (cfgCard && currentUser) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
+  loadTarifsUI();
 }
 
 function openAddMembre(){
@@ -1128,7 +1356,7 @@ async function saveMembre(){
   const action=wasAdd?'membre_ajout':'membre_modif';
   const desc=wasAdd?`Ajout du membre ${data.pseudo}`:`Modification de ${data.pseudo}`;
   await logAction(action,data.pseudo,desc);
-  toast('Membre enregistré');
+  toast('Membre enregistré ✓');
   closeModal('modal-membre');
   await loadMembres();
 
@@ -1166,7 +1394,7 @@ const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAH0CAYAAADL1t+K
 // ============================================================
 
 
-const TARIFS_INIT = {
+const TARIFS_BUS = {
   minibus:  { semaine:900,  mois:3000 },
   midibus:  { semaine:1200, mois:4000 },
   standard: { semaine:1500, mois:5000 },
@@ -1234,7 +1462,7 @@ function renderLignes() {
     <div style="background:var(--off-white);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--border-light)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-weight:700;font-size:13px;color:var(--navy)">Ligne véhicule</span>
-        ${lignesVehicules.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="removeLigne(${l.id})">× Supprimer</button>` : ''}
+        ${lignesVehicules.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="removeLigne(${l.id})">✕ Supprimer</button>` : ''}
       </div>
       <div class="row2">
         <div class="field"><label>Type *</label>
@@ -1284,7 +1512,7 @@ function calcAllLines() {
   let payants   = totalVeh - gratuits;
 
   // Répartir les gratuits sur les lignes (du moins cher au plus cher)
-  const sorted  = [...lignesVehicules].sort((a,b) => (TARIFS[a.type]?.semaine||0) - (TARIFS[b.type]?.semaine||0));
+  const sorted  = [...lignesVehicules].sort((a,b) => (TARIFS_BUS[a.type]?.semaine||0) - (TARIFS_BUS[b.type]?.semaine||0));
   const gratuitsParLigne = {};
   let restGratuits = gratuits;
   for (const l of sorted) {
@@ -1298,7 +1526,7 @@ function calcAllLines() {
   let recap = '';
 
   for (const l of lignesVehicules) {
-    const pu      = TARIFS[l.type]?.[duree] || 0;
+    const pu      = TARIFS_BUS[l.type]?.[duree] || 0;
     const nb      = l.nb || 1;
     const nbu     = l.nbUnites || 1;
     const g       = gratuitsParLigne[l.id] || 0;
@@ -1318,7 +1546,7 @@ function calcAllLines() {
   </div>`;
 
   if (isUlt && busDejaLoues < ULTIMATE_GRATUIT) {
-    recap += `<div style="font-size:11px;color:var(--success);margin-top:6px"><i class="fa-solid fa-star"></i> Forfait Ultimate — ${gratuits} véhicule(s) gratuit(s) sur ${ULTIMATE_GRATUIT - busDejaLoues} restants</div>`;
+    recap += `<div style="font-size:11px;color:var(--success);margin-top:6px">★ Forfait Ultimate — ${gratuits} véhicule(s) gratuit(s) sur ${ULTIMATE_GRATUIT - busDejaLoues} restants</div>`;
   }
 
   const recapEl = document.getElementById('fact-recap');
@@ -1375,14 +1603,14 @@ async function saveFacture() {
   let gratuits   = isUlt ? Math.max(0, Math.min(ULTIMATE_GRATUIT - busDejaLoues, totalVeh)) : 0;
 
   // Répartir gratuits
-  const sorted = [...lignesVehicules].sort((a,b) => (TARIFS[a.type]?.semaine||0)-(TARIFS[b.type]?.semaine||0));
+  const sorted = [...lignesVehicules].sort((a,b) => (TARIFS_BUS[a.type]?.semaine||0)-(TARIFS_BUS[b.type]?.semaine||0));
   const gratuitsParLigne = {};
   let restG = gratuits;
   for (const l of sorted) { const g=Math.min(restG,l.nb||1); gratuitsParLigne[l.id]=g; restG-=g; }
 
   let total = 0;
   const lignesSave = lignesVehicules.map(l => {
-    const pu = TARIFS[l.type]?.[duree]||0;
+    const pu = TARIFS_BUS[l.type]?.[duree]||0;
     const nb = l.nb||1; const nbu = l.nbUnites||1;
     const g  = gratuitsParLigne[l.id]||0;
     const st = pu*(nb-g)*nbu;
@@ -1411,7 +1639,7 @@ async function saveFacture() {
     const {error:errF} = await sb.from('factures').update(rec).eq('id', editFactureId);
     if (errF) { alert('Erreur modification : ' + errF.message); return; }
     await logAction('facture', m.pseudo, `Facture #${String(editFactureId).padStart(3,'0')} modifiée — ${fe(total)}`);
-    toast('Facture modifiée');
+    toast('Facture modifiée ✓');
     editFactureId = null;
   } else {
     const {error:errF} = await sb.from('factures').insert(rec);
@@ -1421,7 +1649,7 @@ async function saveFacture() {
     const mIdx = membres.findIndex(x=>x.id===mid);
     if (mIdx !== -1) membres[mIdx].bus_loues = newBusLoues;
     await logAction('facture', m.pseudo, `Facture créée : ${totalVeh} véh. (${lignesSave.map(l=>l.type+' ×'+l.nb).join(', ')}) — ${fe(total)}`);
-    toast('Facture créée');
+    toast('Facture créée ✓');
   }
   closeModal('modal-facture');
   await loadFactures();
@@ -1482,8 +1710,8 @@ function renderFactures(){
           <option ${d.statut==='Livré'?'selected':''}>Livré</option>
           <option ${d.statut==='Refusé'?'selected':''}>Refusé</option>
         </select>
-        <button class="btn btn-sm" onclick="openEditFacture(${d.id})">Modifier</button>`:''}
-        <button class="btn btn-sm btn-export" onclick="exportJpeg(${d.id})">JPEG</button>
+        <button class="btn btn-sm" onclick="openEditFacture(${d.id})">✏ Modifier</button>`:''}
+        <button class="btn btn-sm btn-export" onclick="exportJpeg(${d.id})">⬇ JPEG</button>
         ${canDelete&&!isReadOnly()?`<button class="btn btn-sm btn-danger" onclick="deleteFacture(${d.id})">Suppr.</button>`:''}
       </div>
     </div>`;
@@ -1635,6 +1863,7 @@ async function saveInterim(){
     nb_personnes:nb,
     nb_unites:nbu,
     duree_key:durKey,
+    duree_label:durLabel,
     prix_unitaire:pu,
     total,
     gratuit,
@@ -1652,13 +1881,13 @@ async function saveInterim(){
     const {error:errI} = await sb.from('interimaires').update(rec).eq('id', editInterimId);
     if(errI){ alert('Erreur modification : ' + errI.message); return; }
     await logAction('interim',m.pseudo,`Demande #${String(editInterimId).padStart(3,'0')} modifiée`);
-    toast('Demande modifiée');
+    toast('Demande modifiée ✓');
     editInterimId = null;
   } else {
     const {error:errI} = await sb.from('interimaires').insert(rec);
     if(errI){ alert('Erreur création : ' + errI.message); return; }
     await logAction('interim',m.pseudo,`Demande d'intérimaires : ${nb} personne(s) ${pole==='conduite'?'(conducteurs)':'(mécaniciens)'} — ${fe(total)}`);
-    toast('Demande créée');
+    toast('Demande créée ✓');
   }
   closeModal('modal-interim');
   await loadInterimaires();
@@ -1685,7 +1914,7 @@ function renderInterimaires() {
       <div style="margin-top:4px">
         <span class="badge ${sb2}">${d.statut}</span>
         ${d.gratuit?'<span class="badge b-ultimate" style="margin-left:6px">Gratuit Ultimate</span>':''}
-        ${d.prioritaire?'<span class="badge b-actif" style="margin-left:6px"><i class="fa-solid fa-star"></i> Prioritaire 72h</span>':''}
+        ${d.prioritaire?'<span class="badge b-actif" style="margin-left:6px">★ Prioritaire 72h</span>':''}
       </div>
       <div class="fact-meta">Créée le ${fd(d.date_creation)}${d.date_traitement?' · Traitée le '+fd(d.date_traitement):''}</div>
       <div class="fact-body">
@@ -1701,8 +1930,8 @@ function renderInterimaires() {
           <option ${d.statut==='Accepté'?'selected':''}>Accepté</option>
           <option ${d.statut==='Refusé'?'selected':''}>Refusé</option>
         </select>
-        <button class="btn btn-sm" onclick="openEditInterim(${d.id})">Modifier</button>
-        <button class="btn btn-sm btn-export" onclick="exportInterimJpeg(${d.id})">JPEG</button>`:''}
+        <button class="btn btn-sm" onclick="openEditInterim(${d.id})">✏ Modifier</button>
+        <button class="btn btn-sm btn-export" onclick="exportInterimJpeg(${d.id})">⬇ JPEG</button>`:''}
         ${canDelete&&!isReadOnly()?`<button class="btn btn-sm btn-danger" onclick="deleteInterim(${d.id})">Suppr.</button>`:''}
       </div>
     </div>`;
@@ -1724,22 +1953,23 @@ function renderStaff(){
       <td>${s.nom_affiche||'—'}</td>
       <td><span class="role-badge role-${s.role}">${r?.label||s.role}</span></td>
       <td><span class="badge ${s.actif?'b-actif':'b-inactif'}">${s.actif?'Actif':'Inactif'}</span></td>
-      <td style="display:flex;gap:6px;align-items:center">
-        ${isSelf
-          ? '<em style="color:#aaa;font-size:12px">Votre compte</em>'
-          : `<button class="btn btn-sm btn-danger" onclick="toggleStaff('${s.id}',${s.actif})">${s.actif?'Désactiver':'Réactiver'}</button>
-             ${currentUser.role==='president' ? `<button class="btn btn-sm btn-danger" onclick="deleteStaff('${s.id}','${s.username}')" title="Supprimer définitivement"><i class="fa-solid fa-trash"></i></button>` : ''}`
-        }
-      </td>
+      <td>${isSelf?'<em style="color:#aaa;font-size:12px">Votre compte</em>':`<button class="btn btn-sm btn-danger" onclick="toggleStaff('${s.id}',${s.actif})">
+        ${s.actif?'Désactiver':'Réactiver'}</button>`}</td>
     </tr>`;
   }).join('');
-  // Afficher tarifs et config pour VP et Président
-  const cfgCard = document.getElementById('card-config');
-  if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
-  loadTarifsUI();
 }
 
-function openAddStaff(){document.getElementById('modal-staff').classList.add('open');}
+function openAddStaff(){
+  const modal=document.getElementById('modal-add-staff');
+  if(!modal){alert('Erreur : modal d’ajout staff introuvable');return;}
+  ['s-username','s-nom','s-password'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  const role=document.getElementById('s-role');
+  if(role) role.value='vice_president';
+  modal.classList.add('open');
+}
 
 async function saveStaff(){
   const user=document.getElementById('st-user').value.trim();
@@ -1750,7 +1980,7 @@ async function saveStaff(){
   if(pass.length<6){alert('Mot de passe : minimum 6 caractères.');return;}
   const{error}=await sb.from('staff').insert({username:user,password_hash:pass,role,nom_affiche:nom,actif:true});
   if(error){alert('Erreur : '+error.message);return;}
-  toast('Compte créé');
+  toast('Compte créé ✓');
   closeModal('modal-staff');
   await loadStaff();
   renderStaff();
@@ -1809,7 +2039,7 @@ function exportInterimJpeg(id){
   const pole=d.pole==='conduite'?'Pôle Conduite — Conducteurs':'Pôle Maintenance — Mécaniciens';
   const badge=d.forfait==='Ultimate'?'<span class="pdf-badge ult">Ultimate</span>':'<span class="pdf-badge std">Standard</span>';
 
-  const content=`<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">${pole}</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de mission</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de mission</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div></div><div class="pdf-stitle">Détail de la mission</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Type de personnel</div><div class="pdf-field-val">${pole}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Nombre de personnes</div><div class="pdf-field-val">${d.nb_personnes} personne(s)</div></div><div class="pdf-field"><div class="pdf-field-lbl">Durée</div><div class="pdf-field-val">${d.nb_unites||1} ${d.duree_key==='semaine'?'semaine(s)':'jour(s)'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Période</div><div class="pdf-field-val">${fd(d.date_debut)} → ${fd(d.date_fin)}</div></div>${d.prioritaire?'<div class="pdf-field"><div class="pdf-field-lbl">Priorité</div><div class="pdf-field-val" style="color:#166534"><i class="fa-solid fa-bolt"></i> Prise en charge sous 72h</div></div>':''}</div><div class="pdf-stitle">Tarification</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>Sous-total</th></tr></thead><tbody><tr class="${d.gratuit?'hl':''}"><td>${pole}</td><td>${d.gratuit?'Gratuit':fe(d.prix_unitaire)}</td><td>${d.nb_personnes} × ${d.nb_unites||1} ${d.duree_key==='semaine'?'sem.':'j.'}</td><td><strong>${d.gratuit?'Gratuit':fe(d.total)}</strong></td></tr></tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">${pole}</div>${d.gratuit?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit?'0 €':fe(d.total)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span></div></div>`;
+  const content=`<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Demande #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">${pole}</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de mission</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de mission</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div></div><div class="pdf-stitle">Détail de la mission</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Type de personnel</div><div class="pdf-field-val">${pole}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Nombre de personnes</div><div class="pdf-field-val">${d.nb_personnes} personne(s)</div></div><div class="pdf-field"><div class="pdf-field-lbl">Durée</div><div class="pdf-field-val">${d.nb_unites||1} ${d.duree_key==='semaine'?'semaine(s)':'jour(s)'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Période</div><div class="pdf-field-val">${fd(d.date_debut)} → ${fd(d.date_fin)}</div></div>${d.prioritaire?'<div class="pdf-field"><div class="pdf-field-lbl">Priorité</div><div class="pdf-field-val" style="color:#166534">★ Prise en charge sous 72h</div></div>':''}</div><div class="pdf-stitle">Tarification</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>Sous-total</th></tr></thead><tbody><tr class="${d.gratuit?'hl':''}"><td>${pole}</td><td>${d.gratuit?'Gratuit':fe(d.prix_unitaire)}</td><td>${d.nb_personnes} × ${d.nb_unites||1} ${d.duree_key==='semaine'?'sem.':'j.'}</td><td><strong>${d.gratuit?'Gratuit':fe(d.total)}</strong></td></tr></tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">${pole}</div>${d.gratuit?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit?'0 €':fe(d.total)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Demande #${String(d.id).padStart(3,'0')}</span></div></div>`;
 
   const tmp=document.createElement('div');
   tmp.style.cssText='position:fixed;top:0;left:0;z-index:-9999;background:#fff;padding:0;margin:0;';
@@ -1953,7 +2183,7 @@ function renderSAL(rows){
         ${isReadOnly()?`<div style="padding:8px 10px;background:var(--off-white);border-radius:7px;font-size:13px;min-height:40px">${salNotes[key]||'<em style="color:#ccc">Aucune note</em>'}</div>`:`<textarea id="note-sal-${safeKey}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px" placeholder="Ajouter une note..." onblur="saveNote('sal','${key}')">${salNotes[key]||''}</textarea><div style="font-size:11px;color:var(--text-muted);margin-top:3px">Sauvegarde automatique au clic en dehors</div>`}
       </div>
       <div class="fact-actions">
-        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('sal','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='Traité'?'selected':''}>Traité</option><option ${statut==='En cours'?'selected':''}>En cours</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('sal','${key}')"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder note</button>`:''}
+        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('sal','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='Traité'?'selected':''}>Traité</option><option ${statut==='En cours'?'selected':''}>En cours</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('sal','${key}')">💾 Sauvegarder note</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -2023,7 +2253,7 @@ function filterPole(){
         ${isReadOnly()?`<div style="padding:8px 10px;background:var(--off-white);border-radius:7px;font-size:13px;min-height:40px">${poleNotes[key]||'<em style="color:#ccc">Aucune note</em>'}</div>`:`<textarea id="note-pole-${safeKey}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px" placeholder="Ajouter une note..." onblur="saveNote('pole','${key}')">${poleNotes[key]||''}</textarea><div style="font-size:11px;color:var(--text-muted);margin-top:3px">Sauvegarde automatique au clic en dehors</div>`}
       </div>
       <div class="fact-actions">
-        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('pole','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='En cours'?'selected':''}>En cours</option><option ${statut==='Traité'?'selected':''}>Traité</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('pole','${key}')"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder note</button>`:''}
+        ${!isReadOnly()?`<select class="btn btn-sm" onchange="setStatut('pole','${key}',this.value)" onclick="event.stopPropagation()"><option ${statut==='En attente'?'selected':''}>En attente</option><option ${statut==='En cours'?'selected':''}>En cours</option><option ${statut==='Traité'?'selected':''}>Traité</option></select><button class="btn btn-sm btn-export" onclick="event.stopPropagation();saveNote('pole','${key}')">💾 Sauvegarder note</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -2118,7 +2348,7 @@ function showError(msg, details='', level='error') {
   if (!bar) return;
 
   const id = 'err-' + (++errCounter);
-  const icon = level==='error' ? '<i class="fa-solid fa-circle" style="color:#991b1b"></i>' : level==='warn' ? '<i class="fa-solid fa-circle" style="color:#f59e0b"></i>' : '<i class="fa-solid fa-circle-info" style="color:#185FA5"></i>';
+  const icon = level==='error' ? '🔴' : level==='warn' ? '🟡' : 'ℹ️';
   const title = level==='error' ? 'Erreur' : level==='warn' ? 'Avertissement' : 'Info';
 
   const div = document.createElement('div');
@@ -2130,7 +2360,7 @@ function showError(msg, details='', level='error') {
       <div class="err-toast-title">${title}</div>
       <div class="err-toast-msg">${msg}${details?'<br><code style="font-size:11px;color:#888">'+details+'</code>':''}</div>
     </div>
-    <button class="err-toast-close" onclick="document.getElementById('${id}').remove()">×</button>
+    <button class="err-toast-close" onclick="document.getElementById('${id}').remove()">✕</button>
   `;
   bar.appendChild(div);
 
@@ -2169,6 +2399,46 @@ async function sbSafe(fn, context='') {
 // ============================================================
 // CONFIG GFORMS — URLs stockées dans Supabase
 // ============================================================
+let objectifEditId = null;
+
+function openAddObjectif(){
+  objectifEditId=null;
+  const modal=document.getElementById('modal-objectif');
+  const title=document.getElementById('obj-modal-title');
+  if(!modal||!title){alert('Erreur : modal objectif introuvable');return;}
+  title.textContent='Ajouter un objectif';
+  ['obj-titre','obj-desc'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  const categorie=document.getElementById('obj-categorie');
+  const priorite=document.getElementById('obj-priorite');
+  if(categorie) categorie.value='membres';
+  if(priorite) priorite.value='normale';
+  modal.classList.add('open');
+}
+
+async function saveObjectif(){
+  const titreEl=document.getElementById('obj-titre');
+  const descEl=document.getElementById('obj-desc');
+  const categorieEl=document.getElementById('obj-categorie');
+  const prioriteEl=document.getElementById('obj-priorite');
+  if(!titreEl||!descEl||!categorieEl||!prioriteEl){alert('Erreur : champs objectif introuvables');return;}
+  const titre=titreEl.value.trim();
+  if(!titre){alert("Le titre de l'objectif est obligatoire.");return;}
+  const {error}=await sb.from('objectifs').insert({
+    titre,
+    description:descEl.value.trim(),
+    categorie:categorieEl.value,
+    priorite:prioriteEl.value,
+    statut:'En cours',
+    progression:0
+  });
+  if(error){alert('Erreur : '+error.message);return;}
+  closeModal('modal-objectif');
+  toast('Objectif ajouté ✓');
+}
+
 async function loadAppConfig() {
   try {
     const { data } = await sb.from('app_config').select('*');
@@ -2323,1006 +2593,343 @@ function calcDateFinInterim() {
 
 
 // ============================================================
-// HISTORIQUE — logAction
-// ============================================================
-async function logAction(type, membrePseudo, description) {
-  try {
-    await sb.from('historique').insert({
-      type,
-      membre_pseudo: membrePseudo || '',
-      description,
-      staff_nom: currentUser.nom_affiche || currentUser.username,
-      note: ''
-    });
-  } catch(e) {
-    console.warn('logAction error:', e.message);
-  }
-}
-
-
-// ============================================================
-// STATUTS ET NOTES FORMULAIRES
-// ============================================================
-async function loadStatutsAndNotes() {
-  try {
-    const { data } = await sb.from('form_statuts').select('*');
-    if (data) {
-      salStatuts = {}; poleStatuts = {}; salNotes = {}; poleNotes = {};
-      data.forEach(r => {
-        if (r.form_type === 'sal') {
-          salStatuts[r.row_key] = r.statut;
-          salNotes[r.row_key]   = r.notes || '';
-        } else if (r.form_type === 'pole') {
-          poleStatuts[r.row_key] = r.statut;
-          poleNotes[r.row_key]   = r.notes || '';
-        }
-      });
-    }
-  } catch(e) { console.warn('loadStatutsAndNotes:', e.message); }
-}
-
-async function setStatut(formType, key, val) {
-  const upd = { form_type: formType, row_key: key, statut: val, updated_at: new Date().toISOString() };
-  await sb.from('form_statuts').upsert(upd, { onConflict: 'form_type,row_key' });
-  if (formType === 'sal') { salStatuts[key] = val; renderSAL(window._salRows || []); }
-  else { poleStatuts[key] = val; filterPole(); }
-}
-
-async function saveNote(formType, key) {
-  const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
-  const el = document.getElementById('note-' + formType + '-' + safeKey);
-  const note = el ? el.value : '';
-  if (formType === 'sal') salNotes[key] = note;
-  else poleNotes[key] = note;
-  await sb.from('form_statuts').upsert(
-    { form_type: formType, row_key: key, statut: (formType === 'sal' ? salStatuts[key] : poleStatuts[key]) || 'En attente', notes: note, updated_at: new Date().toISOString() },
-    { onConflict: 'form_type,row_key' }
-  );
-  toast('Note sauvegardée');
-}
-
-// ============================================================
-// BADGE DEMANDES EN COURS
-// ============================================================
-function membreHasPendingRequest(pseudo) {
-  if (!pseudo) return false;
-  const lp = pseudo.toLowerCase();
-  const salP = (window._salRows || []).some(r => (r['Pseudo jeu'] || '').toLowerCase() === lp && (salStatuts[r['Timestamp']] || 'En attente') === 'En attente');
-  const poleP = poleData.some(r => (r['Pseudo jeu'] || '').toLowerCase() === lp && (poleStatuts[r['Timestamp']] || 'En attente') === 'En attente');
-  return salP || poleP;
-}
-
-function getPendingTypes(pseudo) {
-  if (!pseudo) return [];
-  const lp = pseudo.toLowerCase();
-  const types = [];
-  if ((window._salRows || []).some(r => (r['Pseudo jeu'] || '').toLowerCase() === lp && (salStatuts[r['Timestamp']] || 'En attente') === 'En attente')) types.push('sal');
-  if (poleData.some(r => (r['Pseudo jeu'] || '').toLowerCase() === lp && (poleStatuts[r['Timestamp']] || 'En attente') === 'En attente')) types.push('pole');
-  return types;
-}
-
-function goToPendingRequest(pseudo, event) {
-  event.stopPropagation();
-  const types = getPendingTypes(pseudo);
-  if (!types.length) return;
-  const target = types.includes('sal') ? 'sal' : 'pole';
-  const navBtn = document.getElementById('nav-' + target);
-  if (navBtn) {
-    showPage(target, navBtn);
-    setTimeout(() => {
-      const cards = document.querySelectorAll('#liste-' + target + ' .fact-card');
-      for (const card of cards) {
-        if (card.textContent.toLowerCase().includes(pseudo.toLowerCase())) {
-          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          card.style.outline = '2px solid #0a1f5c';
-          setTimeout(() => card.style.outline = '', 2000);
-          break;
-        }
-      }
-    }, 800);
-  }
-}
-
-// ============================================================
-// OBJECTIFS
-// ============================================================
-let objectifs = [];
-let objCurrentYear  = new Date().getFullYear();
-let objCurrentMonth = new Date().getMonth() + 1;
-let editObjId = null;
-
-const MOIS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const CAT_COLORS = { membres:'#dbeafe', location:'#d1fae5', exploitation:'#fef3c7', finances:'#ede9fe', autre:'#f1f0ea' };
-const CAT_TEXT   = { membres:'#1e40af', location:'#065f46', exploitation:'#92400e', finances:'#4c1d95', autre:'#555' };
-const PRIO_COLORS = { normale:'#f1f0ea', haute:'#fef3c7', critique:'#fee2e2' };
-const PRIO_TEXT   = { normale:'#555', haute:'#92400e', critique:'#991b1b' };
-
-function changeMonth(delta) {
-  objCurrentMonth += delta;
-  if (objCurrentMonth > 12) { objCurrentMonth = 1; objCurrentYear++; }
-  if (objCurrentMonth < 1)  { objCurrentMonth = 12; objCurrentYear--; }
-  loadObjectifs();
-}
-
-function objMonthKey() { return objCurrentYear + '-' + String(objCurrentMonth).padStart(2,'0'); }
-
-async function loadObjectifs() {
-  document.getElementById('obj-month-label').textContent = MOIS_FR[objCurrentMonth-1] + ' ' + objCurrentYear;
-  const { data } = await sb.from('objectifs').select('*').eq('mois', objMonthKey()).order('created_at');
-  objectifs = data || [];
-  renderObjectifs();
-}
-
-function renderObjectifs() {
-  const total = objectifs.length;
-  const atteints = objectifs.filter(o => o.atteint).length;
-  const pct = total ? Math.round(atteints/total*100) : 0;
-  document.getElementById('obj-total').textContent    = total;
-  document.getElementById('obj-atteints').textContent = atteints;
-  document.getElementById('obj-encours').textContent  = total - atteints;
-  document.getElementById('obj-pct').textContent      = pct + '%';
-  const canEdit = ['president','vice_president'].includes(currentUser.role) && !isReadOnly();
-  const cont = document.getElementById('liste-objectifs');
-  if (!objectifs.length) { cont.innerHTML = '<div class="empty">' + (canEdit ? 'Aucun objectif. Cliquez sur "+ Ajouter".' : 'Aucun objectif ce mois.') + '</div>'; return; }
-  cont.innerHTML = objectifs.map(o => {
-    const catBg = CAT_COLORS[o.categorie] || '#f1f0ea';
-    const catCl = CAT_TEXT[o.categorie]   || '#555';
-    const prioBg = PRIO_COLORS[o.priorite] || '#f1f0ea';
-    const prioCl = PRIO_TEXT[o.priorite]   || '#555';
-    return `<div class="fact-card" style="border-left:4px solid ${o.atteint?'#3B6D11':'#d8d8d8'}">
-      <div style="display:flex;align-items:flex-start;gap:12px">
-        ${canEdit ? `<div onclick="toggleObjectif(${o.id},${o.atteint})" style="width:24px;height:24px;border-radius:6px;border:2px solid ${o.atteint?'#3B6D11':'#d8d8d8'};background:${o.atteint?'#3B6D11':'#fff'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px">${o.atteint?'<span style="color:#fff;font-weight:700">✓</span>':''}</div>` : `<div style="width:24px;height:24px;border-radius:6px;border:2px solid ${o.atteint?'#3B6D11':'#d8d8d8'};background:${o.atteint?'#3B6D11':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">${o.atteint?'<span style="color:#fff;font-weight:700">✓</span>':''}</div>`}
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-            <span style="font-weight:700;font-size:15px;color:#0a1f5c;${o.atteint?'text-decoration:line-through;color:#888':''}">${o.titre}</span>
-            <span class="badge" style="background:${catBg};color:${catCl}">${o.categorie}</span>
-            ${o.priorite !== 'normale' ? `<span class="badge" style="background:${prioBg};color:${prioCl}">${o.priorite}</span>` : ''}
-            ${o.atteint ? '<span class="badge b-actif">Atteint ✓</span>' : ''}
-          </div>
-          ${o.description ? `<div style="font-size:13px;color:#666;line-height:1.5">${o.description}</div>` : ''}
-          ${o.atteint && o.date_atteint ? `<div style="font-size:11px;color:#888;margin-top:4px">Atteint le ${fd(o.date_atteint)}</div>` : ''}
-        </div>
-        ${canEdit ? `<div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-sm" onclick="openEditObjectif(${o.id})">Modifier</button><button class="btn btn-sm btn-danger" onclick="deleteObjectif(${o.id})">×</button></div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openAddObjectif() {
-  editObjId = null;
-  document.getElementById('obj-modal-title').textContent = 'Ajouter un objectif';
-  document.getElementById('obj-titre').value = '';
-  document.getElementById('obj-desc').value = '';
-  document.getElementById('obj-categorie').value = 'membres';
-  document.getElementById('obj-priorite').value = 'normale';
-  document.getElementById('modal-objectif').classList.add('open');
-}
-
-function openEditObjectif(id) {
-  const o = objectifs.find(x => x.id === id); if (!o) return;
-  editObjId = id;
-  document.getElementById('obj-modal-title').textContent = "Modifier l'objectif";
-  document.getElementById('obj-titre').value    = o.titre || '';
-  document.getElementById('obj-desc').value     = o.description || '';
-  document.getElementById('obj-categorie').value = o.categorie || 'autre';
-  document.getElementById('obj-priorite').value  = o.priorite || 'normale';
-  document.getElementById('modal-objectif').classList.add('open');
-}
-
-async function saveObjectif() {
-  const titre = document.getElementById('obj-titre').value.trim();
-  if (!titre) { alert('Le titre est obligatoire.'); return; }
-  const data = { titre, description: document.getElementById('obj-desc').value.trim(), categorie: document.getElementById('obj-categorie').value, priorite: document.getElementById('obj-priorite').value, mois: objMonthKey(), atteint: false };
-  if (editObjId) { await sb.from('objectifs').update(data).eq('id', editObjId); }
-  else { await sb.from('objectifs').insert({ ...data, created_by: currentUser.id }); }
-  toast('Objectif enregistré');
-  closeModal('modal-objectif');
-  await loadObjectifs();
-}
-
-async function toggleObjectif(id, current) {
-  const upd = { atteint: !current };
-  if (!current) upd.date_atteint = tod(); else upd.date_atteint = null;
-  await sb.from('objectifs').update(upd).eq('id', id);
-  await loadObjectifs();
-  toast(!current ? 'Objectif atteint !' : 'Objectif remis en cours');
-}
-
-async function deleteObjectif(id) {
-  if (!confirm('Supprimer cet objectif ?')) return;
-  await sb.from('objectifs').delete().eq('id', id);
-  toast('Objectif supprimé');
-  await loadObjectifs();
-}
-
-// ============================================================
-// HISTORIQUE
-// ============================================================
-let historique = [];
-
-async function loadHistorique() {
-  const { data } = await sb.from('historique').select('*').order('created_at', { ascending: false }).limit(200);
-  historique = data || [];
-  renderHistorique();
-}
-
-function renderHistorique() {
-  const q  = (document.getElementById('hist-search').value || '').toLowerCase();
-  const ft = document.getElementById('hist-type').value;
-  const list = historique.filter(h =>
-    (!q || (h.description||'').toLowerCase().includes(q) || (h.membre_pseudo||'').toLowerCase().includes(q)) &&
-    (!ft || h.type === ft)
-  );
-  const cont = document.getElementById('liste-historique');
-  if (!list.length) { cont.innerHTML = '<div class="empty">Aucune action trouvée.</div>'; return; }
-  const typeColors = { membre_ajout:'#d1fae5', membre_modif:'#dbeafe', membre_suppression:'#fee2e2', facture:'#fef3c7', interim:'#ede9fe' };
-  const typeText   = { membre_ajout:'#065f46', membre_modif:'#1e40af', membre_suppression:'#991b1b', facture:'#92400e', interim:'#4c1d95' };
-  const typeLabel  = { membre_ajout:'Ajout membre', membre_modif:'Modification membre', membre_suppression:'Suppression membre', facture:'Facture', interim:'Intérimaires' };
-  cont.innerHTML = list.map(h => {
-    const bg  = typeColors[h.type] || '#f1f0ea';
-    const cl  = typeText[h.type]   || '#555';
-    const lbl = typeLabel[h.type]  || h.type;
-    return `<div class="fact-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div><span class="badge" style="background:${bg};color:${cl}">${lbl}</span>${h.membre_pseudo?`<span style="font-weight:700;color:#0a1f5c;margin-left:8px">${h.membre_pseudo}</span>`:''}</div>
-        <span style="font-size:12px;color:#aaa">${h.created_at ? new Date(h.created_at).toLocaleString('fr-FR') : '—'} · par ${h.staff_nom||'—'}</span>
-      </div>
-      <div style="font-size:13px;color:#555;margin-top:6px;line-height:1.6">${h.description||'—'}</div>
-      ${h.note ? `<div style="background:#f0f7ff;border-left:3px solid #0a1f5c;padding:8px 12px;border-radius:0 6px 6px 0;font-size:13px;color:#0a1f5c;margin-top:8px">${h.note}</div>` : ''}
-      <div class="fact-actions">
-        ${!isReadOnly() ? `<button class="btn btn-sm" onclick="openEditHist(${h.id},'${(h.note||'').replace(/'/g,"\'")}')">Modifier la note</button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openEditHist(id, note) {
-  document.getElementById('hist-edit-id').value   = id;
-  document.getElementById('hist-edit-note').value = note;
-  document.getElementById('modal-edit-hist').classList.add('open');
-}
-
-async function saveHistNote() {
-  const id   = parseInt(document.getElementById('hist-edit-id').value);
-  const note = document.getElementById('hist-edit-note').value.trim();
-  await sb.from('historique').update({ note }).eq('id', id);
-  toast('Note enregistrée');
-  closeModal('modal-edit-hist');
-  await loadHistorique();
-}
-
-
-// ============================================================
-// CSV PARSING & FETCH
-// ============================================================
-function parseCSVLine(line) {
-  if (!line) return [];
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else { cur += c; }
-  }
-  result.push(cur);
-  return result;
-}
-
-function parseCSV(text) {
-  if (!text || typeof text !== 'string') return [];
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  const rawHeaders = parseCSVLine(lines[0]);
-  const headers = rawHeaders.map(h => h != null ? String(h).trim() : '');
-  return lines.slice(1).filter(l => l && l.trim()).map(l => {
-    const vals = parseCSVLine(l);
-    const obj = { _raw: {} };
-    headers.forEach((key, i) => {
-      const raw = vals[i];
-      const val = (raw != null) ? String(raw).trim() : '';
-      obj._raw[i] = { key: key || '', val };
-      if (key) {
-        if (val !== '' && obj[key] === undefined) obj[key] = val;
-        else if (obj[key] === undefined) obj[key] = '';
-      }
-    });
-    return obj;
-  });
-}
-
-function getCol(r) {
-  const names = Array.prototype.slice.call(arguments, 1);
-  for (let ni = 0; ni < names.length; ni++) {
-    const name = names[ni];
-    if (!name) continue;
-    const nameTrim = String(name).trim();
-    if (r && r._raw) {
-      const entries = Object.values(r._raw);
-      for (let i = 0; i < entries.length; i++) {
-        const e = entries[i];
-        if (e && e.key && String(e.key).trim() === nameTrim && e.val) return String(e.val);
-      }
-    }
-    if (r) {
-      const v = r[name];
-      if (v != null && String(v).trim() !== '') return String(v).trim();
-    }
-  }
-  return '';
-}
-
-function getAllCols(r, name) {
-  if (!r || !name) return '';
-  const nameTrim = String(name).trim();
-  const results = [];
-  if (r._raw) {
-    const entries = Object.values(r._raw);
-    for (let i = 0; i < entries.length; i++) {
-      const e = entries[i];
-      if (!e) continue;
-      const k = e.key ? String(e.key).trim() : '';
-      const v = e.val ? String(e.val).trim() : '';
-      if (k === nameTrim && v && !results.includes(v)) results.push(v);
-    }
-    if (results.length) return results.join(' / ');
-  }
-  return '';
-}
-
-async function fetchCSV(url) {
-  if (!url) throw new Error('URL vide — configurez les liens GForms dans Accès Staff');
-  // Essai 1 : proxy GAS
-  try {
-    const res = await fetch(GAS_PROXY + '?url=' + encodeURIComponent(url), { cache: 'no-store' });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 10 && !text.includes('<!DOCTYPE') && !text.includes('<html')) return text;
-    }
-  } catch(e) { console.warn('GAS proxy failed:', e.message); }
-  // Essai 2 : accès direct (fonctionne si le sheet est public)
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 10 && !text.includes('<!DOCTYPE')) return text;
-    }
-  } catch(e) { console.warn('Direct fetch failed:', e.message); }
-  throw new Error('Chargement impossible — vérifiez que le Google Sheet est bien publié en CSV');
-}
-
-
-// ============================================================
-// TARIFS — Chargement et sauvegarde
+// TARIFS
 // ============================================================
 const TARIFS_DEFAULT = {
-  minibus_s:900, minibus_m:3000,
-  midibus_s:1200, midibus_m:4000,
-  standard_s:1500, standard_m:5000,
-  articule_s:1800, articule_m:6000,
-  carle_s:1500, carle_m:5000,
-  ultimate_gratuit:25,
-  cond_std_s:800, cond_ult_s:500,
-  meca_std_j:150, meca_ult_j:75,
-  interim_gratuit:30,
-  ct:150, revision:200, fco:300,
-  renov_affichages:100, renov_barres:150, renov_sellerie:200, renov_sol:150,
-  renov_legere:300, renov_importante:600, renov_majeure:1000,
-  options:300, daimler:500, vdistar:200
+  minibus_s:900,minibus_m:3000,midibus_s:1200,midibus_m:4000,
+  standard_s:1500,standard_m:5000,articule_s:1800,articule_m:6000,
+  carle_s:1500,carle_m:5000,ultimate_gratuit:25,
+  cond_std_s:800,cond_ult_s:500,meca_std_j:150,meca_ult_j:75,
+  interim_gratuit:30,ct:150,revision:200,fco:300,
+  renov_affichages:100,renov_barres:150,renov_sellerie:200,renov_sol:150,
+  renov_legere:300,renov_importante:600,renov_majeure:1000,
+  options:300,daimler:500,vdistar:200
 };
-
-let TARIFS = { ...TARIFS_DEFAULT };
+let TARIFS = {...TARIFS_DEFAULT};
 
 async function loadTarifs() {
   try {
-    const { data } = await sb.from('tarifs').select('*');
-    if (data && data.length) {
-      data.forEach(row => { TARIFS[row.key] = parseFloat(row.value) || 0; });
-    }
-  } catch(e) { console.warn('Tarifs non chargés:', e.message); }
+    const {data} = await sb.from('tarifs').select('*');
+    if (data && data.length) data.forEach(r => { TARIFS[r.key] = parseFloat(r.value)||0; });
+  } catch(e) { console.warn('Tarifs:', e.message); }
 }
 
 async function saveTarifs() {
   const keys = ['minibus_s','minibus_m','midibus_s','midibus_m','standard_s','standard_m',
     'articule_s','articule_m','carle_s','carle_m','ultimate_gratuit',
     'cond_std_s','cond_ult_s','meca_std_j','meca_ult_j','interim_gratuit',
-    'ct','revision','fco',
-    'renov_affichages','renov_barres','renov_sellerie','renov_sol',
-    'renov_legere','renov_importante','renov_majeure',
-    'options','daimler','vdistar'];
-  const newTarifs = {};
-  keys.forEach(k => {
-    const el = document.getElementById('t-' + k.replace(/_/g, '-'));
-    if (el) newTarifs[k] = parseFloat(el.value) || 0;
-  });
-  TARIFS = newTarifs;
+    'ct','revision','fco','renov_affichages','renov_barres','renov_sellerie','renov_sol',
+    'renov_legere','renov_importante','renov_majeure','options','daimler','vdistar'];
+  const newT = {};
+  keys.forEach(k => { const el=document.getElementById('t-'+k.replace(/_/g,'-')); if(el) newT[k]=parseFloat(el.value)||0; });
+  TARIFS = newT;
   try {
-    // Upsert chaque tarif dans la table dédiée
-    for (const [key, value] of Object.entries(newTarifs)) {
-      await sb.from('tarifs').upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    for (const [key,value] of Object.entries(newT)) {
+      await sb.from('tarifs').upsert({key,value,updated_at:new Date().toISOString()},{onConflict:'key'});
     }
-    const res = document.getElementById('tarifs-result');
-    res.textContent = 'Tarifs sauvegardés !';
-    res.style.color = '#166534';
+    const r=document.getElementById('tarifs-result');
+    r.textContent='Tarifs sauvegardés !'; r.style.color='#166634';
   } catch(e) {
-    document.getElementById('tarifs-result').textContent = 'Erreur : ' + e.message;
-    document.getElementById('tarifs-result').style.color = '#991b1b';
+    const r=document.getElementById('tarifs-result');
+    r.textContent='Erreur : '+e.message; r.style.color='#991b1b';
   }
 }
 
 function loadTarifsUI() {
-  if (!currentUser || !['president','vice_president'].includes(currentUser.role)) return;
-  const card = document.getElementById('card-tarifs');
+  if (!currentUser||!['president','vice_president'].includes(currentUser.role)) return;
+  const card=document.getElementById('card-tarifs');
   if (!card) return;
-  card.style.display = '';
-  const map = {
-    'minibus-s':'minibus_s','minibus-m':'minibus_m',
-    'midibus-s':'midibus_s','midibus-m':'midibus_m',
-    'standard-s':'standard_s','standard-m':'standard_m',
-    'articule-s':'articule_s','articule-m':'articule_m',
-    'carle-s':'carle_s','carle-m':'carle_m',
-    'ultimate-gratuit':'ultimate_gratuit',
-    'cond-std-s':'cond_std_s','cond-ult-s':'cond_ult_s',
-    'meca-std-j':'meca_std_j','meca-ult-j':'meca_ult_j',
-    'interim-gratuit':'interim_gratuit',
-    'ct':'ct','revision':'revision','fco':'fco',
-    'renov-affichages':'renov_affichages','renov-barres':'renov_barres',
-    'renov-sellerie':'renov_sellerie','renov-sol':'renov_sol',
-    'renov-legere':'renov_legere','renov-importante':'renov_importante',
-    'renov-majeure':'renov_majeure',
-    'options':'options','daimler':'daimler','vdistar':'vdistar'
-  };
-  Object.entries(map).forEach(([id, key]) => {
-    const el = document.getElementById('t-' + id);
-    if (el) el.value = TARIFS[key] || 0;
-  });
+  card.style.display='';
+  const map={'minibus-s':'minibus_s','minibus-m':'minibus_m','midibus-s':'midibus_s','midibus-m':'midibus_m',
+    'standard-s':'standard_s','standard-m':'standard_m','articule-s':'articule_s','articule-m':'articule_m',
+    'carle-s':'carle_s','carle-m':'carle_m','ultimate-gratuit':'ultimate_gratuit',
+    'cond-std-s':'cond_std_s','cond-ult-s':'cond_ult_s','meca-std-j':'meca_std_j','meca-ult-j':'meca_ult_j',
+    'interim-gratuit':'interim_gratuit','ct':'ct','revision':'revision','fco':'fco',
+    'renov-affichages':'renov_affichages','renov-barres':'renov_barres','renov-sellerie':'renov_sellerie','renov-sol':'renov_sol',
+    'renov-legere':'renov_legere','renov-importante':'renov_importante','renov-majeure':'renov_majeure',
+    'options':'options','daimler':'daimler','vdistar':'vdistar'};
+  Object.entries(map).forEach(([id,key])=>{const el=document.getElementById('t-'+id);if(el)el.value=TARIFS[key]||0;});
 }
 
 // ============================================================
-// SUPPRESSION DÉFINITIVE D'UN COMPTE STAFF
+// STAFF — Suppression + Ajout
 // ============================================================
+async function saveNewStaff() {
+  const username=document.getElementById('s-username').value.trim();
+  const nom=document.getElementById('s-nom').value.trim();
+  const password=document.getElementById('s-password').value;
+  const role=document.getElementById('s-role').value;
+  if (!username||!nom||!password){alert('Tous les champs sont obligatoires.');return;}
+  if (password.length<6){alert('Minimum 6 caractères.');return;}
+  const {data:ex}=await sb.from('staff').select('id').eq('username',username).limit(1);
+  if (ex&&ex.length){alert('Identifiant déjà utilisé.');return;}
+  const {error}=await sb.from('staff').insert({username,password_hash:password,role,nom_affiche:nom,actif:true});
+  if (error){alert('Erreur : '+error.message);return;}
+  toast('Compte créé');
+  closeModal('modal-add-staff');
+  await loadStaff(); renderStaff();
+}
+
+// ============================================================
+// API TM
+// ============================================================
+const TM_API_BASE = 'https://transport-manager.net';
+const TM_ENDPOINTS = {
+  membres:   {url:'/api/v1/membres_alliance?limit=1000', label:'Membres'},
+  vehicules: {url:'/api/v1/vehicules?parc=location&limit=1000', label:'Véhicules location'},
+  vehicules_global:{url:'/api/v1/vehicules?parc=actif&limit=1000', label:'Véhicules Hors Loc'},
+  compta:    {url:'/api/v1/compta?limit=1000', label:'Comptabilité'},
+  salaries:  {url:'/api/v1/salaries?limit=1000', label:'Salariés'},
+};
+let tmCurrentEndpoint=null, tmCurrentData=[];
+
+function getTMKey(){return localStorage.getItem('tm_alliance_api_key')||'';}
+
+function saveTMKey(){
+  const key=document.getElementById('tm-api-key-input').value.trim();
+  if(!key){document.getElementById('tm-key-result').innerHTML='<span style="color:#991b1b">Clé vide.</span>';return;}
+  localStorage.setItem('tm_alliance_api_key',key);
+  document.getElementById('tm-key-result').innerHTML='<span style="color:#166534">Clé sauvegardée.</span>';
+}
+
+async function testTMKey(){
+  const key=getTMKey()||document.getElementById('tm-api-key-input').value.trim();
+  if(!key){document.getElementById('tm-key-result').innerHTML='<span style="color:#991b1b">Entrez une clé.</span>';return;}
+  document.getElementById('tm-key-result').innerHTML='Test en cours...';
+  try {
+    const res=await fetch(TM_API_BASE+'/api/v1/membres_alliance',{headers:{'Authorization':'Bearer '+key,'Accept':'application/json'}});
+    document.getElementById('tm-key-result').innerHTML=res.ok?'<span style="color:#166534">Connexion réussie !</span>':'<span style="color:#991b1b">Erreur '+res.status+'</span>';
+  } catch(e){
+    const msg=e instanceof TypeError
+      ? 'Erreur réseau/CORS : l’API ne répond pas aux appels depuis le navigateur.'
+      : 'Erreur : '+e.message;
+    document.getElementById('tm-key-result').innerHTML='<span style="color:#991b1b">'+msg+'</span>';
+  }
+}
+
+function loadTMPage(){
+  const key=getTMKey();
+  const input=document.getElementById('tm-api-key-input');
+  if(input&&key) input.value='••••••••';
+  document.getElementById('tm-status-card').style.display='';
+  if(currentUser&&currentUser.role==='gestionnaire_parc'){
+    document.querySelectorAll('[data-gdp-hidden]').forEach(el=>el.style.display='none');
+    if(key) loadTMEndpoint('vehicules');
+  } else {
+    if(key) loadTMEndpoint('membres');
+  }
+}
+
+async function loadTMEndpoint(name){
+  if(!name) return;
+  const key=getTMKey();
+  if(!key){toast('Clé API non configurée');return;}
+  document.querySelectorAll('[id^="tm-tab-"]').forEach(b=>b.classList.remove('btn-primary'));
+  const tab=document.getElementById('tm-tab-'+name);
+  if(tab) tab.classList.add('btn-primary');
+  tmCurrentEndpoint=name;
+  const ep=TM_ENDPOINTS[name];
+  if(!ep) return;
+  const container=document.getElementById('tm-data-container');
+  container.innerHTML='<div class="empty">Chargement...</div>';
+  document.getElementById('tm-status-card').style.display='';
+  document.getElementById('tm-status-dot').style.background='#f59e0b';
+  document.getElementById('tm-status-text').textContent='Chargement '+ep.label+'...';
+  try {
+    const res=await fetch(TM_API_BASE+ep.url,{headers:{'Authorization':'Bearer '+key,'Accept':'application/json'}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const raw=await res.json();
+    if(Array.isArray(raw)) tmCurrentData=raw;
+    else { const k=Object.keys(raw).find(k=>Array.isArray(raw[k])); tmCurrentData=k?raw[k]:[raw]; }
+    document.getElementById('tm-status-dot').style.background='#166534';
+    document.getElementById('tm-status-text').textContent=tmCurrentData.length+' résultat(s) — '+ep.label;
+    showTMSearch(['vehicules','vehicules_global','salaries'].includes(name));
+    renderTMData(name,tmCurrentData);
+  } catch(e){
+    document.getElementById('tm-status-dot').style.background='#991b1b';
+    const msg=e instanceof TypeError
+      ? 'Erreur réseau/CORS : l’API est inaccessible depuis le navigateur.'
+      : 'Erreur : '+e.message;
+    document.getElementById('tm-status-text').textContent=msg;
+    container.innerHTML='<div class="empty" style="color:#991b1b">'+msg+'</div>';
+  }
+}
+
+function showTMSearch(show){const w=document.getElementById('tm-search-wrap');if(w)w.style.display=show?'':'';}
+
+function renderTMData(name,data){
+  const container=document.getElementById('tm-data-container');
+  if(!data.length){container.innerHTML='<div class="empty">Aucune donnée</div>';return;}
+  if(name==='membres'){
+    renderTMMembers(data);
+    container.innerHTML='<div style="font-size:13px;color:var(--text-sec)">'+data.length+' membre(s). Utilisez le bouton Sync pour mettre à jour.</div>';
+    return;
+  }
+  const keys=Object.keys(data[0]).filter(k=>typeof data[0][k]!=='object').slice(0,8);
+  container.innerHTML=`<div style="overflow-x:auto"><div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${data.length} résultat(s)</div>
+    <table style="width:100%;font-size:12px;border-collapse:collapse">
+    <thead><tr style="background:var(--off-white)">${keys.map(k=>`<th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">${k}</th>`).join('')}</tr></thead>
+    <tbody>${data.map(row=>`<tr style="border-bottom:1px solid var(--border-light)">${keys.map(k=>`<td style="padding:8px 10px;color:var(--text-sec)">${row[k]!=null?String(row[k]).slice(0,60):'—'}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div>`;
+  if(name==='vehicules') container.innerHTML+=`<div style="margin-top:12px"><button class="btn btn-sm btn-primary" onclick="checkLocationsEnCours()">Vérifier locations en cours</button></div>`;
+}
+
+function filterTMData(){
+  const q=(document.getElementById('tm-member-search').value||'').toLowerCase().trim();
+  const resultEl=document.getElementById('tm-member-result');
+  if(!q||!tmCurrentData.length){if(resultEl)resultEl.innerHTML='';renderTMData(tmCurrentEndpoint,tmCurrentData);return;}
+  const filtered=tmCurrentData.filter(row=>Object.values(row).some(v=>v!=null&&String(v).toLowerCase().includes(q)));
+  if(resultEl){
+    if(filtered.length){
+      if(tmCurrentEndpoint==='vehicules'||tmCurrentEndpoint==='vehicules_global'){
+        const types={};filtered.forEach(v=>{const t=v.type||v.categorie||v.modele||'Inconnu';types[t]=(types[t]||0)+1;});
+        resultEl.innerHTML=`<div style="background:#dcfce7;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:8px"><strong>${filtered.length} véhicule(s)</strong>${Object.entries(types).map(([t,n])=>'<br>• '+t+' : '+n).join('')}</div>`;
+      } else {
+        resultEl.innerHTML=`<div style="background:#dbeafe;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e40af;margin-bottom:8px">${filtered.length} résultat(s)</div>`;
+      }
+    } else resultEl.innerHTML='<div style="color:#991b1b;font-size:13px;margin-bottom:8px">Aucun résultat</div>';
+  }
+  renderTMData(tmCurrentEndpoint,filtered);
+}
+
+function showTMSuggestions(){
+  const q=(document.getElementById('tm-member-search').value||'').toLowerCase().trim();
+  const box=document.getElementById('tm-suggestions');
+  if(!box||!q){if(box)box.style.display='none';return;}
+  const matches=membres.filter(m=>(m.pseudo||'').toLowerCase().startsWith(q)).slice(0,8);
+  if(!matches.length){box.style.display='none';return;}
+  box.style.display='';
+  box.innerHTML=matches.map(m=>`<div onclick="selectTMSuggestion('${m.pseudo.replace(/'/g,"\'")}') " style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border-light)" onmouseover="this.style.background='var(--off-white)'" onmouseout="this.style.background=''"> ${m.pseudo} <span style="color:var(--text-muted);font-size:12px">${m.entreprise||''}</span></div>`).join('');
+}
+
+function selectTMSuggestion(pseudo){
+  const input=document.getElementById('tm-member-search');
+  const box=document.getElementById('tm-suggestions');
+  if(input)input.value=pseudo;if(box)box.style.display='none';filterTMData();
+}
+
+function renderTMMembers(data){
+  const card=document.getElementById('tm-membres-card');
+  const list=document.getElementById('tm-membres-list');
+  if(card)card.style.display='';
+  if(!data.length){if(list)list.innerHTML='<div class="empty">Aucun membre</div>';return;}
+  if(list)list.innerHTML=`<div style="overflow-x:auto;padding:8px 20px"><table style="width:100%;font-size:13px;border-collapse:collapse">
+    <thead><tr style="background:var(--off-white)"><th style="padding:10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Pseudo</th><th style="padding:10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Entreprise</th><th style="padding:10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Niveau</th><th style="padding:10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Forfait</th><th style="padding:10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Action</th></tr></thead>
+    <tbody>${data.map(m=>`<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:10px;font-weight:600;color:var(--navy)">${m.pseudo||m.username||'—'}</td><td style="padding:10px;color:var(--text-sec)">${m.entreprise||m.company||'—'}</td><td style="padding:10px">${m.niveau||m.level||'—'}</td><td style="padding:10px"><span class="badge b-${(m.forfait||'').toLowerCase().includes('ultimate')?'ultimate':'standard'}">${m.forfait||'—'}</span></td><td style="padding:10px"><button class="btn btn-sm" onclick="syncOneMember(${JSON.stringify({pseudo:m.pseudo||m.username,entreprise:m.entreprise||m.company,niveau:m.niveau||m.level,forfait:m.forfait})})">Sync</button></td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+async function syncOneMember(tm){
+  const pseudo=tm.pseudo||'';
+  const existing=membres.find(m=>(m.pseudo||'').toLowerCase()===pseudo.toLowerCase());
+  if(!existing){toast('Membre non trouvé dans Espace Staff');return;}
+  const upd={};
+  if(tm.entreprise&&tm.entreprise!=='—') upd.entreprise=tm.entreprise;
+  if(tm.niveau&&tm.niveau!=='—') upd.niveau=String(tm.niveau);
+  if(tm.forfait&&tm.forfait!=='—') upd.forfait=tm.forfait;
+  if(!Object.keys(upd).length){toast('Aucune mise à jour');return;}
+  const {error}=await sb.from('membres').update(upd).eq('id',existing.id);
+  if(error){alert('Erreur : '+error.message);return;}
+  await loadMembres();
+  toast('Profil de '+pseudo+' mis à jour');
+}
+
+let tmVehiculesEnLocation=[];
+async function checkLocationsEnCours(){
+  const key=getTMKey();if(!key)return;
+  try {
+    const res=await fetch(TM_API_BASE+'/api/v1/vehicules?parc=location&limit=1000',{headers:{'Authorization':'Bearer '+key,'Accept':'application/json'}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const raw=await res.json();
+    tmVehiculesEnLocation=Array.isArray(raw)?raw:(raw.data||raw.vehicules||[]);
+    const container=document.getElementById('tm-data-container');
+    container.innerHTML+='<div style="margin-top:10px;background:#dcfce7;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534"><strong>'+tmVehiculesEnLocation.length+' véhicule(s)</strong> actuellement en location.</div>';
+    toast(tmVehiculesEnLocation.length+' véhicules en location chargés');
+  } catch(e){toast('Erreur : '+e.message);}
+}
+
+async function syncTMMembresAuto(){
+  try {
+    const res=await fetch(TM_API_BASE+'/api/v1/membres_alliance?limit=1000',{headers:{'Authorization':'Bearer '+getTMKey(),'Accept':'application/json'}});
+    if(!res.ok) return;
+    const raw=await res.json();
+    const tm_membres=Array.isArray(raw)?raw:(raw.data||raw.membres||raw.membres_alliance||[]);
+    if(!tm_membres.length) return;
+    const changements=[];
+    for(const tm of tm_membres){
+      const pseudo=tm.pseudo||tm.username||tm.name||'';
+      if(!pseudo) continue;
+      const existing=membres.find(m=>(m.pseudo||'').toLowerCase()===pseudo.toLowerCase());
+      if(!existing) continue;
+      const upd={};
+      const nouvelleEntreprise=tm.entreprise||tm.company||tm.nom_entreprise||'';
+      const nouveauNiveau=tm.niveau||tm.level||'';
+      if(nouvelleEntreprise&&nouvelleEntreprise!==existing.entreprise) upd.entreprise=nouvelleEntreprise;
+      if(nouveauNiveau&&String(nouveauNiveau)!==String(existing.niveau)) upd.niveau=String(nouveauNiveau);
+      if(!Object.keys(upd).length) continue;
+      const msgs=[];
+      if(upd.entreprise) msgs.push('entreprise : "'+existing.entreprise+'" → "'+upd.entreprise+'"');
+      if(upd.niveau) msgs.push('niveau : '+existing.niveau+' → '+upd.niveau);
+      changements.push({pseudo,msgs});
+      await sb.from('membres').update(upd).eq('id',existing.id);
+      const idx=membres.findIndex(m=>m.id===existing.id);
+      if(idx!==-1) membres[idx]={...membres[idx],...upd};
+    }
+    renderMembres();
+    if(changements.length){
+      const msg=changements.map(c=>'• '+c.pseudo+' : '+c.msgs.join(', ')).join('\n');
+      setTimeout(()=>{if(confirm(changements.length+' changement(s) détecté(s) :\n\n'+msg+'\n\nVoir les membres ?')) showPage('membres',document.getElementById('nav-membres'));},1000);
+    }
+  } catch(e){console.warn('Sync TM:',e.message);}
+}
+
+// ============================================================
+// REMBOURSEMENTS — Calcul automatique
+// ============================================================
+const REMB_MAP={
+  'Remboursement CT':'ct','Remboursement révisions':'revision','Remboursement FCO':'fco',
+  "Prise en charge pose d'options":'options','Adhésion au programme gold Daimler Buses':'daimler','Adhésion au club VDIStar':'vdistar',
+};
+const RENOV_INT_MAP={'Remise en état des affichages':'renov_affichages','Remise en état des barres de maintien':'renov_barres','Réparation de la sellerie':'renov_sellerie','Remise en état du sol':'renov_sol'};
+const RENOV_TECH_MAP={'Rénovation légère':'renov_legere','Rénovation importante':'renov_importante','Rénovation majeure':'renov_majeure'};
+const REMB_QTE_COLS={'ct':['Nombre de bus à rembourser'],'revision':['Nombre de bus à rembourser'],'fco':['Nombre de bus à rembourser'],'renov_affichages':['Nombre de véhicules','Nombre de bus à rembourser'],'renov_barres':['Nombre de véhicules','Nombre de bus à rembourser'],'renov_sellerie':['Nombre de véhicules','Nombre de bus à rembourser'],'renov_sol':['Nombre de véhicules','Nombre de bus à rembourser'],'renov_legere':['Nombre de bus à rembourser','Nombre de véhicules'],'renov_importante':['Nombre de bus à rembourser','Nombre de véhicules'],'renov_majeure':['Nombre de bus à rembourser','Nombre de véhicules'],'options':['Nombre de bus à rembourser'],'daimler':['Nombre de bus à rembourser'],'vdistar':['Nombre de bus à rembourser']};
+
+function calcMontantRemboursement(row){
+  const service=getCol(row,'Quel service souhaitez-vous utiliser ?','Quel service souhaitez-vous utiliser ? ','Service');
+  if(!service) return null;
+  let tarifKey=REMB_MAP[service.trim()];
+  if(service.includes('rénovations intérieurs')||service.includes('rénovations intérieur')){
+    const st=getCol(row,'Type de rénovation');tarifKey=st?RENOV_INT_MAP[st.trim()]||'renov_affichages':'renov_affichages';
+  } else if(service.includes('rénovations techniques')){
+    const st=getCol(row,'Type de rénovation');tarifKey=st?RENOV_TECH_MAP[st.trim()]||'renov_legere':'renov_legere';
+  }
+  if(!tarifKey) return null;
+  const tarifUnit=TARIFS[tarifKey]||0;if(!tarifUnit) return null;
+  const qteCols=REMB_QTE_COLS[tarifKey]||['Nombre de bus à rembourser'];
+  let qte=0;
+  for(const col of qteCols){const v=getCol(row,col);if(v){qte=parseInt(v)||0;break;}}
+  if(!qte&&row._raw){const entries=Object.values(row._raw);for(const e of entries){if(e&&e.key&&e.key.toLowerCase().includes('nombre')&&e.val){const n=parseInt(e.val);if(!isNaN(n)&&n>0){qte=n;break;}}}}
+  if(!qte) return null;
+  return {service,tarifKey,tarifUnit,qte,total:tarifUnit*qte};
+}
+
+function getMontantBadge(row){
+  const calc=calcMontantRemboursement(row);
+  if(!calc) return '';
+  return `<div style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:6px 12px;margin-top:8px"><span style="font-size:13px;color:#166534"><strong>${calc.qte} × ${fe(calc.tarifUnit)}</strong> = <strong style="font-size:15px">${fe(calc.total)}</strong></span><span style="font-size:11px;color:#166534;opacity:.7">${calc.service}</span></div>`;
+}
+
+
 async function deleteStaff(id, username) {
   if (currentUser.role !== 'president') { toast('Accès refusé'); return; }
-  if (!confirm('Supprimer définitivement le compte "' + username + '" ? Cette action est irréversible.')) return;
-  // Dissocier les FK avant suppression
+  if (!confirm('Supprimer définitivement le compte "' + username + '" ?')) return;
   await sb.from('factures').update({ created_by: null }).eq('created_by', id);
   await sb.from('interimaires').update({ created_by: null }).eq('created_by', id);
   await sb.from('objectifs').update({ created_by: null }).eq('created_by', id);
   const { error } = await sb.from('staff').delete().eq('id', id);
   if (error) { alert('Erreur : ' + error.message); return; }
   toast('Compte supprimé');
-  await loadStaff();
-  renderStaff();
-}
-
-// ============================================================
-// AFFICHER OPTION PRÉSIDENT POUR LE PRÉSIDENT
-// ============================================================
-function openAddStaff() {
-  document.getElementById('s-username').value = '';
-  document.getElementById('s-nom').value = '';
-  document.getElementById('s-password').value = '';
-  document.getElementById('s-role').value = 'vice_president';
-  // Afficher l'option Président uniquement pour le Président
-  const optPres = document.getElementById('opt-president');
-  if (optPres) optPres.style.display = currentUser.role === 'president' ? '' : 'none';
-  document.getElementById('modal-add-staff').classList.add('open');
-}
-
-
-// ============================================================
-// CALCUL AUTOMATIQUE DES REMBOURSEMENTS (Pôle Financement)
-// ============================================================
-const REMB_MAP = {
-  'Remboursement CT':                     'ct',
-  'Remboursement révisions':              'revision',
-  'Remboursement FCO':                    'fco',
-  "Prise en charge pose d'options":       'options',
-  'Adhésion au programme gold Daimler Buses': 'daimler',
-  'Adhésion au club VDIStar':             'vdistar',
-};
-
-// Sous-types rénovations intérieures
-const RENOV_INT_MAP = {
-  'Remise en état des affichages':       'renov_affichages',
-  'Remise en état des barres de maintien':'renov_barres',
-  'Réparation de la sellerie':           'renov_sellerie',
-  'Remise en état du sol':               'renov_sol',
-};
-
-// Sous-types rénovations techniques
-const RENOV_TECH_MAP = {
-  'Rénovation légère':    'renov_legere',
-  'Rénovation importante':'renov_importante',
-  'Rénovation majeure':   'renov_majeure',
-};
-
-// Colonnes du CSV pour les quantités selon le type
-const REMB_QTE_COLS = {
-  'ct':                ['Nombre de bus à rembourser', 'Nombre de CT'],
-  'revision':          ['Nombre de bus à rembourser', 'Nombre de révisions'],
-  'fco':               ['Nombre de bus à rembourser', 'Nombre de FCO'],
-  'renov_affichages':  ['Nombre de véhicules', 'Nombre de bus à rembourser'],
-  'renov_barres':      ['Nombre de véhicules', 'Nombre de bus à rembourser'],
-  'renov_sellerie':    ['Nombre de véhicules', 'Nombre de bus à rembourser'],
-  'renov_sol':         ['Nombre de véhicules', 'Nombre de bus à rembourser'],
-  'renov_legere':      ['Nombre de bus à rembourser', 'Nombre de véhicules'],
-  'renov_importante':  ['Nombre de bus à rembourser', 'Nombre de véhicules'],
-  'renov_majeure':     ['Nombre de bus à rembourser', 'Nombre de véhicules'],
-  'options':           ['Nombre de bus à rembourser', "Nombre d'options"],
-  'daimler':           ['Nombre de bus à rembourser', 'Nombre'],
-  'vdistar':           ['Nombre de bus à rembourser', 'Nombre'],
-};
-
-function calcMontantRemboursement(row) {
-  // Récupérer le type de service
-  const service = getCol(row,
-    'Quel service souhaitez-vous utiliser ?',
-    'Quel service souhaitez-vous utiliser ? ',
-    'Service'
-  );
-  if (!service) return null;
-
-  let tarifKey = REMB_MAP[service.trim()];
-
-  // Gérer les sous-types de rénovations
-  if (service.includes('rénovations intérieurs') || service.includes('rénovations intérieur')) {
-    const sousType = getCol(row, 'Type de rénovation');
-    if (sousType) tarifKey = RENOV_INT_MAP[sousType.trim()] || 'renov_affichages';
-    else tarifKey = 'renov_affichages';
-  } else if (service.includes('rénovations techniques')) {
-    const sousType = getCol(row, 'Type de rénovation');
-    if (sousType) tarifKey = RENOV_TECH_MAP[sousType.trim()] || 'renov_legere';
-    else tarifKey = 'renov_legere';
-  }
-
-  if (!tarifKey) return null;
-  const tarifUnit = TARIFS[tarifKey] || 0;
-  if (!tarifUnit) return null;
-
-  // Récupérer la quantité
-  const qteCols = REMB_QTE_COLS[tarifKey] || ['Nombre de bus à rembourser'];
-  let qte = 0;
-  for (const col of qteCols) {
-    const val = getCol(row, col);
-    if (val) { qte = parseInt(val) || 0; break; }
-  }
-  if (!qte) {
-    // Chercher dans _raw une colonne contenant "Nombre"
-    if (row._raw) {
-      const entries = Object.values(row._raw);
-      for (const e of entries) {
-        if (e && e.key && e.key.toLowerCase().includes('nombre') && e.val) {
-          const n = parseInt(e.val);
-          if (!isNaN(n) && n > 0) { qte = n; break; }
-        }
-      }
-    }
-  }
-
-  if (!qte) return null;
-  return { service, tarifKey, tarifUnit, qte, total: tarifUnit * qte };
-}
-
-function getMontantBadge(row) {
-  const calc = calcMontantRemboursement(row);
-  if (!calc) return '';
-  return `<div style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:6px 12px;margin-top:8px">
-    <span style="font-size:13px;color:#166534"><strong>${calc.qte} × ${fe(calc.tarifUnit)}</strong> = <strong style="font-size:15px">${fe(calc.total)}</strong></span>
-    <span style="font-size:11px;color:#166534;opacity:.7">${calc.service}</span>
-  </div>`;
-}
-
-
-// ============================================================
-// API TRANSPORT MANAGER — Suivi membres (/api/v1/membres_alliance)
-// ============================================================
-const TM_API_BASE = 'https://transport-manager.net';
-
-function getTMKey() { return localStorage.getItem('tm_alliance_api_key') || ''; }
-
-function saveTMKey() {
-  const key = document.getElementById('tm-api-key-input').value.trim();
-  if (!key) { document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">Clé vide.</span>'; return; }
-  localStorage.setItem('tm_alliance_api_key', key);
-  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534">✓ Clé sauvegardée localement.</span>';
-}
-
-async function testTMKey() {
-  const key = getTMKey() || document.getElementById('tm-api-key-input').value.trim();
-  if (!key) { document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">Entrez une clé.</span>'; return; }
-  document.getElementById('tm-key-result').innerHTML = '<span style="color:#555">Test en cours...</span>';
-  try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (res.ok) {
-      document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534">✓ Connexion réussie !</span>';
-    } else {
-      document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">✗ Erreur ' + res.status + ' — clé invalide ou accès refusé</span>';
-    }
-  } catch(e) {
-    document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">✗ Erreur réseau : ' + e.message + '</span>';
-  }
-}
-
-function loadTMPage() {
-  const key = getTMKey();
-  const input = document.getElementById('tm-api-key-input');
-  if (input && key) input.value = '••••••••';
-  document.getElementById('tm-status-card').style.display = '';
-  // Masquer certains onglets pour GDP
-  if(currentUser && currentUser.role === 'gestionnaire_parc'){
-    document.querySelectorAll('[data-gdp-hidden]').forEach(el => el.style.display='none');
-    // Masquer la section config clé et membres sync
-    const cfgTM = document.querySelector('#page-tm .card');
-    // Charger directement les véhicules
-    if(key) loadTMEndpoint('vehicules');
-  } else {
-    if (key) loadTMMembers();
-  }
-}
-
-async function loadTMMembers() {
-  const key = getTMKey();
-  if (!key) {
-    document.getElementById('tm-status-dot').style.background = '#d8d8d8';
-    document.getElementById('tm-status-text').textContent = 'Clé API non configurée';
-    return;
-  }
-  document.getElementById('tm-status-dot').style.background = '#f59e0b';
-  document.getElementById('tm-status-text').textContent = 'Chargement...';
-  try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const membres_tm = Array.isArray(data) ? data : (data.membres || data.members || data.data || []);
-    document.getElementById('tm-status-dot').style.background = '#166534';
-    document.getElementById('tm-status-text').textContent = '✓ ' + membres_tm.length + ' membre(s) — Dernière MAJ : ' + new Date().toLocaleTimeString('fr-FR');
-    renderTMMembers(membres_tm);
-  } catch(e) {
-    document.getElementById('tm-status-dot').style.background = '#991b1b';
-    document.getElementById('tm-status-text').textContent = '✗ ' + e.message;
-  }
-}
-
-function renderTMMembers(data) {
-  const card = document.getElementById('tm-membres-card');
-  const list = document.getElementById('tm-membres-list');
-  card.style.display = '';
-  if (!data.length) { list.innerHTML = '<div class="empty" style="padding:20px">Aucun membre</div>'; return; }
-
-  list.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;font-size:13px;border-collapse:collapse">
-    <thead><tr style="background:var(--off-white)">
-      <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Pseudo</th>
-      <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Entreprise</th>
-      <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Niveau</th>
-      <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Forfait</th>
-      <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Statut</th>
-      <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700">Action</th>
-    </tr></thead>
-    <tbody>
-    ${data.map(m => {
-      const pseudo     = m.pseudo || m.username || m.name || '—';
-      const entreprise = m.entreprise || m.company || m.nom_entreprise || '—';
-      const niveau     = m.niveau || m.level || '—';
-      const forfait    = m.forfait || m.subscription || m.plan || '—';
-      const statut     = m.statut || m.status || 'Actif';
-      return `<tr style="border-bottom:1px solid var(--border-light)">
-        <td style="padding:10px 14px;font-weight:600;color:var(--navy)">${pseudo}</td>
-        <td style="padding:10px 14px;color:var(--text-sec)">${entreprise}</td>
-        <td style="padding:10px 14px">${niveau}</td>
-        <td style="padding:10px 14px"><span class="badge b-${forfait.toLowerCase().includes('ultimate')?'ultimate':'standard'}">${forfait}</span></td>
-        <td style="padding:10px 14px"><span class="badge b-actif">${statut}</span></td>
-        <td style="padding:10px 14px"><button class="btn btn-sm" onclick="syncOneMember(${JSON.stringify({pseudo,entreprise,niveau,forfait})})">Sync</button></td>
-      </tr>`;
-    }).join('')}
-    </tbody>
-  </table></div>`;
-}
-
-async function syncOneMember(tm) {
-  // Chercher le membre dans Supabase par pseudo
-  const existing = membres.find(m => (m.pseudo||'').toLowerCase() === (tm.pseudo||'').toLowerCase());
-  if (!existing) { toast('Membre non trouvé dans l\'Espace Staff — ajoutez-le d\'abord'); return; }
-  const upd = {};
-  if (tm.entreprise && tm.entreprise !== '—') upd.entreprise = tm.entreprise;
-  if (tm.niveau     && tm.niveau     !== '—') upd.niveau     = tm.niveau;
-  if (tm.forfait    && tm.forfait    !== '—') upd.forfait    = tm.forfait;
-  if (!Object.keys(upd).length) { toast('Aucune mise à jour nécessaire'); return; }
-  const { error } = await sb.from('membres').update(upd).eq('id', existing.id);
-  if (error) { alert('Erreur : ' + error.message); return; }
-  await loadMembres();
-  toast('Profil de ' + tm.pseudo + ' mis à jour ✓');
-}
-
-
-// ── Endpoints disponibles ──────────────────────────────────────────────
-const TM_ENDPOINTS = {
-  membres:   { url: '/api/v1/membres_alliance?limit=1000', label: 'Membres alliance' },
-  vehicules: { url: '/api/v1/vehicules?parc=location&limit=1000', label: 'Véhicules en location' },
-  vehicules_global: { url: '/api/v1/vehicules?parc=actif&limit=1000', label: 'Véhicules Hors Loc' },
-  compta:    { url: '/api/v1/compta?limit=1000', label: 'Comptabilité' },
-  salaries:  { url: '/api/v1/salaries?limit=1000', label: 'Salariés' },
-};
-
-let tmCurrentEndpoint = null;
-let tmCurrentData     = [];
-
-async function loadTMEndpoint(name) {
-  const key = getTMKey();
-  if (!key) { toast('Clé API non configurée'); return; }
-
-  // Mettre en surbrillance l'onglet actif
-  document.querySelectorAll('[id^="tm-tab-"]').forEach(b => b.classList.remove('btn-primary'));
-  const tab = document.getElementById('tm-tab-' + name);
-  if (tab) tab.classList.add('btn-primary');
-
-  const ep = TM_ENDPOINTS[name];
-  if (!ep) return;
-  tmCurrentEndpoint = name;
-
-  const container = document.getElementById('tm-data-container');
-  container.innerHTML = '<div class="empty">Chargement...</div>';
-
-  document.getElementById('tm-status-card').style.display = '';
-  document.getElementById('tm-status-dot').style.background = '#f59e0b';
-  document.getElementById('tm-status-text').textContent = 'Chargement ' + ep.label + '...';
-
-  try {
-    const res = await fetch(TM_API_BASE + ep.url, {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' — clé invalide ou accès refusé');
-    const raw = await res.json();
-    // Chercher les données dans toutes les structures possibles
-  if (Array.isArray(raw)) {
-    tmCurrentData = raw;
-  } else {
-    // Prendre la première valeur tableau trouvée
-    const arrKey = Object.keys(raw).find(k => Array.isArray(raw[k]));
-    tmCurrentData = arrKey ? raw[arrKey] : (raw.data || []);
-    // Si toujours vide, essayer de wrap l'objet dans un tableau
-    if (!tmCurrentData.length && typeof raw === 'object' && !Array.isArray(raw)) {
-      tmCurrentData = [raw];
-    }
-  }
-    document.getElementById('tm-status-dot').style.background = '#166534';
-    document.getElementById('tm-status-text').textContent = '✓ ' + tmCurrentData.length + ' résultat(s) · ' + ep.label;
-    // Afficher barre de recherche pour véhicules et salariés
-    showTMSearch(['vehicules','vehicules_global','salaries'].includes(name));
-    renderTMData(name, tmCurrentData);
-  } catch(e) {
-    document.getElementById('tm-status-dot').style.background = '#991b1b';
-    document.getElementById('tm-status-text').textContent = '✗ ' + e.message;
-    container.innerHTML = '<div class="empty" style="color:#991b1b">Erreur : ' + e.message + '</div>';
-  }
-}
-
-function renderTMData(name, data) {
-  const container = document.getElementById('tm-data-container');
-  if (!data.length) { container.innerHTML = '<div class="empty">Aucune donnée</div>'; return; }
-
-  if (name === 'membres') {
-    document.getElementById('tm-membres-card').style.display = '';
-    renderTMMembers(data);
-    container.innerHTML = '<div style="font-size:13px;color:var(--text-sec)">✓ ' + data.length + ' membre(s) chargé(s). Voir le tableau ci-dessous pour synchroniser.</div>';
-    return;
-  }
-
-  // Affichage générique : tableau dynamique basé sur les clés du 1er objet
-  const keys = Object.keys(data[0]).filter(k => typeof data[0][k] !== 'object');
-  const MAX_COLS = 8;
-  const displayKeys = keys.slice(0, MAX_COLS);
-
-  container.innerHTML = `
-    <div style="overflow-x:auto">
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${data.length} résultat(s) · ${keys.length} colonnes disponibles${keys.length > MAX_COLS ? ' (affichage limité à ' + MAX_COLS + ')' : ''}</div>
-      <table style="width:100%;font-size:12px;border-collapse:collapse">
-        <thead><tr style="background:var(--off-white)">
-          ${displayKeys.map(k => `<th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:700;white-space:nowrap">${k}</th>`).join('')}
-        </tr></thead>
-        <tbody>
-        ${data.map(row =>
-          `<tr style="border-bottom:1px solid var(--border-light)">
-            ${displayKeys.map(k => `<td style="padding:8px 10px;color:var(--text-sec)">${row[k] != null ? String(row[k]).slice(0, 80) : '—'}</td>`).join('')}
-          </tr>`
-        ).join('')}
-        </tbody>
-      </table>
-    </div>`;
-
-  // Si véhicules : proposer de vérifier les locations en cours
-  if (name === 'vehicules') {
-    container.innerHTML += `<div style="margin-top:12px"><button class="btn btn-sm btn-primary" onclick="checkLocationsEnCours()"><i class="fa-solid fa-magnifying-glass"></i> Vérifier locations en cours</button></div>`;
-  }
-}
-
-// Véhicules en location — pour calcul automatique dans les factures
-let tmVehiculesEnLocation = [];
-
-async function checkLocationsEnCours() {
-  const key = getTMKey();
-  if (!key) return;
-  try {
-    const res = await fetch(TM_API_BASE + '/api/v1/vehicules?parc=location', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const raw = await res.json();
-    tmVehiculesEnLocation = Array.isArray(raw) ? raw : (raw.data || raw.vehicules || []);
-    const container = document.getElementById('tm-data-container');
-    const enCours = tmVehiculesEnLocation.length;
-    container.innerHTML += `<div style="margin-top:10px;background:#dcfce7;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534">
-      🚌 <strong>${enCours} véhicule(s)</strong> actuellement en location dans votre alliance.
-      Ces données seront utilisées automatiquement lors de la création de factures.
-    </div>`;
-    toast(enCours + ' véhicules en location chargés');
-  } catch(e) {
-    toast('Erreur : ' + e.message);
-  }
-}
-
-// Nombre de véhicules en location à une date donnée (pour calcul factures)
-function getNbVehiculesLouesADate(dateDebut) {
-  if (!tmVehiculesEnLocation.length || !dateDebut) return 0;
-  const d = new Date(dateDebut);
-  return tmVehiculesEnLocation.filter(v => {
-    const debut = v.date_debut ? new Date(v.date_debut) : null;
-    const fin   = v.date_fin   ? new Date(v.date_fin)   : null;
-    if (!debut) return false;
-    return debut <= d && (!fin || fin >= d);
-  }).length;
-}
-
-async function syncTMToSupabase() {
-  const key = getTMKey();
-  if (!key) { toast('Clé API non configurée'); return; }
-  document.getElementById('tm-status-text').textContent = 'Synchronisation en cours...';
-  try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const membres_tm = Array.isArray(data) ? data : (data.membres || data.members || data.data || []);
-    let updated = 0;
-    for (const tm of membres_tm) {
-      const pseudo = tm.pseudo || tm.username || tm.name || '';
-      if (!pseudo) continue;
-      const existing = membres.find(m => (m.pseudo||'').toLowerCase() === pseudo.toLowerCase());
-      if (!existing) continue;
-      const upd = {};
-      if (tm.entreprise || tm.company) upd.entreprise = tm.entreprise || tm.company;
-      if (tm.niveau     || tm.level)   upd.niveau     = tm.niveau     || tm.level;
-      if (tm.forfait    || tm.plan)     upd.forfait    = tm.forfait    || tm.plan;
-      if (Object.keys(upd).length) {
-        await sb.from('membres').update(upd).eq('id', existing.id);
-        updated++;
-      }
-    }
-    await loadMembres();
-    document.getElementById('tm-status-text').textContent = '✓ ' + updated + ' membre(s) mis à jour';
-    toast(updated + ' membre(s) synchronisé(s) ✓');
-    renderTMMembers(membres_tm);
-  } catch(e) {
-    document.getElementById('tm-status-text').textContent = '✗ ' + e.message;
-    alert('Erreur : ' + e.message);
-  }
-}
-
-
-// ── Recherche membre dans les données TM ──────────────────────────────
-function filterTMData() {
-  const q = (document.getElementById('tm-member-search').value || '').toLowerCase().trim();
-  const resultEl = document.getElementById('tm-member-result');
-
-  if (!q || !tmCurrentData.length) {
-    if (resultEl) resultEl.innerHTML = '';
-    renderTMData(tmCurrentEndpoint, tmCurrentData);
-    return;
-  }
-
-  // Chercher le membre
-  const filtered = tmCurrentData.filter(row => {
-    return Object.values(row).some(v =>
-      v != null && String(v).toLowerCase().includes(q)
-    );
-  });
-
-  if (resultEl) {
-    if (filtered.length) {
-      // Si véhicules — afficher résumé spécial
-      if (tmCurrentEndpoint === 'vehicules' || tmCurrentEndpoint === 'vehicules_global') {
-        const total = filtered.length;
-        const types = {};
-        filtered.forEach(v => {
-          const t = v.type || v.categorie || v.modele || 'Inconnu';
-          types[t] = (types[t] || 0) + 1;
-        });
-        resultEl.innerHTML = `<div style="background:#dcfce7;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:8px">
-          🚌 <strong>${total} véhicule(s)</strong> en location pour ce membre
-          ${Object.entries(types).map(([t,n]) => `<br>&nbsp;&nbsp;• ${t} : ${n}`).join('')}
-        </div>`;
-      } else if (tmCurrentEndpoint === 'salaries') {
-        const conducteurs  = filtered.filter(s => s.poste === 1 || (s.poste||'').toString().toLowerCase().includes('conducteur')).length;
-        const mecaniciens  = filtered.filter(s => s.poste === 2 || (s.poste||'').toString().toLowerCase().includes('mécanic')).length;
-        resultEl.innerHTML = `<div style="background:#dbeafe;border-radius:8px;padding:10px 14px;font-size:13px;color:#1e40af;margin-bottom:8px">
-          <i class="fa-solid fa-hard-hat"></i> <strong>${filtered.length} salarié(s)</strong> pour ce membre
-          ${conducteurs ? '<br>&nbsp;&nbsp;• Conducteurs : ' + conducteurs : ''}
-          ${mecaniciens ? '<br>&nbsp;&nbsp;• Mécaniciens : ' + mecaniciens : ''}
-        </div>`;
-      } else {
-        resultEl.innerHTML = `<div style="background:#dbeafe;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e40af;margin-bottom:8px">
-          ${filtered.length} résultat(s) trouvé(s)
-        </div>`;
-      }
-    } else {
-      resultEl.innerHTML = '<div style="color:#991b1b;font-size:13px;margin-bottom:8px">Aucun résultat</div>';
-    }
-  }
-  renderTMData(tmCurrentEndpoint, filtered);
-}
-
-// Afficher la barre de recherche pour véhicules et salariés
-function showTMSearch(show) {
-  const wrap = document.getElementById('tm-search-wrap');
-  if (wrap) wrap.style.display = show ? '' : 'none';
-}
-
-
-function showTMSuggestions() {
-  const q = (document.getElementById('tm-member-search').value || '').toLowerCase().trim();
-  const box = document.getElementById('tm-suggestions');
-  if (!box) return;
-  if (!q || q.length < 1) { box.style.display = 'none'; return; }
-
-  // Chercher dans les membres Supabase
-  const matches = membres
-    .filter(m => (m.pseudo||'').toLowerCase().startsWith(q))
-    .slice(0, 8);
-
-  if (!matches.length) { box.style.display = 'none'; return; }
-
-  box.style.display = '';
-  box.innerHTML = matches.map(m =>
-    `<div onclick="selectTMSuggestion('${m.pseudo.replace(/'/g,"\'")}') "
-      style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border-light)"
-      onmouseover="this.style.background='var(--off-white)'"
-      onmouseout="this.style.background=''">${m.pseudo} <span style="color:var(--text-muted);font-size:12px">${m.entreprise||''}</span>
-    </div>`
-  ).join('');
-}
-
-function selectTMSuggestion(pseudo) {
-  const input = document.getElementById('tm-member-search');
-  const box   = document.getElementById('tm-suggestions');
-  if (input) input.value = pseudo;
-  if (box)   box.style.display = 'none';
-  filterTMData();
-}
-
-
-async function saveNewStaff() {
-  const username = document.getElementById('s-username').value.trim();
-  const nom      = document.getElementById('s-nom').value.trim();
-  const password = document.getElementById('s-password').value;
-  const role     = document.getElementById('s-role').value;
-  if (!username || !nom || !password) { alert('Tous les champs sont obligatoires.'); return; }
-  if (password.length < 6) { alert('Minimum 6 caractères pour le mot de passe.'); return; }
-  // Vérifier doublon
-  const { data: existing } = await sb.from('staff').select('id').eq('username', username).limit(1);
-  if (existing && existing.length) { alert('Cet identifiant est déjà utilisé.'); return; }
-  const { error } = await sb.from('staff').insert({
-    username, password_hash: password, role, nom_affiche: nom, actif: true
-  });
-  if (error) { alert('Erreur : ' + error.message); return; }
-  toast('Compte créé');
-  closeModal('modal-add-staff');
-  await loadStaff();
-  renderStaff();
+  await loadStaff(); renderStaff();
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
