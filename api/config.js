@@ -7,5 +7,6 @@ export default function handler(req, res) {
   res.send(`
     window.SUPABASE_URL = "${process.env.SUPABASE_URL || ''}";
     window.SUPABASE_KEY = "${process.env.SUPABASE_SERVICE_KEY || ''}";
+    window.TM_API_KEY = "${process.env.TM_API_KEY || ''}";
   `);
 }
