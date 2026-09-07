@@ -820,6 +820,10 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="field"><label>Date d'entrée</label><input type="date" id="m-date"></div>
   </div>
   <div class="field"><label>Notes / Projets</label><textarea id="m-notes"></textarea></div>
+  <div id="mm-requests-section" style="display:none">
+    <div class="sep">Historique des demandes (SAL / Pôle)</div>
+    <div id="mm-membre-requests" style="max-height:220px;overflow-y:auto"></div>
+  </div>
   <div class="modal-footer">
     <button class="btn" onclick="closeModal('modal-membre')">Annuler</button>
     <button class="btn btn-primary" onclick="saveMembre()">Enregistrer</button>
@@ -1241,14 +1245,12 @@ async function loadMembres(){
   const{data}=await sb.from('membres').select('*').order('id',{ascending:false});
   membres=data||[]; renderMembres();
   // Auto-sync TM si clé configurée (silencieux)
-  if(getTMKey()) syncTMMembresAuto();
+  syncTMMembresAuto(); // le proxy utilisera la clé locale si présente, sinon celle du serveur
 }
 
 async function syncTMMembresAuto() {
   try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance?limit=1000', {
-      headers: { 'Authorization': 'Bearer ' + getTMKey(), 'Accept': 'application/json' }
-    });
+    const res = await tmFetch('/api/v1/membres_alliance?limit=1000');
     if (!res.ok) return;
     const raw = await res.json();
     const tm_membres = Array.isArray(raw) ? raw : (raw.data || raw.membres || raw.membres_alliance || []);
@@ -1345,6 +1347,7 @@ function openAddMembre(){
   document.getElementById('m-forfait').value='Standard';
   document.getElementById('m-statut').value='Actif';
   document.getElementById('m-date').value=tod();
+  document.getElementById('mm-requests-section').style.display='none';
   document.getElementById('modal-membre').classList.add('open');
 }
 
@@ -1363,7 +1366,13 @@ function openEditMembre(id){
   document.getElementById('m-solde').value=m.solde||'';
   document.getElementById('m-date').value=m.date_entree||'';
   document.getElementById('m-notes').value=m.notes||'';
+  document.getElementById('mm-requests-section').style.display='';
+  document.getElementById('mm-membre-requests').innerHTML='<div class="empty" style="padding:14px">Chargement...</div>';
   document.getElementById('modal-membre').classList.add('open');
+  ensureFormsDataLoaded().then(()=>{
+    const el=document.getElementById('mm-membre-requests');
+    if(el) el.innerHTML=buildMemberRequestsHtml(m.pseudo);
+  });
 }
 
 function openViewMembre(id){
@@ -1381,8 +1390,14 @@ function openViewMembre(id){
       <div class="pdf-field"><div class="pdf-field-lbl">Référent</div><div class="pdf-field-val">${m.referent||'—'}</div></div>
       ${hasPending?'<div class="pdf-field" style="grid-column:1/-1;background:#fee2e2"><div class="pdf-field-lbl">Alerte</div><div class="pdf-field-val" style="color:#991b1b"><i class="fa-solid fa-triangle-exclamation"></i> Demande en cours</div></div>':''}
       ${m.notes?`<div class="pdf-field" style="grid-column:1/-1"><div class="pdf-field-lbl">Notes</div><div class="pdf-field-val" style="font-weight:400;font-size:13px">${m.notes}</div></div>`:''}
-    </div>`;
+    </div>
+    <div class="sep">Historique des demandes (SAL / Pôle)</div>
+    <div id="view-membre-requests"><div class="empty" style="padding:14px">Chargement...</div></div>`;
   document.getElementById('modal-view-membre').classList.add('open');
+  ensureFormsDataLoaded().then(()=>{
+    const el=document.getElementById('view-membre-requests');
+    if(el) el.innerHTML=buildMemberRequestsHtml(m.pseudo);
+  });
 }
 
 async function saveMembre(){
@@ -2109,7 +2124,13 @@ function canvasToBlob(canvas){
 async function uploadFactureToStorage(canvas, path){
   const blob=await canvasToBlob(canvas);
   if(!blob) throw new Error('Image vide, réessayez.');
-  const {error}=await sb.storage.from(FACTURES_BUCKET).upload(path, blob, {contentType:'image/jpeg', upsert:true});
+  let {error}=await sb.storage.from(FACTURES_BUCKET).upload(path, blob, {contentType:'image/jpeg', upsert:true});
+  if(error && /bucket not found/i.test(error.message||'')){
+    // Le bucket n'existe pas encore — on le crée automatiquement (nécessite la clé service_role)
+    const {error:createErr}=await sb.storage.createBucket(FACTURES_BUCKET, {public:true});
+    if(createErr && !/already exists/i.test(createErr.message||'')) throw createErr;
+    ({error}=await sb.storage.from(FACTURES_BUCKET).upload(path, blob, {contentType:'image/jpeg', upsert:true}));
+  }
   if(error) throw error;
   const {data}=sb.storage.from(FACTURES_BUCKET).getPublicUrl(path);
   return data.publicUrl;
@@ -2734,6 +2755,65 @@ function membreHasPendingRequest(pseudo) {
   return salP || poleP;
 }
 
+// Charge les données SAL / Pôle en arrière-plan si elles ne sont pas encore en mémoire
+// (utile quand on ouvre la fiche d'un membre sans être passé par ces onglets avant)
+async function ensureFormsDataLoaded(){
+  const tasks=[];
+  if(!window._salRows){
+    tasks.push(fetchCSV(SAL_CSV_URL).then(t=>{window._salRows=parseCSV(t);}).catch(()=>{window._salRows=window._salRows||[];}));
+  }
+  if(!poleData || !poleData.length){
+    tasks.push(fetchCSV(POLE_CSV_URL).then(t=>{poleData=parseCSV(t);}).catch(()=>{}));
+  }
+  await Promise.all(tasks);
+}
+
+// Construit la liste de toutes les demandes SAL + Pôle faites par un membre, toutes statuts confondus
+function buildMemberRequestsHtml(pseudo){
+  if(!pseudo) return '<div class="empty" style="padding:14px">—</div>';
+  const lp=pseudo.toLowerCase();
+  const rows=[];
+  (window._salRows||[]).forEach(r=>{
+    if((getCol(r,'Pseudo jeu')||'').toLowerCase()!==lp) return;
+    const key=r['Timestamp'];
+    rows.push({
+      date:key||'',
+      type:'SAL',
+      typeStyle:'background:#fef3c7;color:#854F0B',
+      detail:getCol(r,'Type de SAL demandé')||'—',
+      statut:salStatuts[key]||'En attente',
+      target:'sal'
+    });
+  });
+  (poleData||[]).forEach(r=>{
+    if((getCol(r,'Pseudo jeu')||'').toLowerCase()!==lp) return;
+    const key=r['Timestamp'];
+    rows.push({
+      date:key||'',
+      type:'Pôle',
+      typeStyle:'background:#ede9fe;color:#4c1d95',
+      detail:getCol(r,'À quel pôle souhaitez-vous accéder ?')||'—',
+      statut:poleStatuts[key]||'En attente',
+      target:'pole'
+    });
+  });
+  if(!rows.length) return '<div class="empty" style="padding:14px">Aucune demande trouvée pour ce membre.</div>';
+  rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  return rows.map(r=>{
+    const sbClass=r.statut==='Traité'?'b-accepte':r.statut==='En cours'?'b-livre':'b-attente';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-light);cursor:pointer" onclick="goToMemberRequest('${pseudo.replace(/'/g,"\\'")}','${r.target}',event)" title="Voir dans ${r.type}">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+        <span class="badge" style="${r.typeStyle};flex-shrink:0">${r.type}</span>
+        <span style="font-size:13px;color:var(--text-sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.detail}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-size:11px;color:var(--text-muted)">${r.date}</span>
+        <span class="badge ${sbClass}">${r.statut}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function getPendingTypes(pseudo) {
   if (!pseudo) return [];
   const lp = pseudo.toLowerCase();
@@ -2748,6 +2828,15 @@ function goToPendingRequest(pseudo, event) {
   const types = getPendingTypes(pseudo);
   if (!types.length) return;
   const target = types.includes('sal') ? 'sal' : 'pole';
+  goToMemberRequest(pseudo, target, event);
+}
+
+// Navigue vers l'onglet SAL ou Pôle et met en surbrillance la carte du membre concerné,
+// quel que soit son statut (utilisé depuis l'historique des demandes d'un membre)
+function goToMemberRequest(pseudo, target, event) {
+  if (event) event.stopPropagation();
+  closeModal('modal-view-membre');
+  closeModal('modal-membre');
   const navBtn = document.getElementById('nav-' + target);
   if (navBtn) {
     showPage(target, navBtn);
@@ -3257,31 +3346,45 @@ function getMontantBadge(row) {
 
 
 // ============================================================
-// API TRANSPORT MANAGER — Suivi membres (/api/v1/membres_alliance)
+// API TRANSPORT MANAGER — via proxy Vercel /api/tm (évite CORS + garde la clé côté serveur)
 // ============================================================
-const TM_API_BASE = 'https://transport-manager.net';
+function getTMKey() { return localStorage.getItem('tm_alliance_api_key') || ''; }
+function hasServerTMKey() { return !!window.TM_API_KEY; }
 
-function getTMKey() { return localStorage.getItem('tm_alliance_api_key') || window.TM_API_KEY || ''; }
+// Tous les appels TM passent par ce proxy : le navigateur n'a plus besoin d'atteindre
+// directement transport-manager.net (donc plus de blocage CORS/Safari), et si aucune
+// clé locale n'est enregistrée, le proxy utilise automatiquement TM_API_KEY côté Vercel.
+function tmFetch(endpointPath, explicitKey) {
+  const key = explicitKey || getTMKey();
+  const qs = '/api/tm?endpoint=' + encodeURIComponent(endpointPath) + (key ? '&key=' + encodeURIComponent(key) : '');
+  return fetch(qs, { headers: { 'Accept': 'application/json' } });
+}
 
 function saveTMKey() {
   const key = document.getElementById('tm-api-key-input').value.trim();
   if (!key) { document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">Clé vide.</span>'; return; }
   localStorage.setItem('tm_alliance_api_key', key);
-  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé sauvegardée localement.</span>';
+  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé locale sauvegardée (elle sera utilisée en priorité sur celle du serveur).</span>';
+}
+
+function clearLocalTMKey() {
+  localStorage.removeItem('tm_alliance_api_key');
+  document.getElementById('tm-api-key-input').value = '';
+  toast('Clé locale supprimée — la clé du serveur sera utilisée');
+  loadTMPage();
 }
 
 async function testTMKey() {
-  const key = getTMKey() || document.getElementById('tm-api-key-input').value.trim();
-  if (!key) { document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">Entrez une clé.</span>'; return; }
+  const typed = document.getElementById('tm-api-key-input').value.trim();
+  const key = (typed && typed !== '••••••••') ? typed : getTMKey();
   document.getElementById('tm-key-result').innerHTML = '<span style="color:#555">Test en cours...</span>';
   try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
+    const res = await tmFetch('/api/v1/membres_alliance', key);
     if (res.ok) {
       document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Connexion réussie !</span>';
     } else {
-      document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b"><i class="fa-solid fa-circle-xmark"></i> Erreur ' + res.status + ' — clé invalide ou accès refusé</span>';
+      const body = await res.json().catch(()=>({}));
+      document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b"><i class="fa-solid fa-circle-xmark"></i> Erreur ' + res.status + (body.error?' — '+body.error:' — clé invalide ou accès refusé') + '</span>';
     }
   } catch(e) {
     document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b"><i class="fa-solid fa-circle-xmark"></i> Erreur réseau : ' + e.message + '</span>';
@@ -3289,33 +3392,29 @@ async function testTMKey() {
 }
 
 function loadTMPage() {
-  const key = getTMKey();
+  const local = getTMKey();
   const input = document.getElementById('tm-api-key-input');
-  if (input && key) input.value = '••••••••';
+  if (input) input.value = local ? '••••••••' : '';
   const resultEl = document.getElementById('tm-key-result');
-  if (resultEl && !localStorage.getItem('tm_alliance_api_key') && window.TM_API_KEY) {
-    resultEl.innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé fournie automatiquement par le serveur — aucune saisie nécessaire.</span>';
+  if (resultEl) {
+    resultEl.innerHTML = local
+      ? '<span style="color:#555">Clé locale active. <a href="#" onclick="clearLocalTMKey();return false;" style="color:#0a1f5c;text-decoration:underline">Utiliser la clé du serveur à la place</a></span>'
+      : (hasServerTMKey()
+          ? '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé fournie automatiquement par le serveur — aucune saisie nécessaire.</span>'
+          : '<span style="color:#991b1b">Aucune clé serveur configurée (variable TM_API_KEY absente sur Vercel) et aucune clé locale.</span>');
   }
   document.getElementById('tm-status-card').style.display = '';
-  if (key) loadTMMembers();
+  loadTMMembers();
 }
 
 async function loadTMMembers() {
-  const key = getTMKey();
-  if (!key) {
-    document.getElementById('tm-status-dot').style.background = '#d8d8d8';
-    document.getElementById('tm-status-text').textContent = 'Clé API non configurée';
-    return;
-  }
   document.getElementById('tm-status-dot').style.background = '#f59e0b';
   document.getElementById('tm-status-text').textContent = 'Chargement...';
   try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const membres_tm = Array.isArray(data) ? data : (data.membres || data.members || data.data || []);
+    const res = await tmFetch('/api/v1/membres_alliance');
+    const body = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(body.error || ('HTTP ' + res.status));
+    const membres_tm = Array.isArray(body) ? body : (body.membres || body.members || body.data || []);
     document.getElementById('tm-status-dot').style.background = '#166534';
     document.getElementById('tm-status-text').textContent = '✓ ' + membres_tm.length + ' membre(s) — Dernière MAJ : ' + new Date().toLocaleTimeString('fr-FR');
     renderTMMembers(membres_tm);
@@ -3389,9 +3488,6 @@ let tmCurrentEndpoint = null;
 let tmCurrentData     = [];
 
 async function loadTMEndpoint(name) {
-  const key = getTMKey();
-  if (!key) { toast('Clé API non configurée'); return; }
-
   // Mettre en surbrillance l'onglet actif
   document.querySelectorAll('[id^="tm-tab-"]').forEach(b => b.classList.remove('btn-primary'));
   const tab = document.getElementById('tm-tab-' + name);
@@ -3409,11 +3505,9 @@ async function loadTMEndpoint(name) {
   document.getElementById('tm-status-text').textContent = 'Chargement ' + ep.label + '...';
 
   try {
-    const res = await fetch(TM_API_BASE + ep.url, {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' — clé invalide ou accès refusé');
-    const raw = await res.json();
+    const res = await tmFetch(ep.url);
+    const raw = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(raw.error || ('HTTP ' + res.status + ' — clé invalide ou accès refusé'));
     // Chercher les données dans toutes les structures possibles
   if (Array.isArray(raw)) {
     tmCurrentData = raw;
@@ -3481,12 +3575,8 @@ function renderTMData(name, data) {
 let tmVehiculesEnLocation = [];
 
 async function checkLocationsEnCours() {
-  const key = getTMKey();
-  if (!key) return;
   try {
-    const res = await fetch(TM_API_BASE + '/api/v1/vehicules?parc=location', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
+    const res = await tmFetch('/api/v1/vehicules?parc=location');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const raw = await res.json();
     tmVehiculesEnLocation = Array.isArray(raw) ? raw : (raw.data || raw.vehicules || []);
@@ -3515,13 +3605,9 @@ function getNbVehiculesLouesADate(dateDebut) {
 }
 
 async function syncTMToSupabase() {
-  const key = getTMKey();
-  if (!key) { toast('Clé API non configurée'); return; }
   document.getElementById('tm-status-text').textContent = 'Synchronisation en cours...';
   try {
-    const res = await fetch(TM_API_BASE + '/api/v1/membres_alliance', {
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
-    });
+    const res = await tmFetch('/api/v1/membres_alliance');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const membres_tm = Array.isArray(data) ? data : (data.membres || data.members || data.data || []);
