@@ -2782,19 +2782,24 @@ function buildMemberRequestsHtml(pseudo){
       typeStyle:'background:#fef3c7;color:#854F0B',
       detail:getCol(r,'Type de SAL demandé')||'—',
       statut:salStatuts[key]||'En attente',
-      target:'sal'
+      target:'sal',
+      montant:null
     });
   });
   (poleData||[]).forEach(r=>{
     if((getCol(r,'Pseudo jeu')||'').toLowerCase()!==lp) return;
     const key=r['Timestamp'];
+    const pole=getCol(r,'À quel pôle souhaitez-vous accéder ?')||'';
+    const service=getAllCols(r,'Quel service souhaitez-vous utiliser ?')||getCol(r,'Quel service souhaitez-vous utiliser ?')||'';
+    const calc=calcMontantRemboursement(r);
     rows.push({
       date:key||'',
-      type:'Pôle',
-      typeStyle:'background:#ede9fe;color:#4c1d95',
-      detail:getCol(r,'À quel pôle souhaitez-vous accéder ?')||'—',
+      type:pole.includes('Financement')?'Financement':'Exploitation',
+      typeStyle:pole.includes('Financement')?'background:#d1fae5;color:#065f46':'background:#ede9fe;color:#4c1d95',
+      detail:service||pole||'—',
       statut:poleStatuts[key]||'En attente',
-      target:'pole'
+      target:'pole',
+      montant:calc?calc.total:null
     });
   });
   if(!rows.length) return '<div class="empty" style="padding:14px">Aucune demande trouvée pour ce membre.</div>';
@@ -2802,14 +2807,15 @@ function buildMemberRequestsHtml(pseudo){
   return rows.map(r=>{
     const sbClass=r.statut==='Traité'?'b-accepte':r.statut==='En cours'?'b-livre':'b-attente';
     return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-light);cursor:pointer" onclick="goToMemberRequest('${pseudo.replace(/'/g,"\\'")}','${r.target}',event)" title="Voir dans ${r.type}">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0">
-        <span class="badge" style="${r.typeStyle};flex-shrink:0">${r.type}</span>
-        <span style="font-size:13px;color:var(--text-sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.detail}</span>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+        <span style="font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.detail}</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <span class="badge" style="${r.typeStyle};font-size:10px;padding:2px 8px">${r.type}</span>
+          <span style="font-size:11px;color:var(--text-muted)">${r.date}</span>
+          ${r.montant?`<span style="font-size:11px;font-weight:700;color:#166534">${fe(r.montant)}</span>`:''}
+        </span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <span style="font-size:11px;color:var(--text-muted)">${r.date}</span>
-        <span class="badge ${sbClass}">${r.statut}</span>
-      </div>
+      <span class="badge ${sbClass}" style="flex-shrink:0">${r.statut}</span>
     </div>`;
   }).join('');
 }
