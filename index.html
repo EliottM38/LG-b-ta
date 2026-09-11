@@ -410,16 +410,16 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
   <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavMenu()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
   <div class="nav-links" id="nav-links">
-  <button class="active" id="nav-membres" onclick="showPage('membres',this)">Membres</button>
-  <button id="nav-factures" onclick="showPage('factures',this)">Location</button>
-  <button id="nav-interimaires" onclick="showPage('interimaires',this)">Intérimaires</button>
-  <button id="nav-sal" onclick="showPage('sal',this)">SAL</button>
-  <button id="nav-pole" onclick="showPage('pole',this)">Exploitation & Financement</button>
-  <button id="nav-objectifs" onclick="showPage('objectifs',this)">Objectifs</button>
-  <button id="nav-historique" onclick="showPage('historique',this)">Historique</button>
-  <button id="nav-tm" onclick="showPage('tm',this)" style="display:none"><i class="fa-solid fa-bus"></i> TM</button>
-  <button id="nav-rgpd" onclick="showPage('rgpd',this)">RGPD</button>
-  <button id="nav-acces" onclick="showPage('acces',this)">Accès staff</button>
+  <button class="active" id="nav-membres" data-page="membres" onclick="showPage('membres',this)"><i class="fa-solid fa-users"></i> Membres</button>
+  <button id="nav-factures" data-page="factures" onclick="showPage('factures',this)"><i class="fa-solid fa-file-invoice-dollar"></i> Location</button>
+  <button id="nav-interimaires" data-page="interimaires" onclick="showPage('interimaires',this)"><i class="fa-solid fa-user-clock"></i> Intérimaires</button>
+  <button id="nav-sal" data-page="sal" onclick="showPage('sal',this)"><i class="fa-solid fa-file-lines"></i> SAL</button>
+  <button id="nav-pole" data-page="pole" onclick="showPage('pole',this)"><i class="fa-solid fa-file-lines"></i> Exploitation & Financement</button>
+  <button id="nav-objectifs" data-page="objectifs" onclick="showPage('objectifs',this)"><i class="fa-solid fa-bullseye"></i> Objectifs</button>
+  <button id="nav-historique" data-page="historique" onclick="showPage('historique',this)"><i class="fa-solid fa-clock-rotate-left"></i> Historique</button>
+  <button id="nav-tm" data-page="tm" onclick="showPage('tm',this)" style="display:none"><i class="fa-solid fa-bus"></i> TM</button>
+  <button id="nav-rgpd" data-page="rgpd" onclick="showPage('rgpd',this)">RGPD</button>
+  <button id="nav-acces" data-page="acces" onclick="showPage('acces',this)"><i class="fa-solid fa-gear"></i> Accès staff</button>
   <div class="nav-right">
     <div class="nav-user">Connecté : <strong id="nav-username"></strong></div>
     <button class="logout-btn" onclick="openProfil()" style="background:#f0f7ff;color:#0a1f5c;border-color:#bfdbfe">Mon profil</button>
@@ -427,6 +427,17 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
   </div>
 </nav>
+
+<!-- ===== BARRE DE NAVIGATION MOBILE — style "liquid glass" iOS 26 (mobile uniquement) ===== -->
+<div class="mobile-tabbar" id="mobile-tabbar">
+  <button class="active" data-page="membres" onclick="showPage('membres',this)" title="Membres"><i class="fa-solid fa-users"></i></button>
+  <button data-page="factures" onclick="showPage('factures',this)" title="Location"><i class="fa-solid fa-file-invoice-dollar"></i></button>
+  <button data-page="sal" onclick="showPage('sal',this)" title="Formulaires"><i class="fa-solid fa-file-lines"></i></button>
+  <button data-page="objectifs" onclick="showPage('objectifs',this)" title="Objectifs" class="mtab-accent"><i class="fa-solid fa-bullseye"></i></button>
+  <button data-page="historique" onclick="showPage('historique',this)" title="Historique"><i class="fa-solid fa-clock-rotate-left"></i></button>
+  <button data-page="tm" onclick="showPage('tm',this)" title="TM" id="mtab-tm" style="display:none"><i class="fa-solid fa-bus"></i></button>
+  <button data-page="acces" onclick="showPage('acces',this)" title="Paramètres"><i class="fa-solid fa-gear"></i></button>
+</div>
 
 <!-- PAGE MEMBRES -->
 <div class="page active" id="page-membres">
@@ -1267,7 +1278,10 @@ async function startApp(){
   document.getElementById('nav-objectifs').style.display=perms.objectifs?'':'none';
   document.getElementById('nav-historique').style.display=perms.historique?'':'none';
   document.getElementById('nav-rgpd').style.display='';
-  if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)) document.getElementById('nav-tm').style.display='';
+  if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)){
+    document.getElementById('nav-tm').style.display='';
+    const mtabTm=document.getElementById('mtab-tm'); if(mtabTm) mtabTm.style.display='';
+  }
   // Afficher config GForms pour les présidents
   const cfgCard = document.getElementById('card-config');
   if (cfgCard) cfgCard.style.display = currentUser.role === 'president' ? '' : 'none';
@@ -1292,9 +1306,9 @@ async function startApp(){
 
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('nav button:not(.logout-btn)').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('nav button:not(.logout-btn), .mobile-tabbar button').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  if(btn) btn.classList.add('active');
+  document.querySelectorAll('[data-page="'+id+'"]').forEach(b=>b.classList.add('active'));
   closeNavMenu();
   window.scrollTo({top:0,behavior:'instant'});
   if(id==='membres')    renderMembres();
