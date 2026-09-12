@@ -56,40 +56,48 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 
 /* ── NAV ── */
 nav{background:var(--navy-dark);
-  padding:0 20px;display:flex;align-items:center;gap:1px;flex-wrap:wrap;
+  padding:0 14px;display:flex;align-items:center;gap:1px;
   box-shadow:0 2px 20px rgba(8,15,40,.4);position:sticky;top:0;z-index:50;
   border-bottom:1px solid rgba(184,146,42,.3)}
-nav .logo{display:flex;align-items:center;gap:10px;
-  padding:8px 18px 8px 0;border-right:1px solid rgba(184,146,42,.3);margin-right:8px;flex-shrink:0}
+nav .logo{display:flex;align-items:center;gap:10px;padding:8px 0;flex-shrink:0}
 nav .logo img{height:38px;filter:drop-shadow(0 2px 6px rgba(184,146,42,.4))}
 nav .logo-text{font-weight:800;font-size:13px;color:#fff;line-height:1.2;letter-spacing:.01em}
 nav .logo-text span{color:var(--gold-light);display:block;font-size:11px;font-weight:500}
-nav button{background:none;border:none;padding:14px 11px;cursor:pointer;
-  font-size:11px;font-weight:600;color:rgba(255,255,255,.65);
-  border-bottom:3px solid transparent;transition:all .2s;letter-spacing:.02em;text-transform:uppercase;
-  white-space:nowrap}
-nav button:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.05)}
-nav button.active{color:#fff;border-bottom-color:var(--gold-light);background:rgba(255,255,255,.06)}
-.nav-group{position:relative}
-.nav-group>button{display:flex;align-items:center;gap:5px}
-.nav-group .caret{font-size:8px;opacity:.7;transition:transform .2s}
+nav .nav-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+nav button{background:none;border:none;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:9px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.65);
+  transition:all .2s;white-space:nowrap;text-align:left;border-radius:10px;width:100%}
+nav button:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+nav button.active{color:#fff;background:rgba(255,255,255,.09)}
+.nav-group .caret{font-size:9px;opacity:.6;margin-left:auto;transition:transform .2s}
 .nav-group.open .caret{transform:rotate(180deg)}
-.nav-dropdown{position:absolute;top:100%;left:0;background:var(--navy-dark);min-width:220px;
-  border:1px solid rgba(184,146,42,.3);border-top:none;border-radius:0 0 12px 12px;
-  box-shadow:0 16px 30px rgba(0,0,0,.4);display:none;flex-direction:column;z-index:60;overflow:hidden}
-.nav-group:hover .nav-dropdown,.nav-group.open .nav-dropdown{display:flex}
-.nav-dropdown button{text-transform:none;letter-spacing:0;font-size:13px;padding:12px 18px;
-  border-bottom:1px solid rgba(255,255,255,.06);text-align:left;justify-content:flex-start;
-  width:100%;border-radius:0}
-.nav-dropdown button:last-child{border-bottom:none}
-.nav-dropdown button.active{border-bottom:1px solid rgba(255,255,255,.06);color:var(--gold-xlight)}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.nav-dropdown{display:none;flex-direction:column;overflow:hidden}
+.nav-group.open .nav-dropdown{display:flex}
+.nav-dropdown button{font-size:12.5px;padding:8px 12px 8px 26px}
+.nav-dropdown button .nav-icon{width:24px;height:24px;font-size:11px}
+.nav-right{display:flex;align-items:center;gap:10px}
 .nav-user{font-size:12px;color:rgba(255,255,255,.55)}
 .nav-user strong{color:var(--gold-xlight)}
 .logout-btn{padding:7px 13px;border:1px solid rgba(255,255,255,.2);border-radius:8px;
   background:rgba(255,255,255,.08);font-size:12px;cursor:pointer;color:rgba(255,255,255,.8);
   transition:all .2s;font-weight:500}
 .logout-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35);color:#fff}
+
+/* ── DESKTOP: barre du haut devient une sidebar verticale ── */
+@media(min-width:901px){
+  nav{position:fixed;top:0;left:0;bottom:0;width:270px;height:100vh;
+    flex-direction:column;align-items:stretch;padding:0;overflow-y:auto;
+    border-bottom:none;border-right:1px solid rgba(184,146,42,.3)}
+  nav .logo{padding:22px 20px;border-bottom:1px solid rgba(184,146,42,.2);margin-bottom:6px}
+  nav .nav-hamburger{display:none!important}
+  .nav-links{display:flex!important;flex-direction:column;gap:2px;padding:0 12px;flex:1;overflow-y:auto}
+  .nav-right{flex-direction:column;align-items:stretch;gap:8px;padding:14px 16px 20px;
+    border-top:1px solid rgba(184,146,42,.2);margin-top:6px}
+  .nav-user{text-align:center}
+  .page{margin-left:270px;max-width:none;padding:32px 40px}
+  .home-icons{max-width:1080px}
+}
 
 /* ── PAGES ── */
 .page{display:none;padding:28px 24px;max-width:1080px;margin:0 auto}
@@ -200,7 +208,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
 .home-icons a:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(13,31,78,.14)}
 @media(max-width:900px){.home-icons a{flex:1 1 30%}}
 .msg-badge{background:#e11d48;color:#fff;border-radius:10px;font-size:10px;font-weight:800;
-  padding:1px 6px;margin-left:6px;vertical-align:2px}
+  padding:1px 6px;margin-left:auto;flex-shrink:0}
 
 /* ── PICKER (choix Location / Formulaires sur mobile) ── */
 .picker-grid{display:flex;flex-direction:column;gap:14px;margin-top:6px}
@@ -601,37 +609,37 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
   <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavMenu()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
   <div class="nav-links" id="nav-links">
-  <button class="active" id="nav-home" data-page="home" onclick="showPage('home',this)"><i class="fa-solid fa-house"></i> Accueil</button>
-  <button id="nav-membres" data-page="membres" onclick="showPage('membres',this)"><i class="fa-solid fa-users"></i> Membres</button>
+  <button class="active" id="nav-home" data-page="home" onclick="showPage('home',this)"><span class="nav-icon" style="background:#f0b429"><i class="fa-solid fa-house"></i></span><span class="nav-label">Accueil</span></button>
+  <button id="nav-membres" data-page="membres" onclick="showPage('membres',this)"><span class="nav-icon" style="background:#3b82f6"><i class="fa-solid fa-users"></i></span><span class="nav-label">Membres</span></button>
 
   <div class="nav-group" id="navgrp-location">
-    <button type="button" onclick="toggleNavGroup('navgrp-location')" data-navgrp="factures,interimaires"><i class="fa-solid fa-file-invoice-dollar"></i> Location <i class="fa-solid fa-chevron-down caret"></i></button>
+    <button type="button" onclick="toggleNavGroup('navgrp-location')" data-navgrp="factures,interimaires"><span class="nav-icon" style="background:#10b981"><i class="fa-solid fa-file-invoice-dollar"></i></span><span class="nav-label">Location</span><i class="fa-solid fa-chevron-down caret"></i></button>
     <div class="nav-dropdown">
-      <button id="nav-factures" data-page="factures" onclick="showPage('factures',this)"><i class="fa-solid fa-bus"></i> Location véhicules</button>
-      <button id="nav-interimaires" data-page="interimaires" onclick="showPage('interimaires',this)"><i class="fa-solid fa-user-clock"></i> Location intérimaires</button>
+      <button id="nav-factures" data-page="factures" onclick="showPage('factures',this)"><span class="nav-icon" style="background:#10b981"><i class="fa-solid fa-bus"></i></span><span class="nav-label">Location véhicules</span></button>
+      <button id="nav-interimaires" data-page="interimaires" onclick="showPage('interimaires',this)"><span class="nav-icon" style="background:#10b981"><i class="fa-solid fa-user-clock"></i></span><span class="nav-label">Location intérimaires</span></button>
     </div>
   </div>
 
   <div class="nav-group" id="navgrp-formulaires">
-    <button type="button" onclick="toggleNavGroup('navgrp-formulaires')" data-navgrp="sal,pole"><i class="fa-solid fa-file-lines"></i> Formulaires <i class="fa-solid fa-chevron-down caret"></i></button>
+    <button type="button" onclick="toggleNavGroup('navgrp-formulaires')" data-navgrp="sal,pole"><span class="nav-icon" style="background:#8b5cf6"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">Formulaires</span><i class="fa-solid fa-chevron-down caret"></i></button>
     <div class="nav-dropdown">
-      <button id="nav-sal" data-page="sal" onclick="showPage('sal',this)"><i class="fa-solid fa-file-lines"></i> SAL</button>
-      <button id="nav-pole" data-page="pole" onclick="showPage('pole',this)"><i class="fa-solid fa-file-lines"></i> Exploitation & Financement</button>
+      <button id="nav-sal" data-page="sal" onclick="showPage('sal',this)"><span class="nav-icon" style="background:#8b5cf6"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">SAL</span></button>
+      <button id="nav-pole" data-page="pole" onclick="showPage('pole',this)"><span class="nav-icon" style="background:#8b5cf6"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">Exploitation & Financement</span></button>
     </div>
   </div>
 
-  <button id="nav-objectifs" data-page="objectifs" onclick="showPage('objectifs',this)"><i class="fa-solid fa-bullseye"></i> Objectifs</button>
-  <button id="nav-historique" data-page="historique" onclick="showPage('historique',this)"><i class="fa-solid fa-clock-rotate-left"></i> Historique</button>
-  <button id="nav-cloud" data-page="cloud" onclick="showPage('cloud',this)"><i class="fa-solid fa-cloud"></i> Cloud</button>
-  <button id="nav-messages" data-page="messages" onclick="showPage('messages',this)"><i class="fa-solid fa-comments"></i> Messagerie <span class="msg-badge" id="msg-badge" style="display:none">0</span></button>
-  <button id="nav-agenda" data-page="agenda" onclick="showPage('agenda',this)"><i class="fa-solid fa-calendar-days"></i> Agenda</button>
+  <button id="nav-objectifs" data-page="objectifs" onclick="showPage('objectifs',this)"><span class="nav-icon" style="background:#f97316"><i class="fa-solid fa-bullseye"></i></span><span class="nav-label">Objectifs</span></button>
+  <button id="nav-historique" data-page="historique" onclick="showPage('historique',this)"><span class="nav-icon" style="background:#64748b"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="nav-label">Historique</span></button>
+  <button id="nav-cloud" data-page="cloud" onclick="showPage('cloud',this)"><span class="nav-icon" style="background:#0ea5e9"><i class="fa-solid fa-cloud"></i></span><span class="nav-label">Cloud</span></button>
+  <button id="nav-messages" data-page="messages" onclick="showPage('messages',this)"><span class="nav-icon" style="background:#ec4899"><i class="fa-solid fa-comments"></i></span><span class="nav-label">Messagerie</span><span class="msg-badge" id="msg-badge" style="display:none">0</span></button>
+  <button id="nav-agenda" data-page="agenda" onclick="showPage('agenda',this)"><span class="nav-icon" style="background:#ef4444"><i class="fa-solid fa-calendar-days"></i></span><span class="nav-label">Agenda</span></button>
 
   <div class="nav-group" id="navgrp-plus">
-    <button type="button" onclick="toggleNavGroup('navgrp-plus')" data-navgrp="tm,rgpd,acces"><i class="fa-solid fa-ellipsis"></i> Plus <i class="fa-solid fa-chevron-down caret"></i></button>
+    <button type="button" onclick="toggleNavGroup('navgrp-plus')" data-navgrp="tm,rgpd,acces"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-ellipsis"></i></span><span class="nav-label">Plus</span><i class="fa-solid fa-chevron-down caret"></i></button>
     <div class="nav-dropdown">
-      <button id="nav-tm" data-page="tm" onclick="showPage('tm',this)" style="display:none"><i class="fa-solid fa-bus"></i> TM</button>
-      <button id="nav-rgpd" data-page="rgpd" onclick="showPage('rgpd',this)"><i class="fa-solid fa-shield-halved"></i> RGPD</button>
-      <button id="nav-acces" data-page="acces" onclick="showPage('acces',this)"><i class="fa-solid fa-gear"></i> Accès staff</button>
+      <button id="nav-tm" data-page="tm" onclick="showPage('tm',this)" style="display:none"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-bus"></i></span><span class="nav-label">TM</span></button>
+      <button id="nav-rgpd" data-page="rgpd" onclick="showPage('rgpd',this)"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-shield-halved"></i></span><span class="nav-label">RGPD</span></button>
+      <button id="nav-acces" data-page="acces" onclick="showPage('acces',this)"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-gear"></i></span><span class="nav-label">Accès staff</span></button>
     </div>
   </div>
 
