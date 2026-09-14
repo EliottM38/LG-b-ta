@@ -242,7 +242,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;
   background:linear-gradient(160deg,var(--navy),var(--navy-mid))}
 .picker-card .picker-text{flex:1}
-.picker-card .picker-title{font-weight:800;color:var(--navy);font-size:15px}
+.picker-card .picker-title{font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px}
 .picker-card .picker-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
 .picker-card i.chev{color:var(--border);font-size:15px}
 
@@ -708,11 +708,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <button data-page="membres" onclick="handleTabClick(event,'membres',this)" title="Membres"><i class="fa-solid fa-users"></i><span>Membres</span></button>
   <button data-page="factures" onclick="handleTabClick(event,'location-picker',this)" title="Location"><i class="fa-solid fa-file-invoice-dollar"></i><span>Location</span></button>
   <button data-page="sal" onclick="handleTabClick(event,'formulaires-picker',this)" title="Formulaires"><i class="fa-solid fa-file-lines"></i><span>Formul.</span></button>
-  <button data-page="objectifs" onclick="handleTabClick(event,'objectifs',this)" title="Objectifs"><i class="fa-solid fa-bullseye"></i><span>Objectifs</span></button>
-  <button data-page="historique" onclick="handleTabClick(event,'historique',this)" title="Historique"><i class="fa-solid fa-clock-rotate-left"></i><span>Historiq.</span></button>
-  <button data-page="tm" onclick="handleTabClick(event,'tm',this)" title="TM" id="mtab-tm" style="display:none"><i class="fa-solid fa-bus"></i><span>TM</span></button>
-  <button data-page="acces" onclick="handleTabClick(event,'acces',this)" title="Paramètres"><i class="fa-solid fa-gear"></i><span>Réglages</span></button>
-
+  <button data-page="plus-menu" onclick="handleTabClick(event,'plus-menu',this)" title="Plus"><i class="fa-solid fa-ellipsis"></i><span>Plus</span></button>
 </div>
 
 <!-- PAGE ACCUEIL -->
@@ -804,6 +800,53 @@ tr:hover td{background:rgba(13,31,78,.02)}
 </div>
 
 <!-- PAGE FACTURES -->
+<!-- PAGE MENU "PLUS" (mobile) -->
+<div class="page" id="page-plus-menu">
+  <div class="page-header"><h1>Plus</h1></div>
+  <div class="picker-grid">
+    <div class="picker-card" onclick="showPage('objectifs',document.getElementById('nav-objectifs'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#f97316,#fb923c)"><i class="fa-solid fa-bullseye"></i></div>
+      <div class="picker-text"><div class="picker-title">Objectifs</div><div class="picker-sub">Suivi des objectifs de l'alliance</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" onclick="showPage('historique',document.getElementById('nav-historique'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#64748b,#94a3b8)"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div class="picker-text"><div class="picker-title">Historique</div><div class="picker-sub">Journal des actions du staff</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" onclick="showPage('cloud',document.getElementById('nav-cloud'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#0ea5e9,#38bdf8)"><i class="fa-solid fa-cloud"></i></div>
+      <div class="picker-text"><div class="picker-title">Cloud</div><div class="picker-sub">Fichiers partagés entre le staff</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" onclick="showPage('messages',document.getElementById('nav-messages'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#ec4899,#f472b6)"><i class="fa-solid fa-comments"></i></div>
+      <div class="picker-text"><div class="picker-title">Messagerie <span class="msg-badge" id="plus-msg-badge" style="display:none">0</span></div><div class="picker-sub">Messages internes entre le staff</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" onclick="showPage('agenda',document.getElementById('nav-agenda'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#ef4444,#f87171)"><i class="fa-solid fa-calendar-days"></i></div>
+      <div class="picker-text"><div class="picker-title">Agenda</div><div class="picker-sub">Événements et planning</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" id="plus-tm-item" style="display:none" onclick="showPage('tm',document.getElementById('nav-tm'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#6b7280,#9ca3af)"><i class="fa-solid fa-bus"></i></div>
+      <div class="picker-text"><div class="picker-title">TM</div><div class="picker-sub">Données Transport Manager</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" onclick="showPage('acces',document.getElementById('nav-acces'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#6b7280,#9ca3af)"><i class="fa-solid fa-gear"></i></div>
+      <div class="picker-text"><div class="picker-title">Accès staff</div><div class="picker-sub">Comptes, tarifs, configuration</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+    <div class="picker-card" onclick="showPage('rgpd',document.getElementById('nav-rgpd'))">
+      <div class="picker-icon" style="background:linear-gradient(160deg,#6b7280,#9ca3af)"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="picker-text"><div class="picker-title">RGPD</div><div class="picker-sub">Export et suppression des données</div></div>
+      <i class="fa-solid fa-chevron-right chev"></i>
+    </div>
+  </div>
+</div>
+
 <!-- PAGE PICKER LOCATION (mobile) -->
 <div class="page" id="page-location-picker">
   <div class="page-header"><h1>Location</h1></div>
@@ -1753,7 +1796,7 @@ async function startApp(){
   document.getElementById('nav-rgpd').style.display='';
   if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)){
     document.getElementById('nav-tm').style.display='';
-    const mtabTm=document.getElementById('mtab-tm'); if(mtabTm) mtabTm.style.display='';
+    const mtabTm=document.getElementById('plus-tm-item'); if(mtabTm) mtabTm.style.display='';
   }
   // Afficher config GForms pour les présidents
   const cfgCard = document.getElementById('card-config');
@@ -1781,7 +1824,9 @@ function showPage(id,btn){
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('[data-page="'+id+'"]').forEach(b=>b.classList.add('active'));
   const tabbarAliasMap={factures:'factures',interimaires:'factures','location-picker':'factures',
-    sal:'sal',pole:'sal','formulaires-picker':'sal'};
+    sal:'sal',pole:'sal','formulaires-picker':'sal',
+    objectifs:'plus-menu',historique:'plus-menu',cloud:'plus-menu',messages:'plus-menu',
+    agenda:'plus-menu',tm:'plus-menu',acces:'plus-menu',rgpd:'plus-menu'};
   const tabbarMatchId=tabbarAliasMap[id];
   if(tabbarMatchId){
     document.querySelectorAll('.mobile-tabbar [data-page="'+tabbarMatchId+'"]').forEach(b=>b.classList.add('active'));
@@ -4832,6 +4877,8 @@ function updateMsgBadge(){
   const n=msgAllRows.filter(m=>m.receiver_id===currentUser.id&&!m.read_at).length;
   const badge=document.getElementById('msg-badge');
   if(badge){ badge.style.display=n?'inline-block':'none'; badge.textContent=n; }
+  const plusBadge=document.getElementById('plus-msg-badge');
+  if(plusBadge){ plusBadge.style.display=n?'inline-block':'none'; plusBadge.textContent=n; }
 }
 
 // ============================================================
