@@ -89,26 +89,37 @@ nav button.active{color:#fff;background:rgba(255,255,255,.09)}
   nav{position:fixed;top:0;left:0;bottom:0;width:72px;height:100vh;z-index:200;
     flex-direction:column;align-items:stretch;padding:0;overflow-x:hidden;overflow-y:auto;
     border-bottom:none;border-right:1px solid rgba(184,146,42,.3);
-    transition:width .5s cubic-bezier(.65,0,.35,1);box-shadow:0 0 0 rgba(0,0,0,0)}
-  nav:hover{width:270px;box-shadow:10px 0 34px rgba(5,10,30,.35)}
-  nav .logo{padding:22px 0;border-bottom:1px solid rgba(184,146,42,.2);margin-bottom:6px;
-    justify-content:center}
-  nav:hover .logo{padding:22px 20px;justify-content:flex-start}
-  nav .nav-hamburger{display:none!important}
+    transition:width .5s cubic-bezier(.22,1,.36,1),box-shadow .5s cubic-bezier(.22,1,.36,1);
+    box-shadow:0 0 0 rgba(0,0,0,0)}
+  nav:hover{width:270px;box-shadow:14px 0 40px rgba(5,10,30,.35)}
+
+  /* Icônes toujours ancrées à la même position -> pas de "saut", juste une révélation en fondu */
+  nav .logo{padding:22px 0 22px 21px;border-bottom:1px solid rgba(184,146,42,.2);margin-bottom:6px;
+    justify-content:flex-start;gap:0}
   .nav-links{display:flex!important;flex-direction:column;gap:2px;padding:0 12px;flex:1;overflow-y:auto;overflow-x:hidden}
-  nav button{justify-content:center;padding:10px 0}
-  nav:hover button{justify-content:flex-start;padding:10px 12px}
+  nav button{justify-content:flex-start;padding:10px 0 10px 9px;gap:0}
+  nav .nav-hamburger{display:none!important}
+
+  nav .logo-text,nav .nav-label{
+    display:inline-block;opacity:0;max-width:0;margin-left:0;overflow:hidden;white-space:nowrap;
+    transition:opacity .32s ease .02s,max-width .5s cubic-bezier(.22,1,.36,1),margin-left .5s cubic-bezier(.22,1,.36,1)}
+  nav:hover .logo-text,nav:hover .nav-label{opacity:1;max-width:190px;margin-left:12px}
+  nav .caret{opacity:0;transition:opacity .25s ease,transform .25s ease}
+  nav:hover .caret{opacity:.6}
+  nav:not(:hover) .nav-group .caret{opacity:0}
+  nav .msg-badge{opacity:0;transform:scale(.5);transition:opacity .25s ease .1s,transform .25s ease .1s}
+  nav:hover .msg-badge{opacity:1;transform:scale(1)}
+
   .nav-right{flex-direction:column;align-items:stretch;gap:8px;padding:14px 16px 20px;
-    border-top:1px solid rgba(184,146,42,.2);margin-top:6px;display:none}
-  nav:hover .nav-right{display:flex}
+    border-top:1px solid rgba(184,146,42,.2);margin-top:6px;
+    max-height:0;opacity:0;overflow:hidden;pointer-events:none;
+    transition:max-height .5s cubic-bezier(.22,1,.36,1),opacity .3s ease,padding .5s cubic-bezier(.22,1,.36,1)}
+  nav:hover .nav-right{max-height:160px;opacity:1;pointer-events:auto}
   .nav-user{text-align:center}
-  /* masqué tant que la sidebar est repliée */
-  nav:not(:hover) .logo-text,
-  nav:not(:hover) .nav-label,
-  nav:not(:hover) .caret,
-  nav:not(:hover) .msg-badge{display:none}
+
   nav:not(:hover) .nav-dropdown{display:none!important}
-  .page{margin-left:72px!important;max-width:none!important;padding:32px 40px!important;transition:margin-left .5s cubic-bezier(.65,0,.35,1)}
+  .page{margin-left:72px!important;max-width:none!important;padding:32px 40px!important;
+    transition:margin-left .5s cubic-bezier(.22,1,.36,1)}
   .home-icons{max-width:1080px}
 }
 
