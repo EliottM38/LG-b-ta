@@ -64,7 +64,11 @@ nav .logo img{height:38px;filter:drop-shadow(0 2px 6px rgba(184,146,42,.4))}
 nav .logo-text{font-weight:800;font-size:13px;color:#fff;line-height:1.2;letter-spacing:.01em}
 nav .logo-text span{color:var(--gold-light);display:block;font-size:11px;font-weight:500}
 nav .nav-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  color:rgba(255,255,255,.55);transition:color .2s ease}
+nav button.active .nav-icon,nav button:hover .nav-icon{color:var(--gold-xlight)}
+.nav-dropdown button .nav-icon{color:rgba(255,255,255,.45)}
+.nav-dropdown button.active .nav-icon,.nav-dropdown button:hover .nav-icon{color:var(--gold-xlight)}
 nav button{background:none;border:none;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:9px;
   font-size:13px;font-weight:600;color:rgba(255,255,255,.65);
   transition:all .2s;white-space:nowrap;text-align:left;border-radius:10px;width:100%}
@@ -194,6 +198,16 @@ tr:hover td{background:rgba(13,31,78,.02)}
 .btn-export{background:var(--gold-pale);
   color:var(--gold);border-color:rgba(184,146,42,.3);font-weight:700}
 .btn-export:hover{background:var(--gold-pale);border-color:var(--gold);color:var(--gold)}
+
+/* ── Bouton flottant "+" (remplace les boutons "Nouveau/Ajouter" dans l'en-tête) ── */
+.fab-btn{position:fixed;bottom:28px;right:28px;width:56px;height:56px;border-radius:50%;
+  background:#14161c;color:var(--gold);border:none;font-size:24px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.35);
+  z-index:80;transition:transform .15s ease,box-shadow .15s ease}
+.fab-btn:hover{transform:scale(1.06);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.fab-btn:active{transform:scale(.92)}
+@media(min-width:901px){.fab-btn{right:40px}}
+@media(max-width:900px){.fab-btn{bottom:calc(88px + env(safe-area-inset-bottom));right:18px;width:52px;height:52px;font-size:21px}}
 
 /* ── HOME / ACCUEIL ── */
 .home-hero{display:flex;align-items:center;gap:16px;margin-bottom:6px}
@@ -408,10 +422,12 @@ tr:hover td{background:rgba(13,31,78,.02)}
 .pdf-field{background:#f7f9fc;border-radius:8px;padding:10px 14px;border:1px solid #e8ecf8}
 .pdf-field-lbl{font-size:10px;color:#8896b3;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .pdf-field-val{font-size:14px;font-weight:700;color:#0d1f4e}
-.pdf-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px}
+.pdf-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px;table-layout:fixed}
 .pdf-table th{background:linear-gradient(90deg,#eef2ff,#f0f4ff);padding:9px 14px;
-  text-align:left;font-size:11px;font-weight:800;color:#0d1f4e;border-bottom:2px solid #b8922a}
-.pdf-table td{padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#333}
+  text-align:left;font-size:11px;font-weight:800;color:#0d1f4e;border-bottom:2px solid #b8922a;
+  word-break:break-word;overflow-wrap:anywhere}
+.pdf-table td{padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#333;
+  word-break:break-word;overflow-wrap:anywhere;vertical-align:top}
 .pdf-table tr:last-child td{border-bottom:none}
 .pdf-table .hl{background:linear-gradient(90deg,rgba(13,31,78,.06),rgba(184,146,42,.06));font-weight:800;color:#0d1f4e}
 .pdf-table .hl td{color:#0d1f4e}
@@ -670,37 +686,37 @@ tr:hover td{background:rgba(13,31,78,.02)}
   </div>
   <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavMenu()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
   <div class="nav-links" id="nav-links">
-  <button class="active" id="nav-home" data-page="home" onclick="showPage('home',this)"><span class="nav-icon" style="background:#f0b429"><i class="fa-solid fa-house"></i></span><span class="nav-label">Accueil</span></button>
-  <button id="nav-membres" data-page="membres" onclick="showPage('membres',this)"><span class="nav-icon" style="background:#3b82f6"><i class="fa-solid fa-users"></i></span><span class="nav-label">Membres</span></button>
+  <button class="active" id="nav-home" data-page="home" onclick="showPage('home',this)"><span class="nav-icon"><i class="fa-solid fa-house"></i></span><span class="nav-label">Accueil</span></button>
+  <button id="nav-membres" data-page="membres" onclick="showPage('membres',this)"><span class="nav-icon"><i class="fa-solid fa-users"></i></span><span class="nav-label">Membres</span></button>
 
   <div class="nav-group" id="navgrp-location">
-    <button type="button" onclick="toggleNavGroup('navgrp-location')" data-navgrp="factures,interimaires"><span class="nav-icon" style="background:#10b981"><i class="fa-solid fa-file-invoice-dollar"></i></span><span class="nav-label">Location</span><i class="fa-solid fa-chevron-down caret"></i></button>
+    <button type="button" onclick="toggleNavGroup('navgrp-location')" data-navgrp="factures,interimaires"><span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span><span class="nav-label">Location</span><i class="fa-solid fa-chevron-down caret"></i></button>
     <div class="nav-dropdown">
-      <button id="nav-factures" data-page="factures" onclick="showPage('factures',this)"><span class="nav-icon" style="background:#10b981"><i class="fa-solid fa-bus"></i></span><span class="nav-label">Location véhicules</span></button>
-      <button id="nav-interimaires" data-page="interimaires" onclick="showPage('interimaires',this)"><span class="nav-icon" style="background:#10b981"><i class="fa-solid fa-user-clock"></i></span><span class="nav-label">Location intérimaires</span></button>
+      <button id="nav-factures" data-page="factures" onclick="showPage('factures',this)"><span class="nav-icon"><i class="fa-solid fa-bus"></i></span><span class="nav-label">Location véhicules</span></button>
+      <button id="nav-interimaires" data-page="interimaires" onclick="showPage('interimaires',this)"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span><span class="nav-label">Location intérimaires</span></button>
     </div>
   </div>
 
   <div class="nav-group" id="navgrp-formulaires">
-    <button type="button" onclick="toggleNavGroup('navgrp-formulaires')" data-navgrp="sal,pole"><span class="nav-icon" style="background:#8b5cf6"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">Formulaires</span><i class="fa-solid fa-chevron-down caret"></i></button>
+    <button type="button" onclick="toggleNavGroup('navgrp-formulaires')" data-navgrp="sal,pole"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">Formulaires</span><i class="fa-solid fa-chevron-down caret"></i></button>
     <div class="nav-dropdown">
-      <button id="nav-sal" data-page="sal" onclick="showPage('sal',this)"><span class="nav-icon" style="background:#8b5cf6"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">SAL</span></button>
-      <button id="nav-pole" data-page="pole" onclick="showPage('pole',this)"><span class="nav-icon" style="background:#8b5cf6"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">Exploitation & Financement</span></button>
+      <button id="nav-sal" data-page="sal" onclick="showPage('sal',this)"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">SAL</span></button>
+      <button id="nav-pole" data-page="pole" onclick="showPage('pole',this)"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span><span class="nav-label">Exploitation & Financement</span></button>
     </div>
   </div>
 
-  <button id="nav-objectifs" data-page="objectifs" onclick="showPage('objectifs',this)"><span class="nav-icon" style="background:#f97316"><i class="fa-solid fa-bullseye"></i></span><span class="nav-label">Objectifs</span></button>
-  <button id="nav-historique" data-page="historique" onclick="showPage('historique',this)"><span class="nav-icon" style="background:#64748b"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="nav-label">Historique</span></button>
-  <button id="nav-cloud" data-page="cloud" onclick="showPage('cloud',this)"><span class="nav-icon" style="background:#0ea5e9"><i class="fa-solid fa-cloud"></i></span><span class="nav-label">Cloud</span></button>
-  <button id="nav-messages" data-page="messages" onclick="showPage('messages',this)"><span class="nav-icon" style="background:#ec4899"><i class="fa-solid fa-comments"></i></span><span class="nav-label">Messagerie</span><span class="msg-badge" id="msg-badge" style="display:none">0</span></button>
-  <button id="nav-agenda" data-page="agenda" onclick="showPage('agenda',this)"><span class="nav-icon" style="background:#ef4444"><i class="fa-solid fa-calendar-days"></i></span><span class="nav-label">Agenda</span></button>
+  <button id="nav-objectifs" data-page="objectifs" onclick="showPage('objectifs',this)"><span class="nav-icon"><i class="fa-solid fa-bullseye"></i></span><span class="nav-label">Objectifs</span></button>
+  <button id="nav-historique" data-page="historique" onclick="showPage('historique',this)"><span class="nav-icon"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="nav-label">Historique</span></button>
+  <button id="nav-cloud" data-page="cloud" onclick="showPage('cloud',this)"><span class="nav-icon"><i class="fa-solid fa-cloud"></i></span><span class="nav-label">Cloud</span></button>
+  <button id="nav-messages" data-page="messages" onclick="showPage('messages',this)"><span class="nav-icon"><i class="fa-solid fa-comments"></i></span><span class="nav-label">Messagerie</span><span class="msg-badge" id="msg-badge" style="display:none">0</span></button>
+  <button id="nav-agenda" data-page="agenda" onclick="showPage('agenda',this)"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="nav-label">Agenda</span></button>
 
   <div class="nav-group" id="navgrp-plus">
-    <button type="button" onclick="toggleNavGroup('navgrp-plus')" data-navgrp="tm,rgpd,acces"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-ellipsis"></i></span><span class="nav-label">Plus</span><i class="fa-solid fa-chevron-down caret"></i></button>
+    <button type="button" onclick="toggleNavGroup('navgrp-plus')" data-navgrp="tm,rgpd,acces"><span class="nav-icon"><i class="fa-solid fa-ellipsis"></i></span><span class="nav-label">Plus</span><i class="fa-solid fa-chevron-down caret"></i></button>
     <div class="nav-dropdown">
-      <button id="nav-tm" data-page="tm" onclick="showPage('tm',this)" style="display:none"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-bus"></i></span><span class="nav-label">TM</span></button>
-      <button id="nav-rgpd" data-page="rgpd" onclick="showPage('rgpd',this)"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-shield-halved"></i></span><span class="nav-label">RGPD</span></button>
-      <button id="nav-acces" data-page="acces" onclick="showPage('acces',this)"><span class="nav-icon" style="background:#6b7280"><i class="fa-solid fa-gear"></i></span><span class="nav-label">Accès staff</span></button>
+      <button id="nav-tm" data-page="tm" onclick="showPage('tm',this)" style="display:none"><span class="nav-icon"><i class="fa-solid fa-bus"></i></span><span class="nav-label">TM</span></button>
+      <button id="nav-rgpd" data-page="rgpd" onclick="showPage('rgpd',this)"><span class="nav-icon"><i class="fa-solid fa-shield-halved"></i></span><span class="nav-label">RGPD</span></button>
+      <button id="nav-acces" data-page="acces" onclick="showPage('acces',this)"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span><span class="nav-label">Accès staff</span></button>
     </div>
   </div>
 
@@ -895,7 +911,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-factures">
   <div class="page-header">
     <h1>Location</h1>
-    <button class="btn btn-primary" id="btn-add-facture" onclick="openAddFacture()">+ Nouvelle location</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-label">Locations totales</div><div class="stat-value blue" id="f-total">—</div></div>
@@ -904,6 +919,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="stat"><div class="stat-label">Montant accepté</div><div class="stat-value blue" id="f-montant">—</div></div>
   </div>
   <div id="liste-factures"></div>
+  <button class="fab-btn" id="btn-add-facture" onclick="openAddFacture()" title="Nouvelle location"><i class="fa-solid fa-plus"></i></button>
 </div>
 
 
@@ -911,7 +927,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <div class="page" id="page-interimaires">
   <div class="page-header">
     <h1>Demandes d'intérimaires</h1>
-    <button class="btn btn-primary" id="btn-add-interim" onclick="openAddInterim()">+ Nouvelle demande</button>
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-label">Demandes totales</div><div class="stat-value blue" id="i-total">—</div></div>
@@ -920,6 +935,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="stat"><div class="stat-label">Montant accepté</div><div class="stat-value blue" id="i-montant">—</div></div>
   </div>
   <div id="liste-interimaires"></div>
+  <button class="fab-btn" id="btn-add-interim" onclick="openAddInterim()" title="Nouvelle demande"><i class="fa-solid fa-plus"></i></button>
 </div>
 
 
@@ -990,7 +1006,6 @@ tr:hover td{background:rgba(13,31,78,.02)}
   <div class="page-header">
     <h1>Objectifs du mois</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap" id="obj-actions">
-      <button class="btn btn-primary" id="btn-add-obj" onclick="openAddObjectif()">+ Ajouter un objectif</button>
       <button class="btn btn-export" onclick="exportObjectifsPDF()"> Exporter PDF</button>
     </div>
   </div>
@@ -1006,6 +1021,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="stat"><div class="stat-label">Progression</div><div class="stat-value blue" id="obj-pct">0%</div></div>
   </div>
   <div id="liste-objectifs"></div>
+  <button class="fab-btn" id="btn-add-obj" onclick="openAddObjectif()" title="Ajouter un objectif"><i class="fa-solid fa-plus"></i></button>
 </div>
 
 <!-- PAGE HISTORIQUE -->
@@ -1716,7 +1732,11 @@ let salSelected=new Set(), poleSelected=new Set();
 // CONFIG DYNAMIQUE (URLs GForms stockées dans Supabase)
 // ============================================================
 function isReadOnly() { return currentUser && currentUser.role === 'staff_tm'; }
-function tod() { return new Date().toISOString().slice(0,10); }
+function tod() {
+  // Date du jour en heure LOCALE (et non UTC, qui décale la date la nuit selon le fuseau)
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+}
 function fd(d) { if(!d)return'—'; const[y,m,j]=(d||'').split('-'); return j+'/'+m+'/'+y; }
 function fe(v) { return Number(v).toLocaleString('fr-FR')+' €'; }
 function ini(s){ return (s||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
@@ -3550,20 +3570,27 @@ function openEditInterim(id) {
 function calcDateFin(dateDebutId, dateFinId, dureeKey, nbUnites) {
   const dd = document.getElementById(dateDebutId).value;
   if (!dd) return;
-  const debut = new Date(dd);
-  if (isNaN(debut.getTime())) return;
-  let fin = new Date(debut);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dd);
+  if (!m) return;
+  // Travail en composantes Y/M/D pures pour éviter tout décalage de fuseau horaire
+  let y = parseInt(m[1], 10), mo = parseInt(m[2], 10) - 1, d = parseInt(m[3], 10);
   const n = parseInt(nbUnites) || 1;
+  // Date "utilitaire" ancrée à midi UTC : les calculs jour/mois ne franchissent jamais
+  // minuit dans un fuseau voisin, donc aucun risque de glisser sur le jour d'avant/après.
+  let fin = new Date(Date.UTC(y, mo, d, 12));
   if (dureeKey === 'semaine') {
-    fin.setDate(fin.getDate() + n * 7);
+    fin.setUTCDate(fin.getUTCDate() + n * 7);
   } else if (dureeKey === 'mois') {
-    fin.setMonth(fin.getMonth() + n);
+    fin.setUTCMonth(fin.getUTCMonth() + n);
   } else if (dureeKey === 'jour') {
-    fin.setDate(fin.getDate() + n);
+    fin.setUTCDate(fin.getUTCDate() + n);
   }
   // Reculer d'un jour (fin = dernier jour inclus)
-  fin.setDate(fin.getDate() - 1);
-  document.getElementById(dateFinId).value = fin.toISOString().split('T')[0];
+  fin.setUTCDate(fin.getUTCDate() - 1);
+  const yy = fin.getUTCFullYear();
+  const mm = String(fin.getUTCMonth() + 1).padStart(2, '0');
+  const ddOut = String(fin.getUTCDate()).padStart(2, '0');
+  document.getElementById(dateFinId).value = `${yy}-${mm}-${ddOut}`;
 }
 
 function calcDateFinFacture() {
