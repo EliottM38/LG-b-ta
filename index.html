@@ -476,6 +476,14 @@ tr:hover td{background:rgba(13,31,78,.02)}
     background:linear-gradient(115deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,0) 28%,
                 rgba(255,255,255,0) 62%,rgba(255,255,255,.12) 82%,rgba(255,255,255,0) 100%);
     pointer-events:none;mix-blend-mode:overlay;z-index:0}
+  /* Réfraction SVG (vrai effet "liquid glass") là où le navigateur le supporte.
+     Safari/iOS n'applique pas les filtres SVG dans backdrop-filter : la barre garde
+     alors la version flou+reflet ci-dessus, qui reste correcte sans distorsion. */
+  @supports (backdrop-filter:url(#a)) or (-webkit-backdrop-filter:url(#a)){
+    .mobile-tabbar{
+      -webkit-backdrop-filter:url(#lg-glass-distortion) blur(14px) saturate(190%);
+      backdrop-filter:url(#lg-glass-distortion) blur(14px) saturate(190%)}
+  }
   .mobile-tabbar .tabbar-indicator{position:absolute;top:6px;bottom:6px;width:46px;
     border-radius:20px;
     background:rgba(255,255,255,.2);
@@ -656,6 +664,17 @@ tr:hover td{background:rgba(13,31,78,.02)}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
+
+<!-- Filtre SVG de réfraction pour l'effet "liquid glass" (barre de nav mobile) -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <defs>
+    <filter id="lg-glass-distortion" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="lgNoise"/>
+      <feGaussianBlur in="lgNoise" stdDeviation="3" result="lgBlurredNoise"/>
+      <feDisplacementMap in="SourceGraphic" in2="lgBlurredNoise" scale="34" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
 <!-- ===== ÉCRAN LOGIN ===== -->
 <div id="login-screen">
@@ -2402,6 +2421,7 @@ function updateLigne(id, field, value) {
   if (l) {
     l[field] = field === 'nb' || field === 'nbUnites' ? parseInt(value)||1 : value;
     calcAllLines();
+    if (field === 'nbUnites') calcDateFinFacture();
   }
 }
 
@@ -3591,7 +3611,12 @@ function calcDateFin(dateDebutId, dateFinId, dureeKey, nbUnites) {
 
 function calcDateFinFacture() {
   const duree = document.getElementById('d-duree').value;
-  const nb = parseInt(document.getElementById('d-nb-unites')?.value) || 1;
+  // Le nombre de semaines/mois est saisi PAR LIGNE de véhicule (il n'y a pas de champ
+  // global "d-nb-unites") : on prend la plus longue durée parmi les lignes pour que la
+  // date de fin couvre bien toute la location.
+  const nb = lignesVehicules.length
+    ? Math.max(...lignesVehicules.map(l => parseInt(l.nbUnites) || 1))
+    : 1;
   calcDateFin('d-date-debut', 'd-date-fin', duree, nb);
 }
 
