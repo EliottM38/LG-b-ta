@@ -467,58 +467,66 @@ tr:hover td{background:rgba(13,31,78,.02)}
   box-shadow:0 8px 24px rgba(13,31,78,.4);border:1px solid rgba(184,146,42,.3)}
 .toast.show{opacity:1}
 
-/* ── ZONE PDF ── */
+/* ── ZONE PDF (facture / demande) — design à plat, lisible, insensible au mode sombre ── */
 #pdf-zone{position:fixed;left:-9999px;top:0;width:800px;background:#fff}
-.pdf{width:800px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-.pdf-header{background:linear-gradient(135deg,#080f28 0%,#0d1f4e 60%,#152a6b 100%);
-  padding:28px 40px;display:flex;justify-content:space-between;align-items:center;
-  border-bottom:3px solid #b8922a}
+.pdf{width:800px;background:#fff;color:#1a1a1a;font-family:'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.pdf-header{background:#0d1f4e;padding:28px 40px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #b8922a}
 .pdf-logo-wrap{display:flex;align-items:center;gap:16px}
-.pdf-logo-img{width:70px;height:70px;object-fit:contain;background:#fff;border-radius:50%;padding:4px;
-  box-shadow:0 4px 12px rgba(184,146,42,.4)}
+.pdf-logo-img{width:70px;height:70px;object-fit:contain;background:#fff;border-radius:50%;padding:4px}
 .pdf-logo-texts .pdf-logo-name{font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px}
 .pdf-logo-texts .pdf-logo-name span{color:#c9a84c}
-.pdf-logo-texts .pdf-logo-sub{font-size:11px;color:#8ba8d0;margin-top:3px}
+.pdf-logo-texts .pdf-logo-sub{font-size:11px;color:#a9bddb;margin-top:3px}
 .pdf-ref-block{text-align:right}
 .pdf-ref-num{font-size:22px;font-weight:900;color:#fff}
-.pdf-ref-label{font-size:11px;color:#8ba8d0;margin-top:2px}
+.pdf-ref-label{font-size:11px;color:#a9bddb;margin-top:2px}
 .pdf-statut-pill{display:inline-block;margin-top:8px;padding:5px 16px;border-radius:999px;font-size:12px;font-weight:800}
-.pdf-bar{background:#0a1840;padding:12px 40px;display:flex;gap:0;border-bottom:1px solid rgba(184,146,42,.2)}
-.pdf-bar-item{flex:1;border-right:1px solid rgba(255,255,255,.1);padding-right:16px;margin-right:16px}
+.pdf-bar{background:#0a1840;padding:12px 40px;display:flex;gap:0}
+.pdf-bar-item{flex:1;border-right:1px solid rgba(255,255,255,.18);padding-right:16px;margin-right:16px}
 .pdf-bar-item:last-child{border-right:none;margin-right:0;padding-right:0}
-.pdf-bar-lbl{font-size:10px;color:#8ba8d0;text-transform:uppercase;letter-spacing:.05em}
+.pdf-bar-lbl{font-size:10px;color:#a9bddb;text-transform:uppercase;letter-spacing:.05em}
 .pdf-bar-val{font-size:13px;font-weight:700;color:#fff;margin-top:2px}
-.pdf-body{padding:28px 40px 20px}
-.pdf-stitle{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;
-  color:#0d1f4e;border-bottom:2px solid #b8922a;padding-bottom:5px;
-  margin-bottom:12px;margin-top:22px}
+.pdf-body{padding:28px 40px 20px;background:#fff}
+.pdf-stitle{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#0d1f4e;border-bottom:2px solid #b8922a;padding-bottom:5px;margin-bottom:12px;margin-top:22px}
 .pdf-stitle:first-child{margin-top:0}
 .pdf-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-.pdf-field{background:#f7f9fc;border-radius:8px;padding:10px 14px;border:1px solid #e8ecf8}
-.pdf-field-lbl{font-size:10px;color:#8896b3;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.pdf-field{background:#f7f9fc;border-radius:8px;padding:10px 14px;border:1px solid #e3e8f5}
+.pdf-field-lbl{font-size:10px;color:#6b7896;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .pdf-field-val{font-size:14px;font-weight:700;color:#0d1f4e}
-.pdf-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px;table-layout:fixed}
-.pdf-table th{background:linear-gradient(90deg,#eef2ff,#f0f4ff);padding:9px 14px;
-  text-align:left;font-size:11px;font-weight:800;color:#0d1f4e;border-bottom:2px solid #b8922a;
-  word-break:break-word;overflow-wrap:anywhere}
-.pdf-table td{padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#333;
-  word-break:break-word;overflow-wrap:anywhere;vertical-align:top}
+.pdf-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px;table-layout:fixed;background:#fff}
+.pdf-table th{background:#eef2ff;padding:9px 14px;text-align:left;font-size:11px;font-weight:800;color:#0d1f4e;border-bottom:2px solid #b8922a;word-break:break-word;overflow-wrap:anywhere}
+.pdf-table td{padding:10px 14px;border-bottom:1px solid #ece8da;color:#1a1a1a;background:#fbf9f3;font-weight:600;word-break:break-word;overflow-wrap:anywhere;vertical-align:top}
 .pdf-table tr:last-child td{border-bottom:none}
-.pdf-table .hl{background:linear-gradient(90deg,rgba(13,31,78,.06),rgba(184,146,42,.06));font-weight:800;color:#0d1f4e}
-.pdf-table .hl td{color:#0d1f4e}
-.pdf-total{background:linear-gradient(135deg,#080f28,#0d1f4e);border-radius:12px;
-  padding:22px 28px;display:flex;align-items:center;justify-content:space-between;
-  margin-top:20px;border:1px solid rgba(184,146,42,.3)}
-.pdf-total-left .ptl{font-size:12px;color:#8ba8d0}
+.pdf-table .hl td{background:#fbf9f3;color:#0d1f4e;font-weight:800}
+.pdf-table .promo td{background:#fff7e0;color:#7a5b00;font-weight:700}
+.pdf-total{background:#0d1f4e;border-radius:12px;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;margin-top:20px}
+.pdf-total-left .ptl{font-size:12px;color:#a9bddb}
 .pdf-total-left .ptg{font-size:13px;color:#c9a84c;font-weight:700;margin-top:4px}
 .pdf-total-amount{font-size:36px;font-weight:900;color:#fff}
-.pdf-notes-box{background:#fffbeb;border-left:4px solid #b8922a;padding:12px 16px;
-  border-radius:0 8px 8px 0;font-size:13px;color:#78350f;line-height:1.6;margin-top:4px}
-.pdf-footer{background:linear-gradient(90deg,#f4f6fb,#eef2ff);border-top:2px solid rgba(184,146,42,.2);
-  padding:14px 40px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#8896b3}
+.pdf-notes-box{background:#fffbeb;border-left:4px solid #b8922a;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#78350f;line-height:1.6;margin-top:4px}
+.pdf-footer{background:#f4f6fb;border-top:2px solid #e6dcc0;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#6b7896}
 .pdf-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:800}
 .pdf-badge.ult{background:#dbeafe;color:#1e40af}
 .pdf-badge.std{background:#f1f0ea;color:#555}
+/* Le responsive mobile ("tableaux en cartes") ne doit JAMAIS affecter le rendu de la facture */
+.pdf .pdf-table{display:table!important;width:100%!important;border-collapse:collapse!important;border-spacing:0!important;table-layout:fixed!important}
+.pdf .pdf-table thead{display:table-header-group!important}
+.pdf .pdf-table tbody{display:table-row-group!important;width:auto!important}
+.pdf .pdf-table tr{display:table-row!important;width:auto!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.pdf .pdf-table th,.pdf .pdf-table td{display:table-cell!important;text-align:left!important;min-height:0!important;font-size:13px!important}
+.pdf .pdf-table td{padding:10px 14px!important;border-bottom:1px solid #ece8da!important}
+.pdf .pdf-table th{padding:9px 14px!important;font-size:11px!important}
+.pdf .pdf-table td::before{content:none!important;display:none!important}
+.pdf .pdf-table tr:last-child td{border-bottom:none!important}
+/* Le mode sombre de l'app ne doit JAMAIS affecter le rendu de la facture */
+html[data-theme="dark"] .pdf,html[data-theme="dark"] .pdf-body{background:#fff!important;color:#1a1a1a!important}
+html[data-theme="dark"] .pdf .pdf-table,html[data-theme="dark"] .pdf .pdf-table tr,html[data-theme="dark"] .pdf .pdf-table td{background:#fbf9f3!important;color:#1a1a1a!important;border-color:#ece8da!important}
+html[data-theme="dark"] .pdf .pdf-table th{background:#eef2ff!important;color:#0d1f4e!important}
+html[data-theme="dark"] .pdf .pdf-table .hl td{color:#0d1f4e!important}
+html[data-theme="dark"] .pdf .pdf-table .promo td{background:#fff7e0!important;color:#7a5b00!important}
+html[data-theme="dark"] .pdf .pdf-field{background:#f7f9fc!important;border-color:#e3e8f5!important}
+html[data-theme="dark"] .pdf .pdf-field-val,html[data-theme="dark"] .pdf .pdf-stitle{color:#0d1f4e!important}
+html[data-theme="dark"] .pdf .pdf-notes-box{background:#fffbeb!important;color:#78350f!important}
+html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7896!important}
 
 @media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
 /* ============================================================
@@ -1067,7 +1075,7 @@ tr:hover td{background:rgba(13,31,78,.02)}
     <div class="stat"><div class="stat-label">Traitées</div><div class="stat-value green" id="pole-traites">—</div></div>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    <input type="text" id="pole-search" placeholder="Rechercher un pseudo..." oninput="debounce('filterPole',filterPole)" style="flex:1;min-width:160px">
+    <input type="text" id="pole-search" placeholder="Rechercher un pseudo ou un ID (PEF-012)..." oninput="debounce('filterPole',filterPole)" style="flex:1;min-width:160px">
     <select id="pole-filtre-pole" onchange="filterPole()">
       <option value="">Tous les pôles</option>
       <option>Pôle Exploitation</option>
@@ -1438,6 +1446,24 @@ tr:hover td{background:rgba(13,31,78,.02)}
     </div>
   </div>
 
+  <div class="card" id="card-promos" style="margin-top:24px;display:none">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-tags"></i> Promotions — Location</span></div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Créez des promotions (en % ou en €). Lors de la création d'une facture, le staff coche celles à appliquer et le total se recalcule automatiquement.</p>
+      <div id="promos-list" style="margin-bottom:16px"></div>
+      <div class="pdf-stitle" style="margin:16px 0 10px"><i class="fa-solid fa-plus"></i> Nouvelle promotion</div>
+      <div class="field"><label>Intitulé *</label><input type="text" id="promo-titre" placeholder="ex: Promo été 2026" maxlength="80"></div>
+      <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>Type de remise</label>
+          <select id="promo-type"><option value="percent">Pourcentage (%)</option><option value="amount">Montant fixe (€)</option></select>
+        </div>
+        <div class="field"><label>Valeur *</label><input type="number" id="promo-valeur" min="0" step="any" placeholder="ex: 10"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addPromo()" style="margin-top:8px"><i class="fa-solid fa-plus"></i> Ajouter la promotion</button>
+      <div id="promos-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+
 </div>
 
 </div><!-- /app -->
@@ -1536,6 +1562,9 @@ tr:hover td{background:rgba(13,31,78,.02)}
       <option value="mois">Par mois</option>
     </select>
   </div>
+
+  <div class="sep">Promotions</div>
+  <div id="fact-promos"></div>
 
   <div id="fact-recap" style="background:var(--gold-pale);border-radius:12px;padding:14px 16px;margin:12px 0;border:1px solid rgba(13,31,78,.1);font-size:13px;line-height:2.2;color:var(--navy)"></div>
 
@@ -2659,6 +2688,15 @@ function calcAllLines() {
     </div>`;
   }
 
+  const promoRes = computePromos(totalGeneral);
+  promoRes.items.forEach(it => {
+    recap += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(13,31,78,.08)">
+      <span><i class="fa-solid fa-tag" style="color:var(--gold)"></i> <strong>${escHtml(it.titre)}</strong> (${promoLabel(it)})</span>
+      <span style="font-weight:700;color:var(--success)">−${fe(it.montant)}</span>
+    </div>`;
+  });
+  totalGeneral = promoRes.total;
+
   recap += `<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:2px solid var(--navy)">
     <span style="font-weight:800;font-size:15px;color:var(--navy)">TOTAL</span>
     <span style="font-weight:900;font-size:18px;color:var(--navy)">${totalGeneral===0?'<span style="color:var(--success)">Gratuit</span>':fe(totalGeneral)}</span>
@@ -2672,6 +2710,96 @@ function calcAllLines() {
   if (recapEl) recapEl.innerHTML = recap;
 }
 
+// ============================================================
+// PROMOTIONS (stockées dans app_config, clé "promotions")
+// ============================================================
+let PROMOS = [];                 // [{id,titre,type:'percent'|'amount',valeur,actif}]
+let selectedPromoIds = new Set(); // promos cochées dans la facture en cours
+let promoSnapshots = {};          // promos déjà appliquées à une facture éditée (même si supprimées depuis)
+
+function escHtml(t){ return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function promoLabel(p){ return p.type==='percent' ? '−'+p.valeur+' %' : '−'+fe(p.valeur); }
+function availablePromos(){
+  const list = PROMOS.filter(p => p.actif !== false);
+  Object.values(promoSnapshots).forEach(sn => { if(!list.some(p => p.id === sn.id)) list.push(sn); });
+  return list;
+}
+// Applique les promos cochées sur le sous-total véhicules (% calculé sur la base, jamais sous 0 €)
+function computePromos(base){
+  let rest = base; const items = [];
+  availablePromos().filter(p => selectedPromoIds.has(p.id)).forEach(p => {
+    let m = p.type==='percent' ? Math.round(base*p.valeur)/100 : p.valeur;
+    m = Math.max(0, Math.min(m, rest));
+    if(m <= 0) return;
+    rest -= m;
+    items.push({ promo:true, id:p.id, titre:p.titre, type:p.type, valeur:p.valeur, montant:m });
+  });
+  return { items, total: Math.max(0, Math.round(rest*100)/100) };
+}
+function togglePromo(id, checked){ if(checked) selectedPromoIds.add(id); else selectedPromoIds.delete(id); calcAllLines(); }
+function renderPromoChecks(){
+  const el = document.getElementById('fact-promos'); if(!el) return;
+  const list = availablePromos();
+  if(!list.length){ el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Aucune promotion disponible (à créer dans Accès staff).</div>'; return; }
+  el.innerHTML = list.map(p => `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;background:var(--off-white);border:1px solid var(--border-light);border-radius:10px;cursor:pointer;font-size:13px;min-height:44px">
+    <input type="checkbox" ${selectedPromoIds.has(p.id)?'checked':''} onchange="togglePromo('${p.id}',this.checked)" style="width:18px;height:18px;flex-shrink:0">
+    <span style="flex:1;font-weight:600">${escHtml(p.titre)}</span>
+    <span class="badge b-ultimate">${promoLabel(p)}</span></label>`).join('');
+}
+// Sépare lignes véhicules et lignes promo d'une facture enregistrée
+function splitLignes(d){
+  let arr = null;
+  try { arr = d.lignes ? JSON.parse(d.lignes) : null; } catch(e) {}
+  if(!Array.isArray(arr)) return { veh:null, promos:[] };
+  return { veh: arr.filter(l => !l.promo), promos: arr.filter(l => l.promo) };
+}
+async function savePromos(){
+  const { error } = await sb.from('app_config').upsert({ key:'promotions', value:JSON.stringify(PROMOS) }, { onConflict:'key' });
+  if(error){ alert('Erreur sauvegarde des promotions : '+error.message); return false; }
+  return true;
+}
+function renderPromosUI(){
+  if(!currentUser || !['president','vice_president'].includes(currentUser.role)) return;
+  const card = document.getElementById('card-promos'); if(!card) return;
+  card.style.display = '';
+  const el = document.getElementById('promos-list');
+  if(!PROMOS.length){ el.innerHTML = '<div class="empty" style="padding:10px 0">Aucune promotion créée.</div>'; return; }
+  el.innerHTML = PROMOS.map(p => `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;margin-bottom:6px;background:var(--off-white);border:1px solid var(--border-light);border-radius:10px;${p.actif===false?'opacity:.55':''}">
+    <span style="flex:1;min-width:140px;font-weight:700;font-size:13px">${escHtml(p.titre)}</span>
+    <span class="badge b-ultimate">${promoLabel(p)}</span>
+    <span class="badge ${p.actif===false?'b-inactif':'b-actif'}">${p.actif===false?'Désactivée':'Active'}</span>
+    <button class="btn btn-sm" onclick="togglePromoActive('${p.id}')">${p.actif===false?'Activer':'Désactiver'}</button>
+    <button class="btn btn-sm btn-danger" onclick="deletePromo('${p.id}')" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
+  </div>`).join('');
+}
+async function addPromo(){
+  const res = document.getElementById('promos-result');
+  const titre = document.getElementById('promo-titre').value.trim();
+  const type = document.getElementById('promo-type').value;
+  const valeur = parseFloat(document.getElementById('promo-valeur').value);
+  if(!titre || !(valeur > 0)){ res.textContent = 'Intitulé et valeur (> 0) obligatoires.'; res.style.color = '#991b1b'; return; }
+  if(type==='percent' && valeur > 100){ res.textContent = 'Un pourcentage ne peut pas dépasser 100.'; res.style.color = '#991b1b'; return; }
+  PROMOS.push({ id:'p'+Date.now().toString(36), titre, type, valeur, actif:true });
+  if(await savePromos()){
+    document.getElementById('promo-titre').value = ''; document.getElementById('promo-valeur').value = '';
+    res.textContent = '✓ Promotion ajoutée'; res.style.color = '#166534';
+  } else { PROMOS.pop(); }
+  renderPromosUI();
+}
+async function togglePromoActive(id){
+  const p = PROMOS.find(x => x.id === id); if(!p) return;
+  p.actif = (p.actif === false);
+  if(!(await savePromos())) p.actif = !p.actif;
+  renderPromosUI();
+}
+async function deletePromo(id){
+  const p = PROMOS.find(x => x.id === id); if(!p) return;
+  if(!confirm('Supprimer la promotion « '+p.titre+' » ? Les factures déjà créées ne sont pas modifiées.')) return;
+  const old = PROMOS; PROMOS = PROMOS.filter(x => x.id !== id);
+  if(!(await savePromos())) PROMOS = old;
+  renderPromosUI();
+}
+
 function openAddFacture() {
   try {
     const sel = document.getElementById('d-membre');
@@ -2681,6 +2809,9 @@ function openAddFacture() {
       : '<option value="">— Aucun membre —</option>';
     lignesVehicules = [];
     ligneCounter = 0;
+    selectedPromoIds = new Set();
+    promoSnapshots = {};
+    renderPromoChecks();
     addLigneVehicule();
     const dd = document.getElementById('d-date-debut');
     const df = document.getElementById('d-date-fin');
@@ -2737,6 +2868,11 @@ async function saveFacture() {
     return { type_key:l.type, type:TLABEL[l.type], modele:l.modele, nb, nbUnites:nbu,
              numerosParc:l.numerosParc, prixUnitaire:pu, gratuits:g, sousTotal:st };
   });
+  // Promotions cochées : appliquées sur le sous-total véhicules
+  const baseVeh = total;
+  const promoRes = computePromos(baseVeh);
+  total = promoRes.total;
+  promoRes.items.forEach(it => lignesSave.push(it));
 
   const rec = {
     membre_id: mid, membre_pseudo: m.pseudo,
@@ -2747,7 +2883,7 @@ async function saveFacture() {
     lignes: JSON.stringify(lignesSave),
     nb_vehicules: totalVeh,
     duree_key: duree, duree_label: DLABEL[duree],
-    total, gratuit: total===0,
+    total, gratuit: baseVeh===0,
     date_debut: dd, date_fin: df,
     statut: document.getElementById('d-statut').value,
     notes: document.getElementById('d-notes').value.trim(),
@@ -2767,7 +2903,7 @@ async function saveFacture() {
     await sb.from('membres').update({ bus_loues: newBusLoues }).eq('id', mid);
     const mIdx = membres.findIndex(x=>x.id===mid);
     if (mIdx !== -1) membres[mIdx].bus_loues = newBusLoues;
-    await logAction('facture', m.pseudo, `Facture créée : ${totalVeh} véh. (${lignesSave.map(l=>l.type+' ×'+l.nb).join(', ')}) — ${fe(total)}`);
+    await logAction('facture', m.pseudo, `Facture créée : ${totalVeh} véh. (${lignesSave.filter(l=>!l.promo).map(l=>l.type+' ×'+l.nb).join(', ')})${promoRes.items.length?' — promo : '+promoRes.items.map(i=>i.titre).join(', '):''} — ${fe(total)}`);
     toast('Facture créée ✓');
   }
   closeModal('modal-facture');
@@ -2804,10 +2940,13 @@ function renderFactures(){
   const canDelete=currentUser.role==='president';
   cont.innerHTML=factures.map(d=>{
     const sb2=d.statut==='Accepté'?'b-accepte':d.statut==='Refusé'?'b-refuse':d.statut==='Livré'?'b-livre':'b-attente';
-    const lignes=(()=>{try{return d.lignes?JSON.parse(d.lignes):null;}catch(e){return null;}})();
+    const sp=splitLignes(d);
+    const lignes=sp.veh;
+    const promosHtml=sp.promos.length?sp.promos.map(pr=>`<span style="display:inline-block;background:#fef3c7;color:#854F0B;border-radius:6px;padding:2px 8px;font-size:12px;margin:2px"><i class="fa-solid fa-tag"></i> ${escHtml(pr.titre)} (${promoLabel(pr)})</span>`).join('')+'<br>':'';
     const lignesHtml=lignes&&lignes.length
       ?lignes.map(l=>`<span style="display:inline-block;background:#dbeafe;color:#1e40af;border-radius:6px;padding:2px 8px;font-size:12px;margin:2px">${l.type} ×${l.nb}${l.numerosParc?' ('+l.numerosParc+')':''}</span>`).join('')+'<br>'
       :`<strong>${d.nb_vehicules||1} véh. × ${d.type_vehicule||''}</strong> — `;
+    const lignesHtmlFull=lignesHtml+promosHtml;
     return`<div class="fact-card">
       <div class="fact-title">Location #${String(d.id).padStart(3,'0')} — ${d.membre_pseudo}</div>
       <div style="margin-top:4px">
@@ -2816,7 +2955,7 @@ function renderFactures(){
       </div>
       <div class="fact-meta">Créée le ${fd(d.date_creation)}${d.date_traitement?' · Traitée le '+fd(d.date_traitement):''}</div>
       <div class="fact-body">
-        ${lignesHtml}
+        ${lignesHtmlFull}
         Du <strong>${fd(d.date_debut)}</strong> au <strong>${fd(d.date_fin)}</strong> · ${d.duree_label||''}
         <br>Niveau : ${d.niveau||'—'} · Forfait : ${d.forfait} · Bus déjà loués : ${d.bus_deja_loues}
         ${d.notes?'<br><em style="color:#aaa">'+d.notes+'</em>':''}
@@ -3123,15 +3262,18 @@ function buildFactureContent(d){
   const sc=d.statut==='Accepté'?{bg:'#dcfce7',cl:'#166534'}:d.statut==='Refusé'?{bg:'#fee2e2',cl:'#991b1b'}:d.statut==='Livré'?{bg:'#ede9fe',cl:'#4c1d95'}:{bg:'#fef3c7',cl:'#92400e'};
   const badge=d.forfait==='Ultimate'?'<span class="pdf-badge ult">Ultimate</span>':'<span class="pdf-badge std">Standard</span>';
 
-  let lignes=null;
-  try{lignes=d.lignes?JSON.parse(d.lignes):null;}catch(e){}
+  const sp=splitLignes(d);
+  let lignes=sp.veh;
+  const promos=sp.promos;
   if(!lignes||!lignes.length){
     lignes=[{type:d.type_vehicule||'—',type_key:d.type_key||'standard',modele:d.modele||'',nb:d.nb_vehicules||1,nbUnites:d.nb_unites||1,numerosParc:d.numeros_parc||'',prixUnitaire:d.prix_unitaire||0,gratuits:d.gratuit?(d.nb_vehicules||1):0,sousTotal:d.total||0}];
   }
   const tRows=lignes.map(l=>`<tr class="${l.sousTotal===0?'hl':''}"><td><strong>${l.type||'—'}</strong>${l.modele?' ('+l.modele+')':''}</td><td>${l.prixUnitaire>0?fe(l.prixUnitaire)+' × '+(l.nbUnites||1)+' '+(d.duree_label||'sem.'):'—'}</td><td>${l.nb||1} véh.${l.gratuits>0?' ('+l.gratuits+' gratuit(s))':''}</td><td>${l.numerosParc||'—'}</td><td><strong>${l.sousTotal===0?'Gratuit':fe(l.sousTotal)}</strong></td></tr>`).join('');
+  const pRows=promos.map(pr=>`<tr class="promo"><td colspan="4"><strong>Promotion : ${escHtml(pr.titre)}</strong> (${promoLabel(pr)})</td><td><strong>−${fe(pr.montant)}</strong></td></tr>`).join('');
   const resumeVeh=lignes.map(l=>`${l.nb||1} × ${l.type||'—'}`).join(', ');
+  const gratuitUlt=d.gratuit||lignes.every(l=>l.sousTotal===0);
 
-  return `<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Facture #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">Contrat de location de véhicules</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de location</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de location</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Bus déjà loués</div><div class="pdf-field-val">${d.bus_deja_loues||0} véhicule(s)</div></div></div><div class="pdf-stitle">Détail des véhicules loués</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>N° Parc</th><th>Sous-total</th></tr></thead><tbody>${tRows}</tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">Durée : ${d.duree_label||'semaine'} · ${resumeVeh}</div>${d.gratuit||lignes.every(l=>l.sousTotal===0)?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}</div><div class="pdf-total-amount">${d.gratuit||lignes.every(l=>l.sousTotal===0)?'0 €':fe(d.total||0)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span></div></div>`;
+  return `<div class="pdf"><div class="pdf-header"><div class="pdf-logo-wrap"><img class="pdf-logo-img" src="${LOGO}" alt="Lutèce Group"><div class="pdf-logo-texts"><div class="pdf-logo-name">LUTÈCE<span>GROUP</span></div></div></div><div class="pdf-ref-block"><div class="pdf-ref-num">Facture #${String(d.id).padStart(3,'0')}</div><div class="pdf-ref-label">Contrat de location de véhicules</div><div class="pdf-statut-pill" style="background:${sc.bg};color:${sc.cl}">${d.statut}</div></div></div><div class="pdf-bar"><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de demande</div><div class="pdf-bar-val">${fd(d.date_creation)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Date de traitement</div><div class="pdf-bar-val">${d.date_traitement?fd(d.date_traitement):'En attente'}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Début de location</div><div class="pdf-bar-val">${fd(d.date_debut)}</div></div><div class="pdf-bar-item"><div class="pdf-bar-lbl">Fin de location</div><div class="pdf-bar-val">${fd(d.date_fin)}</div></div></div><div class="pdf-body"><div class="pdf-stitle">Informations membre</div><div class="pdf-fields"><div class="pdf-field"><div class="pdf-field-lbl">Pseudo jeu</div><div class="pdf-field-val">${d.membre_pseudo||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Pseudo forum</div><div class="pdf-field-val">${d.membre_forum||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Niveau</div><div class="pdf-field-val">${d.niveau||'—'}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Forfait alliance</div><div class="pdf-field-val">${badge}</div></div><div class="pdf-field"><div class="pdf-field-lbl">Bus déjà loués</div><div class="pdf-field-val">${d.bus_deja_loues||0} véhicule(s)</div></div></div><div class="pdf-stitle">Détail des véhicules loués</div><table class="pdf-table"><thead><tr><th>Type</th><th>Prix unitaire</th><th>Quantité</th><th>N° Parc</th><th>Sous-total</th></tr></thead><tbody>${tRows}${pRows}</tbody></table><div class="pdf-total"><div class="pdf-total-left"><div class="ptl">Durée : ${d.duree_label||'semaine'} · ${resumeVeh}</div>${gratuitUlt?'<div class="ptg">Forfait Ultimate — Gratuité appliquée</div>':''}${promos.length&&!gratuitUlt?'<div class="ptg">Promotion(s) appliquée(s) : '+promos.map(pr=>escHtml(pr.titre)).join(', ')+'</div>':''}</div><div class="pdf-total-amount">${gratuitUlt?'0 €':fe(d.total||0)}</div></div>${d.notes?`<div class="pdf-stitle" style="margin-top:20px">Notes & Conditions</div><div class="pdf-notes-box">${d.notes}</div>`:''}</div><div class="pdf-footer"><span>Créée le ${fd(tod())} · Facture #${String(d.id).padStart(3,'0')}</span></div></div>`;
 }
 
 function buildInterimContent(d){
@@ -3303,6 +3445,12 @@ async function saveProfil(){
 // ============================================================
 
 
+// Identifiant stable d'une demande = sa position dans le Google Sheet (ex. PEF-012, SAL-007)
+function demandeId(prefix,rows,r){
+  const i=(rows||[]).indexOf(r);
+  return prefix+'-'+String(i+1).padStart(3,'0');
+}
+
 async function loadSAL(){
   document.getElementById('liste-sal').innerHTML='<div class="empty">Chargement...</div>';
   try{
@@ -3375,12 +3523,13 @@ function renderSAL(rows){
     ];
     const details=champs.map(c=>{const v=col(r,c.key);return v?'<strong>'+c.label+' :</strong> '+v:'';}).filter(Boolean);
     const safeKey=key.replace(/[^a-zA-Z0-9]/g,'_');
+    const demId=demandeId('SAL',rows,r);
     return`<div class="fact-card" data-skey="${key}" onclick="if(salSelectMode){handleSALClick(this)}">
       ${salSelectMode?`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:20px;height:20px;border-radius:4px;border:2px solid ${isChecked?'#0d1f4e':'#d4daf0'};background:${isChecked?'#0d1f4e':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${isChecked?'<span style="color:#fff;font-size:13px;font-weight:700">✓</span>':''}</div><span style="font-size:12px;color:#8896b3">Cliquez pour ${isChecked?'désélectionner':'sélectionner'}</span></div>`:''}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div><div class="fact-title">${pseudo}</div>
         <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px"><span class="badge ${sb2}">${statut}</span><span class="badge" style="background:#fef3c7;color:#854F0B">${typeSAL}</span><span class="badge b-${forfait.toLowerCase().includes('ultimate')?'ultimate':'standard'}">${forfait}</span></div></div>
-        <div style="font-size:12px;color:var(--text-muted)">${r['Timestamp']||''}</div>
+        <div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gold);letter-spacing:.03em">#${demId}</div><div style="font-size:12px;color:var(--text-muted)">${r['Timestamp']||''}</div></div>
       </div>
       <div class="fact-meta">Forum : ${forum}</div>
       <div class="fact-body" style="margin-top:8px;line-height:2.2">${details.length?details.join('<br>'):'<em style="color:#ccc">Aucun détail</em>'}</div>
@@ -3409,7 +3558,7 @@ function filterPole(){
     if(isDemandeExpiree(statut,poleStatutDates[r['Timestamp']]))return false;
     const pseudo=(getCol(r,'Pseudo jeu')||'').toLowerCase();
     const pole=getCol(r,'À quel pôle souhaitez-vous accéder ?')||'';
-    return(!q||pseudo.includes(q))&&(!fp||pole.includes(fp))&&(!fs||statut===fs);
+    return(!q||pseudo.includes(q)||demandeId('PEF',poleData,r).toLowerCase().includes(q))&&(!fp||pole.includes(fp))&&(!fs||statut===fs);
   });
   const validPole=poleData.filter(r=>{
     if(!r['Timestamp']||!r['Timestamp'].trim())return false;
@@ -3455,12 +3604,13 @@ function filterPole(){
     }catch(e){}
     const details=colOrder.map(kt=>'<strong>'+kt+' :</strong> '+colGroups[kt].join(' / '));
     const safeKey=key.replace(/[^a-zA-Z0-9]/g,'_');
+    const demId=demandeId('PEF',poleData,r);
     return`<div class="fact-card" data-pkey="${key}" onclick="if(poleSelectMode){handlePoleClick(this)}">
       ${poleSelectMode?`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:20px;height:20px;border-radius:4px;border:2px solid ${isChecked?'#0d1f4e':'#d4daf0'};background:${isChecked?'#0d1f4e':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${isChecked?'<span style="color:#fff;font-size:13px;font-weight:700">✓</span>':''}</div><span style="font-size:12px;color:#8896b3">Cliquez pour ${isChecked?'désélectionner':'sélectionner'}</span></div>`:''}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div><div class="fact-title">${getCol(r,'Pseudo jeu')||'—'}</div>
         <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px"><span class="badge ${sb2}">${statut}</span><span class="badge" style="background:${isExploit?'#d1fae5':'#ede9fe'};color:${isExploit?'#065f46':'#4c1d95'}">${pole}</span><span class="badge b-${forfait.toLowerCase().includes('ultimate')?'ultimate':'standard'}">${forfait}</span></div></div>
-        <div style="font-size:12px;color:var(--text-muted)">${r['Timestamp']||''}</div>
+        <div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gold);letter-spacing:.03em">#${demId}</div><div style="font-size:12px;color:var(--text-muted)">${r['Timestamp']||''}</div></div>
       </div>
       <div class="fact-meta">Forum : ${getCol(r,'Pseudo forum')||'—'}${services?' · Service : '+services:''}</div>
       ${getMontantBadge(r)}
@@ -3623,6 +3773,7 @@ async function loadAppConfig() {
       data.forEach(r => {
         if (r.key === 'sal_csv_url')  SAL_CSV_URL  = r.value;
         if (r.key === 'pole_csv_url') POLE_CSV_URL = r.value;
+        if (r.key === 'promotions') { try { const a = JSON.parse(r.value); if (Array.isArray(a)) PROMOS = a; } catch(e) {} }
       });
     }
   } catch(e) { console.warn('Config non chargée:', e.message); }
@@ -3683,8 +3834,15 @@ function openEditFacture(id) {
   // Reconstruire les lignes
   lignesVehicules = [];
   ligneCounter = 0;
+  selectedPromoIds = new Set();
+  promoSnapshots = {};
   try {
-    const lignes = d.lignes ? JSON.parse(d.lignes) : null;
+    const sp = splitLignes(d);
+    sp.promos.forEach(pr => {
+      selectedPromoIds.add(pr.id);
+      if(!PROMOS.some(x => x.id === pr.id)) promoSnapshots[pr.id] = { id:pr.id, titre:pr.titre, type:pr.type, valeur:pr.valeur, actif:true };
+    });
+    const lignes = sp.veh;
     if (lignes && lignes.length) {
       lignes.forEach(l => {
         lignesVehicules.push({ id: ++ligneCounter, type: l.type_key||'standard', modele: l.modele||'', nb: l.nb||1, nbUnites: l.nbUnites||1, numerosParc: l.numerosParc||'' });
@@ -3702,6 +3860,7 @@ function openEditFacture(id) {
   document.getElementById('d-notes').value       = d.notes      || '';
   document.getElementById('d-bus-deja').value    = d.bus_deja_loues || 0;
 
+  renderPromoChecks();
   renderLignes();
   onMembreChange();
   document.getElementById('modal-facture').classList.add('open');
@@ -4296,6 +4455,7 @@ async function saveTarifs() {
 
 function loadTarifsUI() {
   if (!currentUser || !['president','vice_president'].includes(currentUser.role)) return;
+  renderPromosUI();
   const card = document.getElementById('card-tarifs');
   if (!card) return;
   card.style.display = '';
