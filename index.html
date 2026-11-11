@@ -3339,9 +3339,12 @@ function slugifyPseudo(p){
   return (p||'').replace(/[^a-zA-Z0-9]/g,'') || 'membre';
 }
 
+// Dimensions d'affichage de l'image sur le forum (factures location + intérimaires)
+const SHARE_IMG_W=750, SHARE_IMG_H=175;
+
 function showShareLink(url){
   document.getElementById('share-link-url').value=url;
-  document.getElementById('share-link-bbcode').value='[img]'+url+'[/img]';
+  document.getElementById('share-link-bbcode').value='[img='+SHARE_IMG_W+'x'+SHARE_IMG_H+']'+url+'[/img]';
   document.getElementById('share-bbcode-field').style.display='';
   document.getElementById('share-bbcode-btn').style.display='';
   document.getElementById('share-link-title').innerHTML='<i class="fa-solid fa-link"></i> Lien de la facture';
