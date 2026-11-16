@@ -3339,12 +3339,13 @@ function slugifyPseudo(p){
   return (p||'').replace(/[^a-zA-Z0-9]/g,'') || 'membre';
 }
 
-// Dimensions d'affichage de l'image sur le forum (factures location + intérimaires)
-const SHARE_IMG_W=1800, SHARE_IMG_H=900;
+// Largeur d'affichage de l'image sur le forum (factures location + intérimaires) ; la hauteur suit les proportions réelles pour ne jamais étirer l'image
+const SHARE_IMG_W=1800;
 
-function showShareLink(url){
+function showShareLink(url, canvas){
+  const h=canvas&&canvas.width?Math.round(SHARE_IMG_W*canvas.height/canvas.width):0;
   document.getElementById('share-link-url').value=url;
-  document.getElementById('share-link-bbcode').value='[img='+SHARE_IMG_W+'x'+SHARE_IMG_H+']'+url+'[/img]';
+  document.getElementById('share-link-bbcode').value='[img='+SHARE_IMG_W+(h?'x'+h:'')+']'+url+'[/img]';
   document.getElementById('share-bbcode-field').style.display='';
   document.getElementById('share-bbcode-btn').style.display='';
   document.getElementById('share-link-title').innerHTML='<i class="fa-solid fa-link"></i> Lien de la facture';
@@ -3374,7 +3375,7 @@ async function shareFactureLink(id){
     await uploadFactureToStorage(canvas, path);
     const slug=slugifyPseudo(d.membre_pseudo)+'-'+String(d.id).padStart(3,'0');
     const siteUrl=window.location.origin+'/facture'+slug;
-    showShareLink(siteUrl);
+    showShareLink(siteUrl, canvas);
   }catch(e){
     alert('Erreur lors de la génération du lien : '+e.message+'\n\nVérifiez que le bucket "'+FACTURES_BUCKET+'" existe dans Supabase Storage (voir Accès Staff).');
   }
@@ -3396,7 +3397,7 @@ async function shareInterimLink(id){
     await uploadFactureToStorage(canvas, path);
     const slug=slugifyPseudo(d.membre_pseudo)+'-'+String(d.id).padStart(3,'0');
     const siteUrl=window.location.origin+'/interim'+slug;
-    showShareLink(siteUrl);
+    showShareLink(siteUrl, canvas);
   }catch(e){
     alert('Erreur lors de la génération du lien : '+e.message+'\n\nVérifiez que le bucket "'+FACTURES_BUCKET+'" existe dans Supabase Storage (voir Accès Staff).');
   }
