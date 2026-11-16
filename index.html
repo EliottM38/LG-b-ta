@@ -3293,7 +3293,7 @@ function renderContentToCanvas(content){
     document.body.appendChild(tmp);
     requestAnimationFrame(()=>setTimeout(()=>{
       html2canvas(tmp,{
-        scale:2,useCORS:true,backgroundColor:'#ffffff',
+        scale:SHARE_IMG_W/(tmp.offsetWidth||800),useCORS:true,backgroundColor:'#ffffff',
         logging:false,allowTaint:true,foreignObjectRendering:false,
         imageTimeout:20000
       }).then(canvas=>{
@@ -3339,13 +3339,13 @@ function slugifyPseudo(p){
   return (p||'').replace(/[^a-zA-Z0-9]/g,'') || 'membre';
 }
 
-// Largeur d'affichage de l'image sur le forum (factures location + intérimaires) ; la hauteur suit les proportions réelles pour ne jamais étirer l'image
+// Largeur réelle (en pixels) de l'image exportée / hébergée (factures location + intérimaires). Aucune taille n'est mise dans le BBCode :
+// le forum réduit l'image à sa colonne tout en gardant les proportions.
 const SHARE_IMG_W=1800;
 
-function showShareLink(url, canvas){
-  const h=canvas&&canvas.width?Math.round(SHARE_IMG_W*canvas.height/canvas.width):0;
+function showShareLink(url){
   document.getElementById('share-link-url').value=url;
-  document.getElementById('share-link-bbcode').value='[img='+SHARE_IMG_W+(h?'x'+h:'')+']'+url+'[/img]';
+  document.getElementById('share-link-bbcode').value='[img]'+url+'[/img]';
   document.getElementById('share-bbcode-field').style.display='';
   document.getElementById('share-bbcode-btn').style.display='';
   document.getElementById('share-link-title').innerHTML='<i class="fa-solid fa-link"></i> Lien de la facture';
@@ -3375,7 +3375,7 @@ async function shareFactureLink(id){
     await uploadFactureToStorage(canvas, path);
     const slug=slugifyPseudo(d.membre_pseudo)+'-'+String(d.id).padStart(3,'0');
     const siteUrl=window.location.origin+'/facture'+slug;
-    showShareLink(siteUrl, canvas);
+    showShareLink(siteUrl);
   }catch(e){
     alert('Erreur lors de la génération du lien : '+e.message+'\n\nVérifiez que le bucket "'+FACTURES_BUCKET+'" existe dans Supabase Storage (voir Accès Staff).');
   }
@@ -3397,7 +3397,7 @@ async function shareInterimLink(id){
     await uploadFactureToStorage(canvas, path);
     const slug=slugifyPseudo(d.membre_pseudo)+'-'+String(d.id).padStart(3,'0');
     const siteUrl=window.location.origin+'/interim'+slug;
-    showShareLink(siteUrl, canvas);
+    showShareLink(siteUrl);
   }catch(e){
     alert('Erreur lors de la génération du lien : '+e.message+'\n\nVérifiez que le bucket "'+FACTURES_BUCKET+'" existe dans Supabase Storage (voir Accès Staff).');
   }
