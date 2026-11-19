@@ -1271,6 +1271,38 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
     </div>
   </div>
 
+  <!-- Site public : photos, visuels, liens (lus par /api/public-parc) -->
+  <div class="card" id="card-public-site" style="margin-bottom:16px;display:none">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-globe"></i> Site public — photos, visuels &amp; liens</span></div>
+    <div style="padding:16px 20px">
+      <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Les photos envoyées ici s'affichent sur le site public de l'alliance. Aucune clé ni URL n'est stockée dans le code : tout est en base de données.</p>
+
+      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-images"></i> Visuels du site</div>
+      <div id="pub-site-slots" style="margin-bottom:22px"></div>
+
+      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-bus"></i> Photos des véhicules, par modèle</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        <button class="btn btn-primary" style="min-height:44px" onclick="pubLoadModels()"><i class="fa-solid fa-arrows-rotate"></i> Charger les modèles depuis TM</button>
+        <input id="pub-model-search" placeholder="Filtrer les modèles…" oninput="renderPubModels()" style="flex:1;min-width:180px;min-height:44px;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;box-sizing:border-box">
+      </div>
+      <div id="pub-models-info" style="font-size:12px;color:var(--text-muted);margin-bottom:10px"></div>
+      <div id="pub-models"><div class="empty">Cliquez sur « Charger les modèles depuis TM ».</div></div>
+
+      <!-- Président uniquement : liens publics + liens Google Sheet du parc -->
+      <div id="pub-config" style="display:none;margin-top:24px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-link"></i> Liens affichés sur le site public</div>
+        <div id="pub-links-fields"></div>
+        <div class="pdf-stitle" style="margin:18px 0 10px"><i class="fa-solid fa-table"></i> Google Sheets du parc (statuts, disponibilités)</div>
+        <div class="field">
+          <label>Un lien par ligne, au format : Catégorie | lien CSV (Minibus, Midibus, Standards, Articulés, BHNS, LE &amp; Cars)</label>
+          <textarea id="pub-sheet-urls" rows="5" placeholder="Standards | https://…/pub?output=csv" style="width:100%;box-sizing:border-box"></textarea>
+        </div>
+        <button class="btn btn-primary" style="min-height:44px" onclick="savePubConfig()"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
+        <div id="pub-config-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Membres — sync -->
   <div class="card" id="tm-membres-card" style="display:none">
     <div class="card-header">
@@ -4668,6 +4700,257 @@ async function testTMKey() {
   }
 }
 
+// ============================================================
+// SITE PUBLIC — photos du catalogue, visuels, liens (lus par /api/public-parc)
+// Les clés et URL restent côté serveur / en base : rien dans le code.
+// ============================================================
+const PUB_BUCKET = 'parc-photos';
+const PUB_SLOTS = [
+  ['hero','Accueil — grande image'], ['alliance','Alliance — présentation'], ['location','Pôle Location'],
+  ['exploitation','Pôle Exploitation'], ['financement','Pôle Financement'], ['rejoindre','Nous rejoindre']
+];
+const PUB_LINKS = [
+  ['forum','Forum Transport Manager'], ['tm','Site Transport Manager'], ['demande_location','Formulaire — Demande de location'],
+  ['sal','Formulaire — S.A.L'], ['intervention','Formulaire — Intervention atelier'],
+  ['remboursement','Formulaire — Remboursement'], ['disponibilites','Tableur des disponibilités']
+];
+const PUB_CATS = ['Minibus','Midibus','Standards','Articulés','BHNS','LE & Cars'];
+let pubPhotos = [];
+let pubModels = [];
+
+// Même algorithme que api/public-parc.js (clé de regroupement marque|modèle)
+function pubNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+function pubCle(marque, modele){ return pubNorm(marque) + '|' + pubNorm(modele); }
+function pubFlat(s){ return String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function pubPick(obj, aliases){
+  const map = {};
+  Object.keys(obj||{}).forEach(k => { map[pubFlat(k)] = obj[k]; });
+  for (const a of aliases){
+    const v = map[pubFlat(a)];
+    if (v !== undefined && v !== null && typeof v !== 'object' && String(v).trim() !== '') return String(v).trim();
+  }
+  return '';
+}
+function pubCategorize(){
+  const t = pubNorm(Array.from(arguments).join(' '));
+  if (/\bmini/.test(t)) return 'Minibus';
+  if (/\bmidi/.test(t)) return 'Midibus';
+  if (/articul|double/.test(t)) return 'Articulés';
+  if (/bhns|brt|\btram/.test(t)) return 'BHNS';
+  if (/\bcar\b|autocar|\ble\b|low entry|intercit|tourisme/.test(t)) return 'LE & Cars';
+  return 'Standards';
+}
+function pubUrl(path){ return sb.storage.from(PUB_BUCKET).getPublicUrl(path).data.publicUrl; }
+
+async function loadPublicSiteCard(){
+  const card = document.getElementById('card-public-site');
+  if (!card || !currentUser) return;
+  if (!['president','vice_president','gestionnaire_parc'].includes(currentUser.role)) return;
+  card.style.display = '';
+  const { data, error } = await sb.from('parc_photos').select('*').order('ordre').order('created_at');
+  if (error){
+    document.getElementById('pub-site-slots').innerHTML = '<div class="empty">Table « parc_photos » manquante — exécutez sql/public-site.sql dans Supabase.</div>';
+    return;
+  }
+  pubPhotos = data || [];
+  renderPubSlots();
+  renderPubModels();
+  if (currentUser.role === 'president'){
+    document.getElementById('pub-config').style.display = '';
+    await loadPubConfig();
+  }
+}
+
+function pubThumbs(cle){
+  const list = pubPhotos.filter(p => p.cle === cle);
+  if (!list.length) return '<span style="font-size:12px;color:var(--text-muted)">Aucune photo</span>';
+  return list.map(p => `<span style="position:relative;display:inline-block;margin:0 8px 8px 0">
+      <img src="${escHtml(pubUrl(p.storage_path))}" alt="" loading="lazy" style="width:84px;height:58px;object-fit:cover;border-radius:8px;border:1px solid var(--border-light);display:block">
+      <button class="btn btn-sm btn-danger" onclick="pubDeletePhoto('${p.id}')" title="Supprimer cette photo" style="position:absolute;top:-8px;right:-8px;min-width:28px;min-height:28px;padding:0;border-radius:50%"><i class="fa-solid fa-xmark"></i></button>
+    </span>`).join('');
+}
+
+function renderPubSlots(){
+  const el = document.getElementById('pub-site-slots');
+  el.innerHTML = PUB_SLOTS.map((s, i) => `
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border-light)">
+      <div style="min-width:190px;font-size:13px;font-weight:600;color:var(--text)">${escHtml(s[1])}</div>
+      <div style="flex:1;min-width:120px">${pubThumbs('site:' + s[0])}</div>
+      <button class="btn btn-sm" style="min-height:44px" onclick="pubPickSlot(${i})"><i class="fa-solid fa-upload"></i> Remplacer</button>
+    </div>`).join('');
+}
+
+function renderPubModels(){
+  const el = document.getElementById('pub-models');
+  if (!pubModels.length) return;
+  const q = pubNorm((document.getElementById('pub-model-search') || {}).value || '');
+  const rows = pubModels.map((m, i) => ({ m, i })).filter(x => !q || pubNorm(x.m.marque + ' ' + x.m.modele + ' ' + x.m.categorie).includes(q));
+  if (!rows.length){ el.innerHTML = '<div class="empty">Aucun modèle ne correspond.</div>'; return; }
+  el.innerHTML = rows.map(x => `
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border-light)">
+      <div style="min-width:220px">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${escHtml((x.m.marque + ' ' + x.m.modele).trim() || 'Modèle non renseigné')}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${escHtml(x.m.categorie)} · ${x.m.n} véhicule(s)</div>
+      </div>
+      <div style="flex:1;min-width:120px">${pubThumbs(x.m.cle)}</div>
+      <button class="btn btn-sm" style="min-height:44px" onclick="pubPickModel(${x.i})"><i class="fa-solid fa-plus"></i> Ajouter des photos</button>
+    </div>`).join('');
+}
+
+async function pubLoadModels(){
+  const info = document.getElementById('pub-models-info');
+  info.textContent = 'Chargement des véhicules depuis TM…';
+  try {
+    const res = await tmFetch('/api/v1/vehicules?parc=global&limit=1000');
+    const raw = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(raw.error || ('HTTP ' + res.status));
+    const list = Array.isArray(raw) ? raw : (raw.data || raw.vehicules || Object.values(raw).find(Array.isArray) || []);
+    const groups = {};
+    let sansNom = 0;
+    list.forEach(v => {
+      const marque = pubPick(v, ['marque','constructeur','brand','fabricant']);
+      const modele = pubPick(v, ['modele','model','nom_modele','designation','nom']);
+      if (!marque && !modele){ sansNom++; return; }
+      const cle = pubCle(marque, modele);
+      const type = pubPick(v, ['categorie','category','type_vehicule','type','genre']);
+      if (!groups[cle]) groups[cle] = { cle, marque, modele, categorie: pubCategorize(type, modele), n: 0 };
+      groups[cle].n++;
+    });
+    pubModels = Object.values(groups).sort((a, b) => PUB_CATS.indexOf(a.categorie) - PUB_CATS.indexOf(b.categorie) || (a.marque + a.modele).localeCompare(b.marque + b.modele, 'fr'));
+    const cols = list.length ? Object.keys(list[0]).filter(k => typeof list[0][k] !== 'object').slice(0, 14).join(', ') : '';
+    info.innerHTML = `${list.length} véhicule(s) · ${pubModels.length} modèle(s)` + (sansNom ? ` · <span style="color:#991b1b">${sansNom} sans marque/modèle reconnus</span>` : '') + (cols ? `<br>Colonnes TM détectées : ${escHtml(cols)}` : '');
+    renderPubModels();
+  } catch(e){
+    info.innerHTML = '<span style="color:#991b1b">Erreur : ' + escHtml(e.message) + '</span>';
+  }
+}
+
+function pubPickFiles(multiple, cb){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = !!multiple;
+  inp.onchange = () => { if (inp.files && inp.files.length) cb(Array.from(inp.files)); };
+  inp.click();
+}
+function pubPickSlot(i){
+  const s = PUB_SLOTS[i]; if (!s) return;
+  pubPickFiles(false, files => pubUpload('site:' + s[0], '', s[1], 'site', files, true));
+}
+function pubPickModel(i){
+  const m = pubModels[i]; if (!m) return;
+  pubPickFiles(true, files => pubUpload(m.cle, m.marque, m.modele, m.categorie, files, false));
+}
+
+// Réduit les grandes photos avant envoi (site plus rapide, stockage allégé)
+async function pubResize(file, max){
+  max = max || 2200;
+  const bmp = await createImageBitmap(file);
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  return await new Promise(r => c.toBlob(r, 'image/jpeg', 0.86));
+}
+
+async function pubUpload(cle, marque, modele, categorie, files, replace){
+  try {
+    if (replace) await pubDeleteCle(cle);
+    let ordre = pubPhotos.filter(p => p.cle === cle).length;
+    for (const f of files){
+      let blob = f;
+      try { blob = await pubResize(f); } catch(e) { /* on envoie l'original */ }
+      const slug = cle.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'photo';
+      const path = slug + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.jpg';
+      let { error } = await sb.storage.from(PUB_BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (error && /bucket not found/i.test(error.message || '')){
+        const { error: createErr } = await sb.storage.createBucket(PUB_BUCKET, { public: true });
+        if (createErr && !/already exists/i.test(createErr.message || '')) throw createErr;
+        ({ error } = await sb.storage.from(PUB_BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: true }));
+      }
+      if (error) throw error;
+      const ins = await sb.from('parc_photos').insert({ cle, marque, modele, categorie, storage_path: path, ordre: ordre++, uploaded_by: currentUser.nom_affiche || currentUser.username });
+      if (ins.error) throw ins.error;
+    }
+    toast('Photo(s) envoyée(s) ✓');
+    logAction('parc_photo', '', 'a mis à jour les photos du site public (' + (modele || cle) + ')');
+    await reloadPubPhotos();
+  } catch(e){
+    alert('Erreur envoi : ' + e.message);
+  }
+}
+
+async function pubDeleteCle(cle){
+  const old = pubPhotos.filter(p => p.cle === cle);
+  if (!old.length) return;
+  await sb.storage.from(PUB_BUCKET).remove(old.map(p => p.storage_path));
+  await sb.from('parc_photos').delete().eq('cle', cle);
+}
+
+async function pubDeletePhoto(id){
+  const p = pubPhotos.find(x => String(x.id) === String(id)); if (!p) return;
+  if (!confirm('Supprimer cette photo du site public ?')) return;
+  await sb.storage.from(PUB_BUCKET).remove([p.storage_path]);
+  const { error } = await sb.from('parc_photos').delete().eq('id', p.id);
+  if (error){ alert('Erreur : ' + error.message); return; }
+  toast('Photo supprimée');
+  await reloadPubPhotos();
+}
+
+async function reloadPubPhotos(){
+  const { data } = await sb.from('parc_photos').select('*').order('ordre').order('created_at');
+  pubPhotos = data || [];
+  renderPubSlots();
+  renderPubModels();
+}
+
+// ---- Liens publics + liens Google Sheet (Président) — stockés dans app_config ----
+async function loadPubConfig(){
+  const { data } = await sb.from('app_config').select('*').in('key', ['site_links', 'parc_sheet_urls']);
+  let links = {}, sheets = {};
+  (data || []).forEach(r => {
+    try {
+      if (r.key === 'site_links') links = JSON.parse(r.value) || {};
+      if (r.key === 'parc_sheet_urls') sheets = JSON.parse(r.value) || {};
+    } catch(e) {}
+  });
+  document.getElementById('pub-links-fields').innerHTML = PUB_LINKS.map(l => `
+    <div class="field"><label>${escHtml(l[1])}</label>
+      <input id="pub-link-${l[0]}" value="${escHtml(links[l[0]] || '')}" placeholder="https://…" style="width:100%"></div>`).join('');
+  document.getElementById('pub-sheet-urls').value = Object.keys(sheets).map(k => k + ' | ' + sheets[k]).join('\n');
+}
+
+async function savePubConfig(){
+  if (currentUser.role !== 'president'){ toast('Accès réservé au Président'); return; }
+  const out = document.getElementById('pub-config-result');
+  const fail = msg => { out.textContent = msg; out.style.color = '#991b1b'; };
+  const links = {};
+  for (const l of PUB_LINKS){
+    const v = (document.getElementById('pub-link-' + l[0]).value || '').trim();
+    if (!v) continue;
+    try { const u = new URL(v); if (!/^https?:$/.test(u.protocol)) throw 0; links[l[0]] = u.toString(); }
+    catch(e) { return fail('Lien invalide : ' + l[1]); }
+  }
+  const sheets = {};
+  const lines = (document.getElementById('pub-sheet-urls').value || '').split('\n').map(s => s.trim()).filter(Boolean);
+  for (const line of lines){
+    const i = line.indexOf('|');
+    if (i < 0) return fail('Format attendu : Catégorie | lien — ligne : ' + line.slice(0, 40));
+    const cat = line.slice(0, i).trim();
+    let url = line.slice(i + 1).trim();
+    if (!PUB_CATS.includes(cat)) return fail('Catégorie inconnue : ' + cat);
+    url = url.replace('/pubhtml', '/pub?output=csv');
+    if (!url.includes('output=csv')) url += (url.includes('?') ? '&' : '?') + 'output=csv';
+    try { const u = new URL(url); if (u.protocol !== 'https:') throw 0; } catch(e) { return fail('Lien Sheet invalide pour ' + cat); }
+    sheets[cat] = url;
+  }
+  try {
+    const a = await sb.from('app_config').upsert({ key: 'site_links', value: JSON.stringify(links) }, { onConflict: 'key' });
+    const b = await sb.from('app_config').upsert({ key: 'parc_sheet_urls', value: JSON.stringify(sheets) }, { onConflict: 'key' });
+    if (a.error) throw a.error; if (b.error) throw b.error;
+    out.textContent = 'Enregistré. Le site public se met à jour en quelques minutes.'; out.style.color = '#166534';
+    logAction('site_public_config', '', 'a mis à jour les liens du site public');
+  } catch(e){ fail('Erreur : ' + e.message); }
+}
+
 function loadTMPage() {
   const local = getTMKey();
   const input = document.getElementById('tm-api-key-input');
@@ -4682,6 +4965,7 @@ function loadTMPage() {
   }
   document.getElementById('tm-status-card').style.display = '';
   loadTMMembers();
+  loadPublicSiteCard();
 }
 
 async function loadTMMembers() {

@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/config.js", "destination": "/api/config" },
     { "source": "/facture:slug", "destination": "/api/facture?slug=:slug" },
-    { "source": "/interim:slug", "destination": "/api/interim?slug=:slug" }
+    { "source": "/interim:slug", "destination": "/api/interim?slug=:slug" },
+    { "source": "/alliance", "destination": "/alliance/index.html" }
   ]
 }
