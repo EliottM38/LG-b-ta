@@ -1303,6 +1303,82 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
     </div>
   </div>
 
+  <!-- Site public : articles, pop-up, liens supplémentaires, Discord (lus par /api/public-site) -->
+  <div class="card" id="card-public-content" style="margin-bottom:16px;display:none">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-newspaper"></i> Site public — Articles, pop-up, liens et Discord</span></div>
+    <div style="padding:6px 20px 20px">
+      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-newspaper"></i> Articles</div>
+      <div id="art-list"></div>
+      <div id="art-form" style="display:none;margin-top:14px;border:1px solid var(--border-light);border-radius:14px;padding:16px">
+        <input type="hidden" id="art-id">
+        <div class="field"><label>Titre</label><input id="art-titre" style="width:100%;box-sizing:border-box"></div>
+        <div class="field"><label>Résumé (affiché sur la carte)</label><textarea id="art-resume" rows="2" style="width:100%;box-sizing:border-box"></textarea></div>
+        <div class="field"><label>Contenu (une ligne vide = nouveau paragraphe ; commencer une ligne par ## pour un intertitre)</label><textarea id="art-contenu" rows="10" style="width:100%;box-sizing:border-box"></textarea></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:160px"><label>Catégorie</label><input id="art-categorie" placeholder="Annonce, Parc, Vie de l&#39;alliance…" style="width:100%;box-sizing:border-box"></div>
+          <div class="field" style="flex:1;min-width:160px"><label>Auteur</label><input id="art-auteur" style="width:100%;box-sizing:border-box"></div>
+          <div class="field" style="flex:1;min-width:200px"><label>Date de publication</label><input id="art-date" type="datetime-local" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div class="field"><label>Image de couverture</label>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <img id="art-img-prev" alt="" style="display:none;width:120px;height:68px;object-fit:cover;border-radius:10px">
+            <input type="hidden" id="art-image-url">
+            <input type="file" id="art-file" accept="image/*" onchange="contentPickImage(this,&#39;art&#39;)">
+            <button class="btn btn-sm" type="button" style="min-height:44px" onclick="contentClearImage(&#39;art&#39;)">Retirer l&#39;image</button>
+          </div></div>
+        <label style="display:flex;gap:8px;align-items:center;min-height:44px;font-weight:600"><input type="checkbox" id="art-publie"> Publié sur le site</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-primary" style="min-height:44px" onclick="saveArticle()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer l&#39;article</button>
+          <button class="btn" style="min-height:44px" onclick="closeArticleForm()">Annuler</button>
+        </div>
+        <div id="art-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+      </div>
+      <button class="btn btn-primary" id="art-new" style="min-height:44px;margin-top:12px" onclick="newArticle()"><i class="fa-solid fa-plus"></i> Nouvel article</button>
+
+      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-window-restore"></i> Pop-up d&#39;accueil</div>
+        <label style="display:flex;gap:8px;align-items:center;min-height:44px;font-weight:600"><input type="checkbox" id="pop-actif"> Pop-up actif</label>
+        <div class="field"><label>Titre</label><input id="pop-titre" style="width:100%;box-sizing:border-box"></div>
+        <div class="field"><label>Texte</label><textarea id="pop-texte" rows="4" style="width:100%;box-sizing:border-box"></textarea></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:180px"><label>Texte du bouton</label><input id="pop-bouton" placeholder="En savoir plus" style="width:100%;box-sizing:border-box"></div>
+          <div class="field" style="flex:2;min-width:220px"><label>Lien du bouton</label><input id="pop-lien" placeholder="https://…" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:200px"><label>Début d&#39;affichage (facultatif)</label><input id="pop-debut" type="datetime-local" style="width:100%;box-sizing:border-box"></div>
+          <div class="field" style="flex:1;min-width:200px"><label>Fin d&#39;affichage (facultatif)</label><input id="pop-fin" type="datetime-local" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div class="field"><label>Image (facultatif)</label>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <img id="pop-img-prev" alt="" style="display:none;width:120px;height:68px;object-fit:cover;border-radius:10px">
+            <input type="hidden" id="pop-image-url">
+            <input type="file" id="pop-file" accept="image/*" onchange="contentPickImage(this,&#39;pop&#39;)">
+            <button class="btn btn-sm" type="button" style="min-height:44px" onclick="contentClearImage(&#39;pop&#39;)">Retirer l&#39;image</button>
+          </div></div>
+        <label style="display:flex;gap:8px;align-items:center;min-height:44px"><input type="checkbox" id="pop-reset" checked> Le réafficher à tous les visiteurs (même ceux qui l&#39;ont déjà fermé)</label>
+        <button class="btn btn-primary" style="min-height:44px;margin-top:6px" onclick="savePopup()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer le pop-up</button>
+        <div id="pop-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+      </div>
+
+      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-link"></i> Liens supplémentaires</div>
+        <div class="field"><label>Un lien par ligne : Libellé | https://… | footer (pied de page) ou menu (menu du haut)</label>
+          <textarea id="extra-links" rows="5" placeholder="Boutique | https://… | footer" style="width:100%;box-sizing:border-box"></textarea></div>
+        <button class="btn btn-primary" style="min-height:44px" onclick="saveExtraLinks()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer les liens</button>
+        <div id="extra-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+      </div>
+
+      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-brands fa-discord"></i> Widget Discord</div>
+        <div class="field"><label>Identifiant du serveur, ou code du widget copié depuis Discord (laisser vide pour masquer le widget)</label>
+          <input id="dc-id" placeholder="Identifiant ou code iframe" style="width:100%;box-sizing:border-box"></div>
+        <div class="field"><label>Thème</label><select id="dc-theme" style="min-height:44px"><option value="dark">Sombre</option><option value="light">Clair</option></select></div>
+        <button class="btn btn-primary" style="min-height:44px" onclick="saveDiscord()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
+        <div id="dc-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Membres — sync -->
   <div class="card" id="tm-membres-card" style="display:none">
     <div class="card-header">
@@ -4983,6 +5059,209 @@ async function savePubConfig(){
   } catch(e){ fail('Erreur : ' + e.message); }
 }
 
+/* ---------- Site public : articles, pop-up, liens, Discord ---------- */
+let pubArticles = [];
+const PUB_CONTENT_ROLES = ["president", "vice_president"];
+
+function contentRes(id, msg, ok){ const el = document.getElementById(id); if (!el) return; el.textContent = msg; el.style.color = ok ? "#166534" : "#991b1b"; }
+function contentCfgGet(key){ return sb.from("app_config").select("*").eq("key", key).then(r => { try { return JSON.parse(((r.data || [])[0] || {}).value || "null"); } catch(e) { return null; } }); }
+function contentCfgSet(key, val){ return sb.from("app_config").upsert({ key: key, value: JSON.stringify(val) }, { onConflict: "key" }); }
+function contentSlug(t){ return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "article"; }
+function contentLocal(iso){ if (!iso) return ""; const d = new Date(iso); if (isNaN(d)) return ""; const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes()); }
+function contentIso(local){ if (!local) return ""; const d = new Date(local); return isNaN(d) ? "" : d.toISOString(); }
+
+async function contentUploadImage(file, folder){
+  let blob = file;
+  try { blob = await pubResize(file, 1800); } catch(e) {}
+  const path = folder + "/" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) + ".jpg";
+  let { error } = await sb.storage.from(PUB_BUCKET).upload(path, blob, { contentType: "image/jpeg", upsert: true });
+  if (error && /bucket not found/i.test(error.message || "")){
+    const c = await sb.storage.createBucket(PUB_BUCKET, { public: true });
+    if (c.error && !/already exists/i.test(c.error.message || "")) throw c.error;
+    ({ error } = await sb.storage.from(PUB_BUCKET).upload(path, blob, { contentType: "image/jpeg", upsert: true }));
+  }
+  if (error) throw error;
+  return pubUrl(path);
+}
+async function contentPickImage(input, pre){
+  const f = input.files && input.files[0]; if (!f) return;
+  try {
+    toast("Envoi de l\u2019image\u2026");
+    const url = await contentUploadImage(f, pre === "art" ? "articles" : "popup");
+    document.getElementById(pre + "-image-url").value = url;
+    const img = document.getElementById(pre + "-img-prev"); img.src = url; img.style.display = "";
+  } catch(e){ toast("Erreur : " + e.message); }
+  input.value = "";
+}
+function contentClearImage(pre){
+  document.getElementById(pre + "-image-url").value = "";
+  const img = document.getElementById(pre + "-img-prev"); img.removeAttribute("src"); img.style.display = "none";
+}
+function contentSetImage(pre, url){
+  document.getElementById(pre + "-image-url").value = url || "";
+  const img = document.getElementById(pre + "-img-prev");
+  if (url){ img.src = url; img.style.display = ""; } else { img.removeAttribute("src"); img.style.display = "none"; }
+}
+
+async function loadPublicContentCard(){
+  const card = document.getElementById("card-public-content");
+  if (!card || !currentUser || !PUB_CONTENT_ROLES.includes(currentUser.role)) return;
+  card.style.display = "";
+  await loadArticles();
+  const pop = await contentCfgGet("site_popup");
+  if (pop){
+    document.getElementById("pop-actif").checked = !!pop.actif;
+    document.getElementById("pop-titre").value = pop.titre || "";
+    document.getElementById("pop-texte").value = pop.texte || "";
+    document.getElementById("pop-bouton").value = pop.bouton || "";
+    document.getElementById("pop-lien").value = pop.lien || "";
+    document.getElementById("pop-debut").value = contentLocal(pop.debut);
+    document.getElementById("pop-fin").value = contentLocal(pop.fin);
+    contentSetImage("pop", pop.image || "");
+  }
+  const links = await contentCfgGet("site_links_extra");
+  if (Array.isArray(links)) document.getElementById("extra-links").value = links.map(l => l.label + " | " + l.url + " | " + (l.zone || "footer")).join("\n");
+  const dc = await contentCfgGet("site_discord");
+  if (dc){ document.getElementById("dc-id").value = dc.id || ""; document.getElementById("dc-theme").value = dc.theme === "light" ? "light" : "dark"; }
+}
+
+async function loadArticles(){
+  const el = document.getElementById("art-list");
+  const { data, error } = await sb.from("articles").select("*").order("publie_le", { ascending: false });
+  if (error){ el.innerHTML = `<div class="empty">Table « articles » manquante — exécutez sql/public-site.sql dans Supabase.</div>`; document.getElementById("art-new").style.display = "none"; return; }
+  pubArticles = data || [];
+  if (!pubArticles.length){ el.innerHTML = `<div class="empty">Aucun article pour le moment.</div>`; return; }
+  el.innerHTML = pubArticles.map((a, i) => `
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border-light)">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">${escHtml(a.titre)}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${a.publie ? "Publié" : "Brouillon"} · ${escHtml(new Date(a.publie_le || a.created_at).toLocaleDateString("fr-FR"))}</div>
+      </div>
+      <button class="btn btn-sm" style="min-height:44px" onclick="editArticle(${i})"><i class="fa-solid fa-pen"></i> Modifier</button>
+      <button class="btn btn-sm" style="min-height:44px" onclick="toggleArticle(${i})">${a.publie ? "Dépublier" : "Publier"}</button>
+      <button class="btn btn-sm" style="min-height:44px;color:#991b1b" onclick="deleteArticle(${i})"><i class="fa-solid fa-trash"></i></button>
+    </div>`).join("");
+}
+
+function fillArticleForm(a){
+  document.getElementById("art-id").value = a.id || "";
+  document.getElementById("art-titre").value = a.titre || "";
+  document.getElementById("art-resume").value = a.resume || "";
+  document.getElementById("art-contenu").value = a.contenu || "";
+  document.getElementById("art-categorie").value = a.categorie || "";
+  document.getElementById("art-auteur").value = a.auteur || (currentUser.nom_affiche || currentUser.username || "");
+  document.getElementById("art-date").value = contentLocal(a.publie_le || new Date().toISOString());
+  document.getElementById("art-publie").checked = !!a.publie;
+  contentSetImage("art", a.image_url || "");
+  contentRes("art-result", "", true);
+  document.getElementById("art-form").style.display = "";
+  document.getElementById("art-titre").focus();
+}
+function newArticle(){ fillArticleForm({}); }
+function editArticle(i){ if (pubArticles[i]) fillArticleForm(pubArticles[i]); }
+function closeArticleForm(){ document.getElementById("art-form").style.display = "none"; }
+
+async function saveArticle(){
+  const titre = document.getElementById("art-titre").value.trim();
+  if (!titre) return contentRes("art-result", "Le titre est obligatoire.", false);
+  const id = document.getElementById("art-id").value;
+  const row = {
+    titre: titre,
+    resume: document.getElementById("art-resume").value.trim(),
+    contenu: document.getElementById("art-contenu").value,
+    categorie: document.getElementById("art-categorie").value.trim(),
+    auteur: document.getElementById("art-auteur").value.trim(),
+    image_url: document.getElementById("art-image-url").value,
+    publie: document.getElementById("art-publie").checked,
+    publie_le: contentIso(document.getElementById("art-date").value) || new Date().toISOString()
+  };
+  try {
+    let res;
+    if (id){
+      res = await sb.from("articles").update(row).eq("id", id);
+    } else {
+      let slug = contentSlug(titre);
+      if (pubArticles.some(a => a.slug === slug)) slug += "-" + Math.random().toString(36).slice(2, 6);
+      row.slug = slug;
+      res = await sb.from("articles").insert(row);
+    }
+    if (res.error) throw res.error;
+    contentRes("art-result", "Article enregistré.", true);
+    logAction("site_public_article", "", (id ? "a modifié" : "a créé") + " l\u2019article « " + titre + " »");
+    closeArticleForm();
+    await loadArticles();
+  } catch(e){ contentRes("art-result", "Erreur : " + e.message, false); }
+}
+async function toggleArticle(i){
+  const a = pubArticles[i]; if (!a) return;
+  const { error } = await sb.from("articles").update({ publie: !a.publie }).eq("id", a.id);
+  if (error){ toast("Erreur : " + error.message); return; }
+  toast(a.publie ? "Article dépublié" : "Article publié");
+  await loadArticles();
+}
+async function deleteArticle(i){
+  const a = pubArticles[i]; if (!a) return;
+  if (!confirm("Supprimer définitivement l\u2019article « " + a.titre + " » ?")) return;
+  const { error } = await sb.from("articles").delete().eq("id", a.id);
+  if (error){ toast("Erreur : " + error.message); return; }
+  logAction("site_public_article", "", "a supprimé l\u2019article « " + a.titre + " »");
+  await loadArticles();
+}
+
+function contentUrl(v){ try { const u = new URL(String(v || "").trim()); return /^https?:$/.test(u.protocol) ? u.toString() : ""; } catch(e) { return ""; } }
+
+async function savePopup(){
+  const lien = document.getElementById("pop-lien").value.trim();
+  if (lien && !contentUrl(lien)) return contentRes("pop-result", "Lien du bouton invalide.", false);
+  const old = (await contentCfgGet("site_popup")) || {};
+  const val = {
+    actif: document.getElementById("pop-actif").checked,
+    titre: document.getElementById("pop-titre").value.trim(),
+    texte: document.getElementById("pop-texte").value.trim(),
+    bouton: document.getElementById("pop-bouton").value.trim(),
+    lien: lien ? contentUrl(lien) : "",
+    debut: contentIso(document.getElementById("pop-debut").value),
+    fin: contentIso(document.getElementById("pop-fin").value),
+    image: document.getElementById("pop-image-url").value,
+    id: document.getElementById("pop-reset").checked || !old.id ? String(Date.now()) : old.id
+  };
+  const { error } = await contentCfgSet("site_popup", val);
+  if (error) return contentRes("pop-result", "Erreur : " + error.message, false);
+  contentRes("pop-result", "Pop-up enregistré.", true);
+  logAction("site_public_popup", "", "a mis à jour le pop-up du site public");
+}
+
+async function saveExtraLinks(){
+  const out = [];
+  const lines = (document.getElementById("extra-links").value || "").split("\n").map(s => s.trim()).filter(Boolean);
+  for (const line of lines){
+    const parts = line.split("|").map(s => s.trim());
+    if (parts.length < 2) return contentRes("extra-result", "Format attendu : Libellé | lien | footer ou menu — ligne : " + line.slice(0, 40), false);
+    const url = contentUrl(parts[1]);
+    if (!parts[0] || !url) return contentRes("extra-result", "Libellé ou lien invalide : " + line.slice(0, 40), false);
+    out.push({ label: parts[0], url: url, zone: (parts[2] || "footer").toLowerCase() === "menu" ? "menu" : "footer" });
+  }
+  const { error } = await contentCfgSet("site_links_extra", out);
+  if (error) return contentRes("extra-result", "Erreur : " + error.message, false);
+  contentRes("extra-result", out.length + " lien(s) enregistré(s).", true);
+  logAction("site_public_liens", "", "a mis à jour les liens supplémentaires du site public");
+}
+
+async function saveDiscord(){
+  const raw = document.getElementById("dc-id").value.trim();
+  let id = "";
+  if (raw){
+    const m = raw.match(/[?&]id=(\d{5,25})/) || raw.match(/^(\d{5,25})$/);
+    if (!m) return contentRes("dc-result", "Identifiant invalide : collez l\u2019identifiant (chiffres) ou le code du widget Discord.", false);
+    id = m[1];
+  }
+  const { error } = await contentCfgSet("site_discord", id ? { id: id, theme: document.getElementById("dc-theme").value } : {});
+  if (error) return contentRes("dc-result", "Erreur : " + error.message, false);
+  document.getElementById("dc-id").value = id;
+  contentRes("dc-result", id ? "Widget Discord enregistré." : "Widget Discord masqué.", true);
+  logAction("site_public_discord", "", "a mis à jour le widget Discord du site public");
+}
+
 function loadTMPage() {
   const local = getTMKey();
   const input = document.getElementById('tm-api-key-input');
@@ -4998,6 +5277,7 @@ function loadTMPage() {
   document.getElementById('tm-status-card').style.display = '';
   loadTMMembers();
   loadPublicSiteCard();
+  loadPublicContentCard();
 }
 
 async function loadTMMembers() {
