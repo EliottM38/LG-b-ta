@@ -6,7 +6,7 @@
      « réduire les animations ». */
 (() => {
 'use strict';
-const BASE = '/alliance/';
+const BASE = (() => { try { const s = document.currentScript && document.currentScript.src; return s ? new URL('../', s).pathname : './'; } catch (e) { return './'; } })();
 const API = '/api/public-parc';
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FINE = matchMedia('(hover:hover) and (pointer:fine)').matches;

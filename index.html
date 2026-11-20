@@ -4717,6 +4717,7 @@ const PUB_LINKS = [
 const PUB_CATS = ['Minibus','Midibus','Standards','Articulés','BHNS','LE & Cars'];
 let pubPhotos = [];
 let pubModels = [];
+let pubCatOverrides = {};
 
 // Même algorithme que api/public-parc.js (clé de regroupement marque|modèle)
 function pubNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
@@ -4790,21 +4791,47 @@ function renderPubModels(){
     <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border-light)">
       <div style="min-width:220px">
         <div style="font-size:13px;font-weight:700;color:var(--text)">${escHtml((x.m.marque + ' ' + x.m.modele).trim() || 'Modèle non renseigné')}</div>
-        <div style="font-size:12px;color:var(--text-muted)">${escHtml(x.m.categorie)} · ${x.m.n} véhicule(s)</div>
+        <div style="font-size:12px;color:var(--text-muted)">${x.m.n} véhicule(s)</div>
+        <select onchange="pubSetCat(${x.i}, this.value)" style="margin-top:6px;min-height:44px" aria-label="Catégorie">${PUB_CATS.map(c => `<option value="${escHtml(c)}"${c === x.m.categorie ? ' selected' : ''}>${escHtml(c)}</option>`).join('')}</select>
       </div>
       <div style="flex:1;min-width:120px">${pubThumbs(x.m.cle)}</div>
       <button class="btn btn-sm" style="min-height:44px" onclick="pubPickModel(${x.i})"><i class="fa-solid fa-plus"></i> Ajouter des photos</button>
     </div>`).join('');
 }
 
+async function pubSetCat(i, cat){
+  const m = pubModels[i];
+  if (!m || !PUB_CATS.includes(cat)) return;
+  m.categorie = cat;
+  pubCatOverrides[m.cle] = cat;
+  try {
+    const { error } = await sb.from('app_config').upsert({ key: 'parc_categories', value: JSON.stringify(pubCatOverrides) }, { onConflict: 'key' });
+    if (error) throw error;
+    toast('Catégorie enregistrée');
+    logAction('site_public_categorie', '', (m.marque + ' ' + m.modele).trim() + ' → ' + cat);
+  } catch(e) { toast('Erreur : ' + e.message); }
+}
+
 async function pubLoadModels(){
   const info = document.getElementById('pub-models-info');
   info.textContent = 'Chargement des véhicules depuis TM…';
   try {
-    const res = await tmFetch('/api/v1/vehicules?parc=global&limit=1000');
-    const raw = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(raw.error || ('HTTP ' + res.status));
-    const list = Array.isArray(raw) ? raw : (raw.data || raw.vehicules || Object.values(raw).find(Array.isArray) || []);
+    const asArr = raw => Array.isArray(raw) ? raw : (raw.data || raw.vehicules || Object.values(raw).find(Array.isArray) || []);
+    const fetchParc = async parc => {
+      const res = await tmFetch('/api/v1/vehicules?parc=' + parc + '&limit=1000');
+      const raw = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(raw.error || ('HTTP ' + res.status));
+      return asArr(raw);
+    };
+    const [lg, ll, ov] = await Promise.all([fetchParc('global'), fetchParc('location').catch(() => []), sb.from('app_config').select('*').eq('key', 'parc_categories')]);
+    try { pubCatOverrides = JSON.parse(((ov.data || [])[0] || {}).value || '{}') || {}; } catch(e) { pubCatOverrides = {}; }
+    const seen = new Set();
+    const list = lg.concat(ll).filter(v => {
+      const r = pubPick(v, ['numero_parc','num_parc','n_parc','parc_numero','numero','immatriculation','id']);
+      if (!r) return true;
+      if (seen.has(r)) return false;
+      seen.add(r); return true;
+    });
     const groups = {};
     let sansNom = 0;
     list.forEach(v => {
@@ -4813,7 +4840,7 @@ async function pubLoadModels(){
       if (!marque && !modele){ sansNom++; return; }
       const cle = pubCle(marque, modele);
       const type = pubPick(v, ['categorie','category','type_vehicule','type','genre']);
-      if (!groups[cle]) groups[cle] = { cle, marque, modele, categorie: pubCategorize(type, modele), n: 0 };
+      if (!groups[cle]) groups[cle] = { cle, marque, modele, categorie: pubCatOverrides[cle] || pubCategorize(type, modele), n: 0 };
       groups[cle].n++;
     });
     pubModels = Object.values(groups).sort((a, b) => PUB_CATS.indexOf(a.categorie) - PUB_CATS.indexOf(b.categorie) || (a.marque + a.modele).localeCompare(b.marque + b.modele, 'fr'));
