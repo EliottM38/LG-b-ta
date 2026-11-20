@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json');
     res.send(text);
   } catch (e) {
-    res.status(502).json({ error: 'Erreur proxy TM : ' + e.message });
+    const c = e && e.cause ? (e.cause.code || e.cause.message || '') : '';
+    res.status(502).json({ error: 'Erreur proxy TM : ' + e.message + (c ? ' (' + String(c).slice(0, 80) + ')' : '') });
   }
 }
