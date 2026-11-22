@@ -16,13 +16,16 @@ function safeEndpoint(raw) {
 }
 
 async function requireStaff(req) {
-  const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = process.env;
+  const { SUPABASE_URL } = process.env;
+  // SUPABASE_ANON_KEY était le nom employé avant le passage aux clés
+  // « publishable ». Accepter les deux pendant la transition.
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
   const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_KEY;
   const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || !serverKey || !token) return false;
+  if (!SUPABASE_URL || !publishableKey || !serverKey || !token) return false;
 
   const userRes = await fetch(SUPABASE_URL.replace(/\/$/, '') + '/auth/v1/user', {
-    headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: 'Bearer ' + token }
+    headers: { apikey: publishableKey, Authorization: 'Bearer ' + token }
   });
   if (!userRes.ok) return false;
   const user = await userRes.json();
@@ -47,7 +50,8 @@ export default async function handler(req, res) {
   if (!key) { res.status(503).json({ error: 'Clé API TM non configurée côté serveur' }); return; }
 
   try {
-    const upstream = await fetch('https://transport-manager.net' + endpoint, {
+    const base = (process.env.TM_API_BASE || 'https://transport-manager.net').replace(/\/$/, '');
+    const upstream = await fetch(base + endpoint, {
       headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
     });
     const text = await upstream.text();

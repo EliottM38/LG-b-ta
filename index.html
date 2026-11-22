@@ -82,6 +82,8 @@ html[data-theme="dark"] #fact-recap strong,html[data-theme="dark"] #fact-recap s
    propre fond clair : ils deviennent invisibles sur les fonds désormais sombres. */
 html[data-theme="dark"] [style*="color:#0a1f5c"]:not([style*="background"]),
 html[data-theme="dark"] [style*="color: #0a1f5c"]:not([style*="background"]){color:var(--text)!important}
+html[data-theme="dark"] [style*="color:#0d1f4e"]:not([style*="background"]),
+html[data-theme="dark"] [style*="color: #0d1f4e"]:not([style*="background"]){color:var(--text)!important}
 html[data-theme="dark"] [style*="color:#166534"]:not([style*="background"]){color:#4ade80!important}
 html[data-theme="dark"] [style*="color:#991b1b"]:not([style*="background"]){color:#f87171!important}
 html[data-theme="dark"] [style*="color:#333"]:not([style*="background"]),
@@ -90,6 +92,15 @@ html[data-theme="dark"] [style*="color:#555"]:not([style*="background"]),
 html[data-theme="dark"] [style*="color:#666"]:not([style*="background"]),
 html[data-theme="dark"] [style*="color:#888"]:not([style*="background"]),
 html[data-theme="dark"] [style*="color:#aaa"]:not([style*="background"]){color:var(--text-sec)!important}
+/* Les sous-titres de formulaires étaient écrits avec le bleu de la charte,
+   adapté au fond clair. Ils doivent rester lisibles sur les cartes sombres. */
+html[data-theme="dark"] .pdf-stitle,html[data-theme="dark"] .card h2,
+html[data-theme="dark"] .card h3,html[data-theme="dark"] .card h4,
+html[data-theme="dark"] .site-admin-panel h2,html[data-theme="dark"] .site-admin-panel h3{color:var(--text)!important}
+html[data-theme="dark"] .site-admin-hero{background:linear-gradient(135deg,#101b38,#142a55)}
+html[data-theme="dark"] .site-admin-nav{background:var(--white);border-color:var(--border)}
+html[data-theme="dark"] .site-admin-nav button{color:var(--text-sec)}
+html[data-theme="dark"] .site-admin-nav button:hover,html[data-theme="dark"] .site-admin-nav button.active{color:var(--gold-xlight);background:rgba(201,168,76,.14)}
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:var(--text);font-size:14px;min-height:100vh}
@@ -204,6 +215,19 @@ nav button.active{color:#fff;background:rgba(255,255,255,.09)}
 .page-header h1{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.5px}
 .page-header h1::after{content:'';display:block;width:40px;height:3px;
   background:var(--gold);border-radius:2px;margin-top:5px}
+
+/* ── Administration du site public ── */
+.site-admin-hero{background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));border-radius:18px;padding:28px 30px;color:#fff;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px;box-shadow:0 14px 32px rgba(8,15,40,.18)}
+.site-admin-hero .kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-xlight);font-weight:800;margin-bottom:10px}
+.site-admin-hero h1{font-size:28px;line-height:1.1;color:#fff;margin:0}
+.site-admin-hero p{max-width:640px;color:rgba(255,255,255,.75);font-size:14px;line-height:1.55;margin:10px 0 0}
+.site-admin-nav{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border:1px solid var(--border-light);border-radius:14px;background:#fff;margin-bottom:16px}
+.site-admin-nav button{border:0;background:transparent;color:var(--text-sec);border-radius:9px;padding:10px 13px;font:700 13px inherit;cursor:pointer}
+.site-admin-nav button:hover,.site-admin-nav button.active{background:var(--gold-pale);color:var(--navy)}
+.site-admin-panel{scroll-margin-top:24px;margin-bottom:18px}
+#page-site-public .card{box-shadow:0 8px 24px rgba(13,31,78,.07)}
+#page-site-public .card-header{padding:18px 20px}
+#page-site-public .card-title{font-size:15px}
 
 /* ── STATS ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
@@ -1208,14 +1232,20 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
 
 <!-- PAGE API TM -->
 <div class="page" id="page-site-public">
-  <div class="page-header">
-    <div><h1><i class="fa-solid fa-globe"></i> Site public</h1><p style="margin-top:8px;color:var(--text-sec)">Un espace dédié pour piloter le contenu, les visuels et les services affichés sur lutece-group-site-public.</p></div>
-    <a class="btn btn-primary" href="https://lut-ce-group-site-public.vercel.app" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le site</a>
-  </div>
+  <section class="site-admin-hero">
+    <div><div class="kicker">Lutèce Group · Publication</div><h1>Administration du site public</h1><p>Gérez les contenus affichés aux visiteurs : visuels, parc, actualités, message d’accueil, liens et informations de règlement.</p></div>
+    <a class="btn btn-primary" href="https://lut-ce-group-site-public.vercel.app" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Voir le site</a>
+  </section>
+  <nav class="site-admin-nav" aria-label="Rubriques d’administration du site">
+    <button type="button" onclick="openSiteAdminSection('site-assets',this)"><i class="fa-solid fa-images"></i> Visuels &amp; parc</button>
+    <button type="button" onclick="openSiteAdminSection('site-editorial',this)"><i class="fa-solid fa-newspaper"></i> Actualités</button>
+    <button type="button" onclick="openSiteAdminSection('site-settings',this)"><i class="fa-solid fa-sliders"></i> Accueil &amp; liens</button>
+    <button type="button" onclick="openSiteAdminSection('site-reglement',this)"><i class="fa-solid fa-scale-balanced"></i> Règlement</button>
+  </nav>
   <div class="stats" style="grid-template-columns:repeat(3,1fr)">
-    <div class="stat"><div class="stat-label">Contenu</div><div class="stat-value blue">Éditorial</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Articles, pop-up et liens</div></div>
-    <div class="stat"><div class="stat-label">Identité</div><div class="stat-value amber">Visuels</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Logo, pages et parc</div></div>
-    <div class="stat"><div class="stat-label">Services</div><div class="stat-value green">Forfaits</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Règlement et offres publiques</div></div>
+    <div class="stat"><div class="stat-label">Contenu</div><div class="stat-value blue">Éditorial</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Articles et message d’accueil</div></div>
+    <div class="stat"><div class="stat-label">Parc</div><div class="stat-value amber">Visuels</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Images et modèles issus de TM</div></div>
+    <div class="stat"><div class="stat-label">Références</div><div class="stat-value green">Liens</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Discord, formulaires et règlement</div></div>
   </div>
   <div id="site-public-mount"></div>
 </div>
@@ -1237,11 +1267,10 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
       </div>
       <div style="display:flex;gap:10px;align-items:flex-end">
         <div class="field" style="flex:1;margin:0">
-          <label>Clé API Alliance (Hub API TM)</label>
-          <input type="password" id="tm-api-key-input" placeholder="Votre clé API Alliance" style="width:100%">
-          <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Stockée localement dans votre navigateur uniquement</div>
+          <label>Connexion API Alliance</label>
+          <input type="password" id="tm-api-key-input" value="Clé configurée côté serveur" readonly style="width:100%">
+          <div style="font-size:11px;color:var(--text-muted);margin-top:3px">La clé reste uniquement dans les variables Vercel ; elle n’est jamais affichée ni enregistrée dans le navigateur.</div>
         </div>
-        <button class="btn btn-primary" onclick="saveTMKey()"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
         <button class="btn" onclick="testTMKey()"><i class="fa-solid fa-magnifying-glass"></i> Tester</button>
       </div>
       <div id="tm-key-result" style="margin-top:10px;font-size:13px"></div>
@@ -1286,12 +1315,12 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
   </div>
 
   <!-- Site public : photos, visuels, liens (lus par /api/public-parc) -->
-  <div class="card" id="card-public-site" style="margin-bottom:16px;display:none">
-    <div class="card-header"><span class="card-title"><i class="fa-solid fa-globe"></i> Site public — photos, visuels &amp; liens</span></div>
+  <div class="card site-admin-panel" id="card-public-site" style="margin-bottom:16px;display:none">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-images"></i> Visuels et parc du site</span></div>
     <div style="padding:16px 20px">
       <p style="font-size:13px;color:var(--text-sec);margin-bottom:16px">Les photos envoyées ici s'affichent sur le site public de l'alliance. Aucune clé ni URL n'est stockée dans le code : tout est en base de données.</p>
 
-      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-images"></i> Visuels du site</div>
+      <div class="pdf-stitle" id="site-assets" style="margin-bottom:10px"><i class="fa-solid fa-images"></i> Visuels du site</div>
       <div id="pub-site-slots" style="margin-bottom:22px"></div>
 
       <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-bus"></i> Photos des véhicules, par modèle</div>
@@ -1318,10 +1347,10 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
   </div>
 
   <!-- Site public : articles, pop-up, liens supplémentaires, Discord (lus par /api/public-site) -->
-  <div class="card" id="card-public-content" style="margin-bottom:16px;display:none">
-    <div class="card-header"><span class="card-title"><i class="fa-solid fa-newspaper"></i> Site public — Articles, pop-up, liens et Discord</span></div>
+  <div class="card site-admin-panel" id="card-public-content" style="margin-bottom:16px;display:none">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-pen-to-square"></i> Contenu, accueil et règlement</span></div>
     <div style="padding:6px 20px 20px">
-      <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-newspaper"></i> Articles</div>
+      <div class="pdf-stitle" id="site-editorial" style="margin-bottom:10px"><i class="fa-solid fa-newspaper"></i> Articles</div>
       <div id="art-list"></div>
       <div id="art-form" style="display:none;margin-top:14px;border:1px solid var(--border-light);border-radius:14px;padding:16px">
         <input type="hidden" id="art-id">
@@ -1349,7 +1378,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
       </div>
       <button class="btn btn-primary" id="art-new" style="min-height:44px;margin-top:12px" onclick="newArticle()"><i class="fa-solid fa-plus"></i> Nouvel article</button>
 
-      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+      <div id="site-settings" style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
         <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-window-restore"></i> Pop-up d&#39;accueil</div>
         <label style="display:flex;gap:8px;align-items:center;min-height:44px;font-weight:600"><input type="checkbox" id="pop-actif"> Pop-up actif</label>
         <div class="field"><label>Titre</label><input id="pop-titre" style="width:100%;box-sizing:border-box"></div>
@@ -1374,7 +1403,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
         <div id="pop-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
       </div>
 
-      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+      <div id="site-links" style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
         <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-link"></i> Liens supplémentaires</div>
         <div class="field"><label>Un lien par ligne : Libellé | https://… | footer (pied de page) ou menu (menu du haut)</label>
           <textarea id="extra-links" rows="5" placeholder="Boutique | https://… | footer" style="width:100%;box-sizing:border-box"></textarea></div>
@@ -1382,7 +1411,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
         <div id="extra-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
       </div>
 
-      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+      <div id="site-discord" style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
         <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-brands fa-discord"></i> Widget Discord</div>
         <div class="field"><label>Identifiant du serveur, ou code du widget copié depuis Discord (laisser vide pour masquer le widget)</label>
           <input id="dc-id" placeholder="Identifiant ou code iframe" style="width:100%;box-sizing:border-box"></div>
@@ -1391,7 +1420,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
         <div id="dc-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
       </div>
 
-      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+      <div id="site-reglement" style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
         <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-scale-balanced"></i> Page règlement</div>
         <p style="font-size:13px;color:var(--text-sec);margin-bottom:14px">Le contenu du règlement reste versionné dans le site. Ces champs permettent de mettre à jour son bandeau sans modifier le code.</p>
         <div class="field"><label>Version affichée</label><input id="rg-version" placeholder="2027.01" style="width:100%;box-sizing:border-box"></div>
@@ -4854,6 +4883,14 @@ function pubCategorize(){
   return 'Standards';
 }
 function pubUrl(path){ return sb.storage.from(PUB_BUCKET).getPublicUrl(path).data.publicUrl; }
+
+function openSiteAdminSection(id, button){
+  const section = document.getElementById(id);
+  if (!section) return;
+  document.querySelectorAll('.site-admin-nav button').forEach(b => b.classList.remove('active'));
+  if (button) button.classList.add('active');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 function mountPublicSitePage(){
   const mount = document.getElementById('site-public-mount');
