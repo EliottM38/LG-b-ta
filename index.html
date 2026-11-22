@@ -1376,6 +1376,15 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
         <button class="btn btn-primary" style="min-height:44px" onclick="saveDiscord()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
         <div id="dc-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
       </div>
+
+      <div style="margin-top:26px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-scale-balanced"></i> Page règlement</div>
+        <p style="font-size:13px;color:var(--text-sec);margin-bottom:14px">Le contenu du règlement reste versionné dans le site. Ces champs permettent de mettre à jour son bandeau sans modifier le code.</p>
+        <div class="field"><label>Version affichée</label><input id="rg-version" placeholder="2027.01" style="width:100%;box-sizing:border-box"></div>
+        <div class="field"><label>Introduction</label><textarea id="rg-introduction" rows="2" style="width:100%;box-sizing:border-box"></textarea></div>
+        <button class="btn btn-primary" style="min-height:44px" onclick="saveReglementConfig()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer le bandeau</button>
+        <div id="rg-result" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+      </div>
     </div>
   </div>
 
@@ -5167,6 +5176,8 @@ async function loadPublicContentCard(){
   if (Array.isArray(links)) document.getElementById("extra-links").value = links.map(l => l.label + " | " + l.url + " | " + (l.zone || "footer")).join("\n");
   const dc = await contentCfgGet("site_discord");
   if (dc){ document.getElementById("dc-id").value = dc.id || ""; document.getElementById("dc-theme").value = dc.theme === "light" ? "light" : "dark"; }
+  const rg = await contentCfgGet("site_reglement");
+  if (rg){ document.getElementById("rg-version").value = rg.version || ""; document.getElementById("rg-introduction").value = rg.introduction || ""; }
 }
 
 async function loadArticles(){
@@ -5314,6 +5325,16 @@ async function saveDiscord(){
   document.getElementById("dc-id").value = id;
   contentRes("dc-result", id ? "Widget Discord enregistré." : "Widget Discord masqué.", true);
   logAction("site_public_discord", "", "a mis à jour le widget Discord du site public");
+}
+
+async function saveReglementConfig(){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
+  const version = document.getElementById("rg-version").value.trim().slice(0, 40);
+  const introduction = document.getElementById("rg-introduction").value.trim().slice(0, 240);
+  const { error } = await contentCfgSet("site_reglement", { version, introduction });
+  if (error) return contentRes("rg-result", "Erreur : " + error.message, false);
+  contentRes("rg-result", "Bandeau du règlement enregistré.", true);
+  logAction("site_public_reglement", "", "a mis à jour le bandeau du règlement public");
 }
 
 function loadTMPage() {

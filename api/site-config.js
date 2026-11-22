@@ -1,4 +1,4 @@
-const CONTENT_KEYS = new Set(['site_popup', 'site_links_extra', 'site_discord']);
+const CONTENT_KEYS = new Set(['site_popup', 'site_links_extra', 'site_discord', 'site_reglement']);
 const PRESIDENT_KEYS = new Set(['site_links', 'parc_sheet_urls']);
 const PARC_KEY = 'parc_categories';
 
