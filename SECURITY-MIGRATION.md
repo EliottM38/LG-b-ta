@@ -21,3 +21,11 @@ accès directs aux données et doit être converti table par table.
 La route `api/session` lit uniquement le profil strictement nécessaire à la
 session après validation du jeton Supabase Auth. Elle ne renvoie jamais
 `password_hash` ni une clé d'environnement.
+
+## Phase 2 — contenu du site public
+
+Après le déploiement de `api/site-config.js`, exécuter
+`sql/phase-2-public-site-rls.sql` dans le SQL Editor Supabase. Cette migration
+active RLS sur les articles, les photos du catalogue et leurs écritures Storage.
+Les réglages éditoriaux stockés dans `app_config` passent déjà par une API Vercel
+authentifiée afin de ne pas perturber les autres modules de l'admin.
