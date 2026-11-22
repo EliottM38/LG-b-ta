@@ -3572,7 +3572,7 @@ function demandeId(prefix,rows,r){
 async function loadSAL(){
   document.getElementById('liste-sal').innerHTML='<div class="empty">Chargement...</div>';
   try{
-    await loadStatutsAndNotes();
+    if(!(await loadStatutsAndNotes())) throw new Error('Les statuts enregistrés ne sont pas accessibles. Aucun statut n’a été modifié : vérifiez les règles RLS.');
     const text=await fetchCSV(SAL_CSV_URL);
     const rows=parseCSV(text);
     window._salRows=rows;
@@ -3585,7 +3585,7 @@ async function loadSAL(){
 async function loadPole(){
   document.getElementById('liste-pole').innerHTML='<div class="empty">Chargement...</div>';
   try{
-    await loadStatutsAndNotes();
+    if(!(await loadStatutsAndNotes())) throw new Error('Les statuts enregistrés ne sont pas accessibles. Aucun statut n’a été modifié : vérifiez les règles RLS.');
     const text=await fetchCSV(POLE_CSV_URL);
     poleData=parseCSV(text);
     filterPole();
@@ -4083,23 +4083,23 @@ async function logAction(type, membrePseudo, description) {
 // ============================================================
 async function loadStatutsAndNotes() {
   try {
-    const { data } = await sb.from('form_statuts').select('*');
-    if (data) {
-      salStatuts = {}; poleStatuts = {}; salNotes = {}; poleNotes = {};
-      salStatutDates = {}; poleStatutDates = {};
-      data.forEach(r => {
-        if (r.form_type === 'sal') {
-          salStatuts[r.row_key] = r.statut;
-          salNotes[r.row_key]   = r.notes || '';
-          salStatutDates[r.row_key] = r.updated_at;
-        } else if (r.form_type === 'pole') {
-          poleStatuts[r.row_key] = r.statut;
-          poleNotes[r.row_key]   = r.notes || '';
-          poleStatutDates[r.row_key] = r.updated_at;
-        }
-      });
-    }
-  } catch(e) { console.warn('loadStatutsAndNotes:', e.message); }
+    const { data, error } = await sb.from('form_statuts').select('*');
+    if (error) { console.warn('loadStatutsAndNotes:', error.message); return false; }
+    salStatuts = {}; poleStatuts = {}; salNotes = {}; poleNotes = {};
+    salStatutDates = {}; poleStatutDates = {};
+    (data || []).forEach(r => {
+      if (r.form_type === 'sal') {
+        salStatuts[r.row_key] = r.statut;
+        salNotes[r.row_key]   = r.notes || '';
+        salStatutDates[r.row_key] = r.updated_at;
+      } else if (r.form_type === 'pole') {
+        poleStatuts[r.row_key] = r.statut;
+        poleNotes[r.row_key]   = r.notes || '';
+        poleStatutDates[r.row_key] = r.updated_at;
+      }
+    });
+    return true;
+  } catch(e) { console.warn('loadStatutsAndNotes:', e.message); return false; }
 }
 
 // Une demande traitée depuis plus de 30 jours disparaît de la liste
@@ -4111,7 +4111,8 @@ function isDemandeExpiree(statut, updatedAt) {
 
 async function setStatut(formType, key, val) {
   const upd = { form_type: formType, row_key: key, statut: val, updated_at: new Date().toISOString() };
-  await sb.from('form_statuts').upsert(upd, { onConflict: 'form_type,row_key' });
+  const { error } = await sb.from('form_statuts').upsert(upd, { onConflict: 'form_type,row_key' });
+  if (error) { alert('Statut non sauvegardé : '+error.message); return; }
   if (formType === 'sal') { salStatuts[key] = val; salStatutDates[key] = upd.updated_at; renderSAL(window._salRows || []); }
   else { poleStatuts[key] = val; poleStatutDates[key] = upd.updated_at; filterPole(); }
 }
@@ -4122,10 +4123,11 @@ async function saveNote(formType, key) {
   const note = el ? el.value : '';
   if (formType === 'sal') salNotes[key] = note;
   else poleNotes[key] = note;
-  await sb.from('form_statuts').upsert(
+  const { error } = await sb.from('form_statuts').upsert(
     { form_type: formType, row_key: key, statut: (formType === 'sal' ? salStatuts[key] : poleStatuts[key]) || 'En attente', notes: note, updated_at: new Date().toISOString() },
     { onConflict: 'form_type,row_key' }
   );
+  if (error) { alert('Note non sauvegardée : '+error.message); return; }
   toast('Note sauvegardée ✓');
 }
 
