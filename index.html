@@ -2046,6 +2046,15 @@ async function adminConfigApi(method='GET', body) {
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||'Opération impossible'); }
   return res.status===204 ? null : res.json();
 }
+
+async function formStatusesApi(method='GET', body) {
+  const { data } = await sb.auth.getSession();
+  const token = data.session && data.session.access_token;
+  if (!token) throw new Error('Session absente');
+  const res = await fetch('/api/form-statuses', { method, headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})}, body:body?JSON.stringify(body):undefined });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||'Opération impossible'); }
+  return res.status===204 ? null : res.json();
+}
 function initTheme() {
   if (currentUser && currentUser.theme_preference) {
     applyTheme(currentUser.theme_preference);
@@ -3758,7 +3767,8 @@ async function deleteSelectedSAL(){
   if(!salSelected.size){toast('Aucune demande sélectionnée');return;}
   if(!confirm('Supprimer '+salSelected.size+' demande(s) ?'))return;
   const keys=[...salSelected];
-  for(const key of keys){await sb.from('form_statuts').upsert({form_type:'sal',row_key:key,statut:'deleted',updated_at:new Date().toISOString()},{onConflict:'form_type,row_key'});salStatuts[key]='deleted';}
+  await formStatusesApi('PUT',{rows:keys.map(key=>({form_type:'sal',row_key:key,statut:'deleted'}))});
+  for(const key of keys){salStatuts[key]='deleted';}
   addSuppressed('sal',keys);salSelected.clear();toggleSALSelectMode(false);renderSAL(window._salRows||[]);toast(keys.length+' demande(s) supprimée(s) ✓');
 }
 function togglePoleSelectMode(on){poleSelectMode=on;poleSelected.clear();document.getElementById('pole-select-bar').style.display=on?'flex':'none';document.getElementById('pole-mode-btn').style.display=on?'none':'';filterPole();}
@@ -3770,7 +3780,8 @@ async function deleteSelectedPole(){
   if(!poleSelected.size){toast('Aucune demande sélectionnée');return;}
   if(!confirm('Supprimer '+poleSelected.size+' demande(s) ?'))return;
   const keys=[...poleSelected];
-  for(const key of keys){await sb.from('form_statuts').upsert({form_type:'pole',row_key:key,statut:'deleted',updated_at:new Date().toISOString()},{onConflict:'form_type,row_key'});poleStatuts[key]='deleted';}
+  await formStatusesApi('PUT',{rows:keys.map(key=>({form_type:'pole',row_key:key,statut:'deleted'}))});
+  for(const key of keys){poleStatuts[key]='deleted';}
   addSuppressed('pole',keys);poleSelected.clear();togglePoleSelectMode(false);filterPole();toast(keys.length+' demande(s) supprimée(s) ✓');
 }
 
@@ -4083,8 +4094,7 @@ async function logAction(type, membrePseudo, description) {
 // ============================================================
 async function loadStatutsAndNotes() {
   try {
-    const { data, error } = await sb.from('form_statuts').select('*');
-    if (error) { console.warn('loadStatutsAndNotes:', error.message); return false; }
+    const { rows:data } = await formStatusesApi();
     salStatuts = {}; poleStatuts = {}; salNotes = {}; poleNotes = {};
     salStatutDates = {}; poleStatutDates = {};
     (data || []).forEach(r => {
@@ -4111,8 +4121,8 @@ function isDemandeExpiree(statut, updatedAt) {
 
 async function setStatut(formType, key, val) {
   const upd = { form_type: formType, row_key: key, statut: val, updated_at: new Date().toISOString() };
-  const { error } = await sb.from('form_statuts').upsert(upd, { onConflict: 'form_type,row_key' });
-  if (error) { alert('Statut non sauvegardé : '+error.message); return; }
+  try { await formStatusesApi('PUT',{rows:[upd]}); }
+  catch(e) { alert('Statut non sauvegardé : '+e.message); return; }
   if (formType === 'sal') { salStatuts[key] = val; salStatutDates[key] = upd.updated_at; renderSAL(window._salRows || []); }
   else { poleStatuts[key] = val; poleStatutDates[key] = upd.updated_at; filterPole(); }
 }
@@ -4123,11 +4133,8 @@ async function saveNote(formType, key) {
   const note = el ? el.value : '';
   if (formType === 'sal') salNotes[key] = note;
   else poleNotes[key] = note;
-  const { error } = await sb.from('form_statuts').upsert(
-    { form_type: formType, row_key: key, statut: (formType === 'sal' ? salStatuts[key] : poleStatuts[key]) || 'En attente', notes: note, updated_at: new Date().toISOString() },
-    { onConflict: 'form_type,row_key' }
-  );
-  if (error) { alert('Note non sauvegardée : '+error.message); return; }
+  try { await formStatusesApi('PUT',{rows:[{form_type:formType,row_key:key,statut:(formType === 'sal' ? salStatuts[key] : poleStatuts[key]) || 'En attente',notes:note}]}); }
+  catch(e) { alert('Note non sauvegardée : '+e.message); return; }
   toast('Note sauvegardée ✓');
 }
 
