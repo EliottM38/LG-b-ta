@@ -4810,10 +4810,12 @@ function pubPick(obj, aliases){
 }
 function pubCategorize(){
   const t = pubNorm(Array.from(arguments).join(' '));
-  if (/\bmini/.test(t)) return 'Minibus';
-  if (/\bmidi/.test(t)) return 'Midibus';
-  if (/articul|double/.test(t)) return 'Articulés';
+  // Doit rester aligné sur api/public-parc.js : sinon l'admin propose une
+  // catégorie différente de celle réellement publiée sur le catalogue.
   if (/bhns|brt|\btram/.test(t)) return 'BHNS';
+  if (/\bmini|sprinter/.test(t)) return 'Minibus';
+  if (/\bmidi|\bcitaro k\b/.test(t)) return 'Midibus';
+  if (/articul|\bgu\s*c2\b|double|\bciti?aro\s*g\b|\bg\s*c2\b|\b(lion.?s city|urbino|solaris|sileo)\s*18\b|\b(eletta|e0[0-9]+)\s*g\b/.test(t)) return 'Articulés';
   if (/\bcar\b|autocar|\ble\b|low entry|intercit|tourisme/.test(t)) return 'LE & Cars';
   return 'Standards';
 }
@@ -4876,6 +4878,7 @@ function renderPubModels(){
 }
 
 async function pubSetCat(i, cat){
+  if (!canManagePublicSite()) return toast('Accès non autorisé');
   const m = pubModels[i];
   if (!m || !PUB_CATS.includes(cat)) return;
   m.categorie = cat;
@@ -4956,16 +4959,25 @@ async function pubResize(file, max){
   const c = document.createElement('canvas');
   c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
   c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-  return await new Promise(r => c.toBlob(r, 'image/jpeg', 0.86));
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.86));
+  if (!blob) throw new Error('Conversion de l’image impossible');
+  return blob;
 }
 
 async function pubUpload(cle, marque, modele, categorie, files, replace){
+  if (!canManagePublicSite()) return toast('Accès non autorisé');
+  if (!Array.isArray(files) || !files.length || files.some(f => !/^image\//i.test(f.type || '') || f.size > 15 * 1024 * 1024)) {
+    return alert('Choisissez uniquement des images de 15 Mo maximum.');
+  }
+  // Ne supprimons pas l'ancien visuel avant que tous les nouveaux fichiers et
+  // leurs lignes de base soient créés : un échec d'upload ne doit pas vider le site.
+  const old = replace ? pubPhotos.filter(p => p.cle === cle) : [];
+  const created = [];
   try {
-    if (replace) await pubDeleteCle(cle);
     let ordre = pubPhotos.filter(p => p.cle === cle).length;
     for (const f of files){
-      let blob = f;
-      try { blob = await pubResize(f); } catch(e) { /* on envoie l'original */ }
+      let blob;
+      try { blob = await pubResize(f); } catch(e) { throw new Error('Une image ne peut pas être lue.'); }
       const slug = cle.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'photo';
       const path = slug + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.jpg';
       let { error } = await sb.storage.from(PUB_BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: true });
@@ -4977,11 +4989,21 @@ async function pubUpload(cle, marque, modele, categorie, files, replace){
       if (error) throw error;
       const ins = await sb.from('parc_photos').insert({ cle, marque, modele, categorie, storage_path: path, ordre: ordre++, uploaded_by: currentUser.nom_affiche || currentUser.username });
       if (ins.error) throw ins.error;
+      created.push(path);
+    }
+    if (replace && old.length) {
+      const oldPaths = old.map(p => p.storage_path);
+      const { error: deleteRowsError } = await sb.from('parc_photos').delete().eq('cle', cle).in('storage_path', oldPaths);
+      if (deleteRowsError) throw deleteRowsError;
+      const { error: deleteFilesError } = await sb.storage.from(PUB_BUCKET).remove(oldPaths);
+      if (deleteFilesError) console.warn('Anciennes photos à supprimer manuellement :', deleteFilesError.message);
     }
     toast('Photo(s) envoyée(s) ✓');
     logAction('parc_photo', '', 'a mis à jour les photos du site public (' + (modele || cle) + ')');
     await reloadPubPhotos();
   } catch(e){
+    // Nettoyage des fichiers nouvellement créés sans toucher aux visuels existants.
+    if (created.length) await sb.storage.from(PUB_BUCKET).remove(created);
     alert('Erreur envoi : ' + e.message);
   }
 }
@@ -4994,6 +5016,7 @@ async function pubDeleteCle(cle){
 }
 
 async function pubDeletePhoto(id){
+  if (!canManagePublicSite()) return toast('Accès non autorisé');
   const p = pubPhotos.find(x => String(x.id) === String(id)); if (!p) return;
   if (!confirm('Supprimer cette photo du site public ?')) return;
   await sb.storage.from(PUB_BUCKET).remove([p.storage_path]);
@@ -5062,6 +5085,12 @@ async function savePubConfig(){
 /* ---------- Site public : articles, pop-up, liens, Discord ---------- */
 let pubArticles = [];
 const PUB_CONTENT_ROLES = ["president", "vice_president"];
+const PUB_SITE_ROLES = ["president", "vice_president", "gestionnaire_parc"];
+
+// Les contrôles côté navigateur améliorent l'UX, mais les mêmes droits doivent
+// impérativement être imposés par les règles RLS Supabase (voir le README).
+function canManagePublicContent(){ return !!currentUser && PUB_CONTENT_ROLES.includes(currentUser.role); }
+function canManagePublicSite(){ return !!currentUser && PUB_SITE_ROLES.includes(currentUser.role); }
 
 function contentRes(id, msg, ok){ const el = document.getElementById(id); if (!el) return; el.textContent = msg; el.style.color = ok ? "#166534" : "#991b1b"; }
 function contentCfgGet(key){ return sb.from("app_config").select("*").eq("key", key).then(r => { try { return JSON.parse(((r.data || [])[0] || {}).value || "null"); } catch(e) { return null; } }); }
@@ -5071,8 +5100,11 @@ function contentLocal(iso){ if (!iso) return ""; const d = new Date(iso); if (is
 function contentIso(local){ if (!local) return ""; const d = new Date(local); return isNaN(d) ? "" : d.toISOString(); }
 
 async function contentUploadImage(file, folder){
-  let blob = file;
-  try { blob = await pubResize(file, 1800); } catch(e) {}
+  if (!canManagePublicContent()) throw new Error("Accès non autorisé");
+  if (!file || !/^image\//i.test(file.type || "")) throw new Error("Choisissez une image valide.");
+  if (file.size > 15 * 1024 * 1024) throw new Error("L’image ne doit pas dépasser 15 Mo.");
+  let blob;
+  try { blob = await pubResize(file, 1800); } catch(e) { throw new Error("Cette image ne peut pas être lue."); }
   const path = folder + "/" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) + ".jpg";
   let { error } = await sb.storage.from(PUB_BUCKET).upload(path, blob, { contentType: "image/jpeg", upsert: true });
   if (error && /bucket not found/i.test(error.message || "")){
@@ -5162,8 +5194,11 @@ function editArticle(i){ if (pubArticles[i]) fillArticleForm(pubArticles[i]); }
 function closeArticleForm(){ document.getElementById("art-form").style.display = "none"; }
 
 async function saveArticle(){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
   const titre = document.getElementById("art-titre").value.trim();
   if (!titre) return contentRes("art-result", "Le titre est obligatoire.", false);
+  const image = document.getElementById("art-image-url").value.trim();
+  if (image && !contentUrl(image)) return contentRes("art-result", "Image de couverture invalide.", false);
   const id = document.getElementById("art-id").value;
   const row = {
     titre: titre,
@@ -5171,7 +5206,7 @@ async function saveArticle(){
     contenu: document.getElementById("art-contenu").value,
     categorie: document.getElementById("art-categorie").value.trim(),
     auteur: document.getElementById("art-auteur").value.trim(),
-    image_url: document.getElementById("art-image-url").value,
+    image_url: image ? contentUrl(image) : "",
     publie: document.getElementById("art-publie").checked,
     publie_le: contentIso(document.getElementById("art-date").value) || new Date().toISOString()
   };
@@ -5193,6 +5228,7 @@ async function saveArticle(){
   } catch(e){ contentRes("art-result", "Erreur : " + e.message, false); }
 }
 async function toggleArticle(i){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
   const a = pubArticles[i]; if (!a) return;
   const { error } = await sb.from("articles").update({ publie: !a.publie }).eq("id", a.id);
   if (error){ toast("Erreur : " + error.message); return; }
@@ -5200,6 +5236,7 @@ async function toggleArticle(i){
   await loadArticles();
 }
 async function deleteArticle(i){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
   const a = pubArticles[i]; if (!a) return;
   if (!confirm("Supprimer définitivement l\u2019article « " + a.titre + " » ?")) return;
   const { error } = await sb.from("articles").delete().eq("id", a.id);
@@ -5211,8 +5248,11 @@ async function deleteArticle(i){
 function contentUrl(v){ try { const u = new URL(String(v || "").trim()); return /^https?:$/.test(u.protocol) ? u.toString() : ""; } catch(e) { return ""; } }
 
 async function savePopup(){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
   const lien = document.getElementById("pop-lien").value.trim();
   if (lien && !contentUrl(lien)) return contentRes("pop-result", "Lien du bouton invalide.", false);
+  const image = document.getElementById("pop-image-url").value.trim();
+  if (image && !contentUrl(image)) return contentRes("pop-result", "Image du pop-up invalide.", false);
   const old = (await contentCfgGet("site_popup")) || {};
   const val = {
     actif: document.getElementById("pop-actif").checked,
@@ -5222,7 +5262,7 @@ async function savePopup(){
     lien: lien ? contentUrl(lien) : "",
     debut: contentIso(document.getElementById("pop-debut").value),
     fin: contentIso(document.getElementById("pop-fin").value),
-    image: document.getElementById("pop-image-url").value,
+    image: image ? contentUrl(image) : "",
     id: document.getElementById("pop-reset").checked || !old.id ? String(Date.now()) : old.id
   };
   const { error } = await contentCfgSet("site_popup", val);
@@ -5232,6 +5272,7 @@ async function savePopup(){
 }
 
 async function saveExtraLinks(){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
   const out = [];
   const lines = (document.getElementById("extra-links").value || "").split("\n").map(s => s.trim()).filter(Boolean);
   for (const line of lines){
@@ -5248,6 +5289,7 @@ async function saveExtraLinks(){
 }
 
 async function saveDiscord(){
+  if (!canManagePublicContent()) return toast("Accès non autorisé");
   const raw = document.getElementById("dc-id").value.trim();
   let id = "";
   if (raw){
