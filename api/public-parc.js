@@ -2,7 +2,7 @@
 // API PUBLIQUE (lecture seule) du site vitrine /alliance
 // ------------------------------------------------------------
 // - Aucune clé ni URL dans le code : tout vient des variables Vercel
-//   (TM_API_KEY, TM_API_BASE, SUPABASE_URL, SUPABASE_SERVICE_KEY)
+//   (TM_API_KEY, TM_API_BASE, SUPABASE_URL, SUPABASE_SECRET_KEY)
 //   et de la table app_config (liens des Google Sheets, liens publics).
 // - GET uniquement, aucun paramètre ne choisit l'URL appelée en amont.
 // - Seuls des champs filtrés (liste blanche) sont renvoyés : jamais de
@@ -180,7 +180,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Méthode non autorisée' });
   }
 
-  const { SUPABASE_URL, SUPABASE_SERVICE_KEY, TM_API_KEY, TM_API_BASE } = process.env;
+  const { SUPABASE_URL, TM_API_KEY, TM_API_BASE } = process.env;
+  const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_KEY;
   const sources = { tm: false, sheet: false, db: false };
   const warnings = [];
 
