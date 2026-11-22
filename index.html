@@ -769,7 +769,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
     <div class="login-title">Lutèce Group</div>
     <div class="login-sub">Espace staff — Connexion requise</div>
     <div class="login-err" id="login-err">Identifiants incorrects</div>
-    <div class="login-field"><label>Identifiant</label><input id="login-user" placeholder="ex: president" autocomplete="username"></div>
+    <div class="login-field"><label>Adresse e-mail</label><input id="login-user" type="email" placeholder="nom@exemple.fr" autocomplete="email"></div>
     <div class="login-field"><label>Mot de passe</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="login-btn" onclick="doLogin()">Se connecter</button>
   </div>
@@ -1752,11 +1752,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
     <input id="p-username" placeholder="Laisser vide pour ne pas changer">
   </div>
 
-  <div class="sep">Modifier le mot de passe</div>
-  <div class="field">
-    <label>Mot de passe actuel *</label>
-    <input type="password" id="p-pass-actuel" placeholder="Requis pour toute modification">
-  </div>
+  <div class="sep">Modifier le mot de passe Supabase Auth</div>
   <div class="field">
     <label>Nouveau mot de passe</label>
     <input type="password" id="p-pass-new" placeholder="Laisser vide pour ne pas changer">
@@ -2048,11 +2044,11 @@ function toast(msg,dur=2500){
 // LOGIN / LOGOUT
 // ============================================================
 async function doLogin(){
-  const user = document.getElementById('login-user').value.trim();
+  const email = document.getElementById('login-user').value.trim();
   const pass = document.getElementById('login-pass').value;
-  if(!user||!pass) return;
+  if(!email||!pass) return;
 
-  if(!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+  if(!window.LG_RUNTIME_CONFIG?.supabaseUrl || !window.LG_RUNTIME_CONFIG?.supabasePublishableKey) {
     showLoginErr('Erreur de configuration serveur.');
     return;
   }
@@ -2061,14 +2057,13 @@ async function doLogin(){
   btn.textContent = 'Connexion...'; btn.disabled = true;
 
   try {
-    const {data:rows, error} = await sb.from('staff').select('*').eq('username',user).limit(1);
-    if(error){ showLoginErr('Erreur serveur : '+error.message); btn.textContent='Se connecter'; btn.disabled=false; return; }
-    const data = rows && rows.length > 0 ? rows[0] : null;
-    if(!data){ showLoginErr('Identifiant introuvable.'); btn.textContent='Se connecter'; btn.disabled=false; return; }
-    if(data.actif===false){ showLoginErr('Compte désactivé.'); btn.textContent='Se connecter'; btn.disabled=false; return; }
-    if(data.password_hash!==pass){ showLoginErr('Mot de passe incorrect.'); btn.textContent='Se connecter'; btn.disabled=false; return; }
-    currentUser = data;
-    localStorage.setItem('lg_session', JSON.stringify({id:data.id,username:data.username,role:data.role,nom:data.nom_affiche}));
+    const { data: authData, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error || !authData.user) throw new Error('Adresse e-mail ou mot de passe incorrect.');
+    const ok = await checkSession();
+    if (!ok) {
+      await sb.auth.signOut();
+      throw new Error('Ce compte n’est pas autorisé à accéder à l’espace staff.');
+    }
     startApp();
   } catch(e) {
     showLoginErr('Erreur : '+e.message); btn.textContent='Se connecter'; btn.disabled=false;
@@ -2081,19 +2076,19 @@ function showLoginErr(msg){
   setTimeout(()=>e.style.display='none',4000);
 }
 
-function doLogout(){
+async function doLogout(){
+  try { await sb?.auth.signOut(); } catch (e) {}
   currentUser=null; localStorage.removeItem('lg_session');
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').style.display='block';
 }
 
 async function checkSession(){
-  const stored=localStorage.getItem('lg_session');
-  if(!stored) return false;
-  const sess=JSON.parse(stored);
-  const {data:rows2}=await sb.from('staff').select('*').eq('id',sess.id).limit(1);
+  const { data: authData, error: authError } = await sb.auth.getUser();
+  if (authError || !authData.user) return false;
+  const {data:rows2}=await sb.from('staff').select('*').eq('auth_user_id',authData.user.id).limit(1);
   const data=rows2&&rows2.length>0?rows2[0]:null;
-  if(!data) return false;
+  if(!data || data.actif===false) return false;
   currentUser=data; return true;
 }
 
@@ -3342,18 +3337,7 @@ function renderStaff(){
 function openAddStaff(){document.getElementById('modal-staff').classList.add('open');}
 
 async function saveStaff(){
-  const user=document.getElementById('st-user').value.trim();
-  const nom=document.getElementById('st-nom').value.trim();
-  const pass=document.getElementById('st-pass').value;
-  const role=document.getElementById('st-role').value;
-  if(!user||!nom||!pass){alert('Tous les champs sont obligatoires.');return;}
-  if(pass.length<6){alert('Mot de passe : minimum 6 caractères.');return;}
-  const{error}=await sb.from('staff').insert({username:user,password_hash:pass,role,nom_affiche:nom,actif:true});
-  if(error){alert('Erreur : '+error.message);return;}
-  toast('Compte créé ✓');
-  closeModal('modal-staff');
-  await loadStaff();
-  renderStaff();
+  alert('Créez d’abord l’utilisateur dans Supabase Auth, puis liez son UUID à public.staff.auth_user_id. Les mots de passe ne sont plus stockés dans la table staff.');
 }
 
 async function toggleStaff(id,actif){
@@ -3514,7 +3498,6 @@ function openProfil(){
   const roleLabels={president:'Président',vice_president:'Vice-Président',gestionnaire_parc:'Gestionnaire de parc',comptable:'Comptable',staff_tm:'Staff TM'};
   document.getElementById('p-role-display').value=roleLabels[currentUser.role]||currentUser.role;
   document.getElementById('p-username').value='';
-  document.getElementById('p-pass-actuel').value='';
   document.getElementById('p-pass-new').value='';
   document.getElementById('p-pass-confirm').value='';
   document.getElementById('p-err').style.display='none';
@@ -3523,7 +3506,6 @@ function openProfil(){
   document.getElementById('modal-profil').classList.add('open');
 }
 async function saveProfil(){
-  const passActuel=document.getElementById('p-pass-actuel').value;
   const newUsername=document.getElementById('p-username').value.trim();
   const newPass=document.getElementById('p-pass-new').value;
   const newConfirm=document.getElementById('p-pass-confirm').value;
@@ -3532,21 +3514,21 @@ async function saveProfil(){
   errEl.style.display='none';okEl.style.display='none';
   function showErr(msg){errEl.textContent=msg;errEl.style.display='block';}
   function showOk(msg){okEl.textContent=msg;okEl.style.display='block';}
-  if(!passActuel){showErr('Le mot de passe actuel est obligatoire.');return;}
-  const{data:sc}=await sb.from('staff').select('id').eq('id',currentUser.id).eq('password_hash',passActuel).limit(1);
-  if(!sc||!sc.length){showErr('Mot de passe actuel incorrect.');return;}
   if(!newUsername&&!newPass){showErr('Aucune modification à enregistrer.');return;}
   if(newPass&&newPass.length<6){showErr('Minimum 6 caractères.');return;}
   if(newPass&&newPass!==newConfirm){showErr('Les mots de passe ne correspondent pas.');return;}
   const updates={};
   if(newUsername)updates.username=newUsername;
-  if(newPass)updates.password_hash=newPass;
-  const{error}=await sb.from('staff').update(updates).eq('id',currentUser.id);
-  if(error){showErr('Erreur : '+error.message);return;}
+  if(newPass){
+    const { error: authError }=await sb.auth.updateUser({password:newPass});
+    if(authError){showErr('Erreur de mise à jour du mot de passe : '+authError.message);return;}
+  }
+  if(Object.keys(updates).length){
+    const{error}=await sb.from('staff').update(updates).eq('id',currentUser.id);
+    if(error){showErr('Erreur : '+error.message);return;}
+  }
   if(newUsername)currentUser.username=newUsername;
-  localStorage.setItem('lg_session',JSON.stringify({id:currentUser.id,username:currentUser.username,role:currentUser.role,nom:currentUser.nom_affiche}));
   showOk('Modifications enregistrées !');
-  document.getElementById('p-pass-actuel').value='';
   document.getElementById('p-pass-new').value='';
   document.getElementById('p-pass-confirm').value='';
 }
@@ -4733,38 +4715,34 @@ function getMontantBadge(row) {
 // ============================================================
 // API TRANSPORT MANAGER — via proxy Vercel /api/tm (évite CORS + garde la clé côté serveur)
 // ============================================================
-function getTMKey() { return localStorage.getItem('tm_alliance_api_key') || ''; }
-function hasServerTMKey() { return !!window.TM_API_KEY; }
+function hasServerTMKey() { return !!window.LG_RUNTIME_CONFIG?.tmProxyEnabled; }
 
-// Tous les appels TM passent par ce proxy : le navigateur n'a plus besoin d'atteindre
-// directement transport-manager.net (donc plus de blocage CORS/Safari), et si aucune
-// clé locale n'est enregistrée, le proxy utilise automatiquement TM_API_KEY côté Vercel.
-function tmFetch(endpointPath, explicitKey) {
-  const key = explicitKey || getTMKey();
-  const qs = '/api/tm?endpoint=' + encodeURIComponent(endpointPath) + (key ? '&key=' + encodeURIComponent(key) : '');
-  return fetch(qs, { headers: { 'Accept': 'application/json' } });
+// Tous les appels TM passent par le proxy, qui vérifie la session Supabase et
+// l'autorisation staff avant d'utiliser la clé conservée uniquement sur Vercel.
+async function tmFetch(endpointPath) {
+  const { data } = await sb.auth.getSession();
+  const token = data.session && data.session.access_token;
+  if (!token) throw new Error('Session expirée : reconnectez-vous.');
+  return fetch('/api/tm?endpoint=' + encodeURIComponent(endpointPath), {
+    headers: { Accept: 'application/json', Authorization: 'Bearer ' + token }
+  });
 }
 
 function saveTMKey() {
-  const key = document.getElementById('tm-api-key-input').value.trim();
-  if (!key) { document.getElementById('tm-key-result').innerHTML = '<span style="color:#991b1b">Clé vide.</span>'; return; }
-  localStorage.setItem('tm_alliance_api_key', key);
-  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé locale sauvegardée (elle sera utilisée en priorité sur celle du serveur).</span>';
+  document.getElementById('tm-api-key-input').value = '';
+  document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> La clé TM est gérée uniquement par le serveur.</span>';
 }
 
 function clearLocalTMKey() {
-  localStorage.removeItem('tm_alliance_api_key');
   document.getElementById('tm-api-key-input').value = '';
-  toast('Clé locale supprimée — la clé du serveur sera utilisée');
+  toast('La clé est gérée côté serveur');
   loadTMPage();
 }
 
 async function testTMKey() {
-  const typed = document.getElementById('tm-api-key-input').value.trim();
-  const key = (typed && typed !== '••••••••') ? typed : getTMKey();
   document.getElementById('tm-key-result').innerHTML = '<span style="color:#555">Test en cours...</span>';
   try {
-    const res = await tmFetch('/api/v1/membres_alliance', key);
+    const res = await tmFetch('/api/v1/membres_alliance');
     if (res.ok) {
       document.getElementById('tm-key-result').innerHTML = '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Connexion réussie !</span>';
     } else {
@@ -5305,16 +5283,13 @@ async function saveDiscord(){
 }
 
 function loadTMPage() {
-  const local = getTMKey();
   const input = document.getElementById('tm-api-key-input');
-  if (input) input.value = local ? '••••••••' : '';
+  if (input) { input.value = ''; input.disabled = true; input.placeholder = 'Gérée uniquement côté serveur'; }
   const resultEl = document.getElementById('tm-key-result');
   if (resultEl) {
-    resultEl.innerHTML = local
-      ? '<span style="color:#555">Clé locale active. <a href="#" onclick="clearLocalTMKey();return false;" style="color:#0a1f5c;text-decoration:underline">Utiliser la clé du serveur à la place</a></span>'
-      : (hasServerTMKey()
-          ? '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé fournie automatiquement par le serveur — aucune saisie nécessaire.</span>'
-          : '<span style="color:#991b1b">Aucune clé serveur configurée (variable TM_API_KEY absente sur Vercel) et aucune clé locale.</span>');
+    resultEl.innerHTML = hasServerTMKey()
+      ? '<span style="color:#166534"><i class="fa-solid fa-circle-check"></i> Clé fournie automatiquement par le serveur — aucune saisie nécessaire.</span>'
+      : '<span style="color:#991b1b">Aucune clé serveur configurée (variable TM_API_KEY absente sur Vercel).</span>';
   }
   document.getElementById('tm-status-card').style.display = '';
   loadTMMembers();
@@ -5644,24 +5619,7 @@ function selectTMSuggestion(pseudo) {
 
 
 async function saveNewStaff() {
-  if (currentUser.role !== 'president') { toast('Accès réservé au Président'); return; }
-  const username = document.getElementById('s-username').value.trim();
-  const nom      = document.getElementById('s-nom').value.trim();
-  const password = document.getElementById('s-password').value;
-  const role     = document.getElementById('s-role').value;
-  if (!username || !nom || !password) { alert('Tous les champs sont obligatoires.'); return; }
-  if (password.length < 6) { alert('Minimum 6 caractères pour le mot de passe.'); return; }
-  // Vérifier doublon
-  const { data: existing } = await sb.from('staff').select('id').eq('username', username).limit(1);
-  if (existing && existing.length) { alert('Cet identifiant est déjà utilisé.'); return; }
-  const { error } = await sb.from('staff').insert({
-    username, password_hash: password, role, nom_affiche: nom, actif: true
-  });
-  if (error) { alert('Erreur : ' + error.message); return; }
-  toast('Compte créé ✓');
-  closeModal('modal-add-staff');
-  await loadStaff();
-  renderStaff();
+  alert('Créez d’abord l’utilisateur dans Supabase Auth, puis liez son UUID à public.staff.auth_user_id. Les mots de passe ne sont plus stockés dans la table staff.');
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
@@ -5672,10 +5630,11 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 // Fonction d'initialisation appelée après config.js chargé
 window._startInit = async function() {
   try {
-    // Initialiser sb avec les clés Vercel
+    // Le navigateur ne reçoit qu'une clé publishable. Les secrets restent dans
+    // les fonctions Vercel, où ils peuvent contourner RLS sans être exposés.
     sb = supabase.createClient(
-      window.SUPABASE_URL,
-      window.SUPABASE_KEY
+      window.LG_RUNTIME_CONFIG?.supabaseUrl,
+      window.LG_RUNTIME_CONFIG?.supabasePublishableKey
     );
     const ok = await checkSession();
     if (ok) { startApp(); }
