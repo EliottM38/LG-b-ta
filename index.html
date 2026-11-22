@@ -810,6 +810,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
   <button id="nav-cloud" data-page="cloud" onclick="showPage('cloud',this)"><span class="nav-icon"><i class="fa-solid fa-cloud"></i></span><span class="nav-label">Cloud</span></button>
   <button id="nav-messages" data-page="messages" onclick="showPage('messages',this)"><span class="nav-icon"><i class="fa-solid fa-comments"></i></span><span class="nav-label">Messagerie</span><span class="msg-badge" id="msg-badge" style="display:none">0</span></button>
   <button id="nav-agenda" data-page="agenda" onclick="showPage('agenda',this)"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="nav-label">Agenda</span></button>
+  <button id="nav-site-public" data-page="site-public" onclick="showPage('site-public',this)" style="display:none"><span class="nav-icon"><i class="fa-solid fa-globe"></i></span><span class="nav-label">Site public</span></button>
 
   <div class="nav-group" id="navgrp-plus">
     <button type="button" onclick="toggleNavGroup('navgrp-plus')" data-navgrp="tm,rgpd,acces"><span class="nav-icon"><i class="fa-solid fa-ellipsis"></i></span><span class="nav-label">Plus</span><i class="fa-solid fa-chevron-down caret"></i></button>
@@ -1206,6 +1207,19 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
 </div>
 
 <!-- PAGE API TM -->
+<div class="page" id="page-site-public">
+  <div class="page-header">
+    <div><h1><i class="fa-solid fa-globe"></i> Site public</h1><p style="margin-top:8px;color:var(--text-sec)">Un espace dédié pour piloter le contenu, les visuels et les services affichés sur lutece-group-site-public.</p></div>
+    <a class="btn btn-primary" href="https://lut-ce-group-site-public.vercel.app" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le site</a>
+  </div>
+  <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat"><div class="stat-label">Contenu</div><div class="stat-value blue">Éditorial</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Articles, pop-up et liens</div></div>
+    <div class="stat"><div class="stat-label">Identité</div><div class="stat-value amber">Visuels</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Logo, pages et parc</div></div>
+    <div class="stat"><div class="stat-label">Services</div><div class="stat-value green">Forfaits</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Règlement et offres publiques</div></div>
+  </div>
+  <div id="site-public-mount"></div>
+</div>
+
 <div class="page" id="page-tm">
   <div class="page-header">
     <h1><i class="fa-solid fa-bus"></i> Suivi des membres TM</h1>
@@ -2161,6 +2175,7 @@ async function startApp(){
   document.getElementById('nav-rgpd').style.display='';
   if(['president','vice_president','gestionnaire_parc'].includes(currentUser.role)){
     document.getElementById('nav-tm').style.display='';
+    document.getElementById('nav-site-public').style.display='';
     const mtabTm=document.getElementById('plus-tm-item'); if(mtabTm) mtabTm.style.display='';
   }
   // Afficher config GForms pour les présidents
@@ -2192,7 +2207,7 @@ function showPage(id,btn){
   const tabbarAliasMap={factures:'factures',interimaires:'factures','location-picker':'factures',
     sal:'sal',pole:'sal','formulaires-picker':'sal',
     objectifs:'plus-menu',historique:'plus-menu',cloud:'plus-menu',messages:'plus-menu',
-    agenda:'plus-menu',tm:'plus-menu',acces:'plus-menu',rgpd:'plus-menu'};
+    agenda:'plus-menu',tm:'plus-menu',acces:'plus-menu',rgpd:'plus-menu','site-public':'plus-menu'};
   const tabbarMatchId=tabbarAliasMap[id];
   if(tabbarMatchId){
     document.querySelectorAll('.mobile-tabbar [data-page="'+tabbarMatchId+'"]').forEach(b=>b.classList.add('active'));
@@ -2219,6 +2234,7 @@ function showPage(id,btn){
   if(id==='cloud')      loadCloudFiles();
   if(id==='messages')   openMessagerie();
   if(id==='agenda')     loadAgenda();
+  if(id==='site-public') mountPublicSitePage();
 }
 
 function updateTabbarIndicator(){
@@ -4838,6 +4854,17 @@ function pubCategorize(){
   return 'Standards';
 }
 function pubUrl(path){ return sb.storage.from(PUB_BUCKET).getPublicUrl(path).data.publicUrl; }
+
+function mountPublicSitePage(){
+  const mount = document.getElementById('site-public-mount');
+  if (!mount || !currentUser) return;
+  ['card-public-site', 'card-public-content'].forEach(id => {
+    const card = document.getElementById(id);
+    if (card && card.parentElement !== mount) mount.appendChild(card);
+  });
+  loadPublicSiteCard();
+  loadPublicContentCard();
+}
 
 async function loadPublicSiteCard(){
   const card = document.getElementById('card-public-site');
