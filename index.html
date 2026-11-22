@@ -4865,8 +4865,7 @@ async function pubSetCat(i, cat){
   m.categorie = cat;
   pubCatOverrides[m.cle] = cat;
   try {
-    const { error } = await sb.from('app_config').upsert({ key: 'parc_categories', value: JSON.stringify(pubCatOverrides) }, { onConflict: 'key' });
-    if (error) throw error;
+    await siteConfigSet('parc_categories', pubCatOverrides);
     toast('Catégorie enregistrée');
     logAction('site_public_categorie', '', (m.marque + ' ' + m.modele).trim() + ' → ' + cat);
   } catch(e) { toast('Erreur : ' + e.message); }
@@ -5016,18 +5015,11 @@ async function reloadPubPhotos(){
 
 // ---- Liens publics + liens Google Sheet (Président) — stockés dans app_config ----
 async function loadPubConfig(){
-  const { data } = await sb.from('app_config').select('*').in('key', ['site_links', 'parc_sheet_urls']);
-  let links = {}, sheets = {};
-  (data || []).forEach(r => {
-    try {
-      if (r.key === 'site_links') links = JSON.parse(r.value) || {};
-      if (r.key === 'parc_sheet_urls') sheets = JSON.parse(r.value) || {};
-    } catch(e) {}
-  });
+  const [links, sheets] = await Promise.all([siteConfigGet('site_links'), siteConfigGet('parc_sheet_urls')]);
   document.getElementById('pub-links-fields').innerHTML = PUB_LINKS.map(l => `
     <div class="field"><label>${escHtml(l[1])}</label>
-      <input id="pub-link-${l[0]}" value="${escHtml(links[l[0]] || '')}" placeholder="https://…" style="width:100%"></div>`).join('');
-  document.getElementById('pub-sheet-urls').value = Object.keys(sheets).map(k => k + ' | ' + sheets[k]).join('\n');
+      <input id="pub-link-${l[0]}" value="${escHtml((links || {})[l[0]] || '')}" placeholder="https://…" style="width:100%"></div>`).join('');
+  document.getElementById('pub-sheet-urls').value = Object.keys(sheets || {}).map(k => k + ' | ' + sheets[k]).join('\n');
 }
 
 async function savePubConfig(){
@@ -5055,9 +5047,7 @@ async function savePubConfig(){
     sheets[cat] = url;
   }
   try {
-    const a = await sb.from('app_config').upsert({ key: 'site_links', value: JSON.stringify(links) }, { onConflict: 'key' });
-    const b = await sb.from('app_config').upsert({ key: 'parc_sheet_urls', value: JSON.stringify(sheets) }, { onConflict: 'key' });
-    if (a.error) throw a.error; if (b.error) throw b.error;
+    await Promise.all([siteConfigSet('site_links', links), siteConfigSet('parc_sheet_urls', sheets)]);
     out.textContent = 'Enregistré. Le site public se met à jour en quelques minutes.'; out.style.color = '#166534';
     logAction('site_public_config', '', 'a mis à jour les liens du site public');
   } catch(e){ fail('Erreur : ' + e.message); }
@@ -5074,8 +5064,21 @@ function canManagePublicContent(){ return !!currentUser && PUB_CONTENT_ROLES.inc
 function canManagePublicSite(){ return !!currentUser && PUB_SITE_ROLES.includes(currentUser.role); }
 
 function contentRes(id, msg, ok){ const el = document.getElementById(id); if (!el) return; el.textContent = msg; el.style.color = ok ? "#166534" : "#991b1b"; }
-function contentCfgGet(key){ return sb.from("app_config").select("*").eq("key", key).then(r => { try { return JSON.parse(((r.data || [])[0] || {}).value || "null"); } catch(e) { return null; } }); }
-function contentCfgSet(key, val){ return sb.from("app_config").upsert({ key: key, value: JSON.stringify(val) }, { onConflict: "key" }); }
+async function siteConfigRequest(method, key, value){
+  const { data } = await sb.auth.getSession();
+  const token = data.session && data.session.access_token;
+  if (!token) throw new Error('Session expirée');
+  const options = { method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } };
+  const url = '/api/site-config?key=' + encodeURIComponent(key);
+  if (method === 'PUT') options.body = JSON.stringify({ key, value });
+  const res = await fetch(url, options);
+  if (!res.ok) { const body = await res.json().catch(() => ({})); throw new Error(body.error || 'Accès refusé'); }
+  return method === 'GET' ? (await res.json()).value : null;
+}
+function siteConfigGet(key){ return siteConfigRequest('GET', key); }
+function siteConfigSet(key, value){ return siteConfigRequest('PUT', key, value); }
+function contentCfgGet(key){ return siteConfigGet(key); }
+function contentCfgSet(key, val){ return siteConfigSet(key, val).then(() => ({ error: null })).catch(error => ({ error })); }
 function contentSlug(t){ return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "article"; }
 function contentLocal(iso){ if (!iso) return ""; const d = new Date(iso); if (isNaN(d)) return ""; const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes()); }
 function contentIso(local){ if (!local) return ""; const d = new Date(local); return isNaN(d) ? "" : d.toISOString(); }
