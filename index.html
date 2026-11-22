@@ -97,10 +97,7 @@ html[data-theme="dark"] [style*="color:#aaa"]:not([style*="background"]){color:v
 html[data-theme="dark"] .pdf-stitle,html[data-theme="dark"] .card h2,
 html[data-theme="dark"] .card h3,html[data-theme="dark"] .card h4,
 html[data-theme="dark"] .site-admin-panel h2,html[data-theme="dark"] .site-admin-panel h3{color:var(--text)!important}
-html[data-theme="dark"] .site-admin-hero{background:linear-gradient(135deg,#101b38,#142a55)}
-html[data-theme="dark"] .site-admin-nav{background:var(--white);border-color:var(--border)}
-html[data-theme="dark"] .site-admin-nav button{color:var(--text-sec)}
-html[data-theme="dark"] .site-admin-nav button:hover,html[data-theme="dark"] .site-admin-nav button.active{color:var(--gold-xlight);background:rgba(201,168,76,.14)}
+html[data-theme="dark"] .site-admin-nav button{color:var(--text)}
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:var(--text);font-size:14px;min-height:100vh}
@@ -216,18 +213,11 @@ nav button.active{color:#fff;background:rgba(255,255,255,.09)}
 .page-header h1::after{content:'';display:block;width:40px;height:3px;
   background:var(--gold);border-radius:2px;margin-top:5px}
 
-/* ── Administration du site public ── */
-.site-admin-hero{background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));border-radius:18px;padding:28px 30px;color:#fff;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px;box-shadow:0 14px 32px rgba(8,15,40,.18)}
-.site-admin-hero .kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-xlight);font-weight:800;margin-bottom:10px}
-.site-admin-hero h1{font-size:28px;line-height:1.1;color:#fff;margin:0}
-.site-admin-hero p{max-width:640px;color:rgba(255,255,255,.75);font-size:14px;line-height:1.55;margin:10px 0 0}
-.site-admin-nav{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border:1px solid var(--border-light);border-radius:14px;background:#fff;margin-bottom:16px}
-.site-admin-nav button{border:0;background:transparent;color:var(--text-sec);border-radius:9px;padding:10px 13px;font:700 13px inherit;cursor:pointer}
-.site-admin-nav button:hover,.site-admin-nav button.active{background:var(--gold-pale);color:var(--navy)}
+/* ── Administration du site public : intégrée au gestionnaire, sans navigation parallèle ── */
+.site-admin-nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.site-admin-nav button{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font:600 13px inherit;cursor:pointer}
+.site-admin-nav button:hover,.site-admin-nav button.active{border-color:var(--gold);color:var(--gold)}
 .site-admin-panel{scroll-margin-top:24px;margin-bottom:18px}
-#page-site-public .card{box-shadow:0 8px 24px rgba(13,31,78,.07)}
-#page-site-public .card-header{padding:18px 20px}
-#page-site-public .card-title{font-size:15px}
 
 /* ── STATS ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
@@ -1232,20 +1222,15 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
 
 <!-- PAGE API TM -->
 <div class="page" id="page-site-public">
-  <section class="site-admin-hero">
-    <div><div class="kicker">Lutèce Group · Publication</div><h1>Administration du site public</h1><p>Gérez les contenus affichés aux visiteurs : visuels, parc, actualités, message d’accueil, liens et informations de règlement.</p></div>
-    <a class="btn btn-primary" href="https://lut-ce-group-site-public.vercel.app" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Voir le site</a>
-  </section>
-  <nav class="site-admin-nav" aria-label="Rubriques d’administration du site">
+  <div class="page-header">
+    <div><h1><i class="fa-solid fa-globe"></i> Site public</h1><p style="margin-top:8px;color:var(--text-sec)">Gérez les visuels, le parc, les actualités et les informations affichées sur le site.</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" onclick="showPage('home',document.getElementById('nav-home'))"><i class="fa-solid fa-arrow-left"></i> Retour à la gestion</button><a class="btn btn-primary" href="https://lut-ce-group-site-public.vercel.app" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le site</a></div>
+  </div>
+  <div class="site-admin-nav" role="navigation" aria-label="Rubriques du site public">
     <button type="button" onclick="openSiteAdminSection('site-assets',this)"><i class="fa-solid fa-images"></i> Visuels &amp; parc</button>
     <button type="button" onclick="openSiteAdminSection('site-editorial',this)"><i class="fa-solid fa-newspaper"></i> Actualités</button>
     <button type="button" onclick="openSiteAdminSection('site-settings',this)"><i class="fa-solid fa-sliders"></i> Accueil &amp; liens</button>
     <button type="button" onclick="openSiteAdminSection('site-reglement',this)"><i class="fa-solid fa-scale-balanced"></i> Règlement</button>
-  </nav>
-  <div class="stats" style="grid-template-columns:repeat(3,1fr)">
-    <div class="stat"><div class="stat-label">Contenu</div><div class="stat-value blue">Éditorial</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Articles et message d’accueil</div></div>
-    <div class="stat"><div class="stat-label">Parc</div><div class="stat-value amber">Visuels</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Images et modèles issus de TM</div></div>
-    <div class="stat"><div class="stat-label">Références</div><div class="stat-value green">Liens</div><div style="font-size:12px;color:var(--text-muted);margin-top:5px">Discord, formulaires et règlement</div></div>
   </div>
   <div id="site-public-mount"></div>
 </div>
