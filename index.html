@@ -2084,12 +2084,15 @@ async function doLogout(){
 }
 
 async function checkSession(){
-  const { data: authData, error: authError } = await sb.auth.getUser();
-  if (authError || !authData.user) return false;
-  const {data:rows2}=await sb.from('staff').select('*').eq('auth_user_id',authData.user.id).limit(1);
-  const data=rows2&&rows2.length>0?rows2[0]:null;
-  if(!data || data.actif===false) return false;
-  currentUser=data; return true;
+  const { data, error } = await sb.auth.getSession();
+  const token = data.session && data.session.access_token;
+  if (error || !token) return false;
+  const res = await fetch('/api/session', { headers: { Authorization: 'Bearer ' + token } });
+  if (!res.ok) return false;
+  const body = await res.json();
+  if (!body.staff) return false;
+  currentUser = body.staff;
+  return true;
 }
 
 // ============================================================

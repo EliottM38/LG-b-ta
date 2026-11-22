@@ -17,3 +17,7 @@ déploiement :
 La phase 2 activera les politiques RLS sur l'ensemble des tables consultées par
 l'admin. Ne pas activer RLS avant : le reste de l'interface utilise encore des
 accès directs aux données et doit être converti table par table.
+
+La route `api/session` lit uniquement le profil strictement nécessaire à la
+session après validation du jeton Supabase Auth. Elle ne renvoie jamais
+`password_hash` ni une clé d'environnement.
