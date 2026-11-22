@@ -14,10 +14,6 @@ déploiement :
    `public.staff.auth_user_id`.
 4. Garder la protection Vercel activée durant toute la migration.
 
-La phase 2 activera les politiques RLS sur l'ensemble des tables consultées par
-l'admin. Ne pas activer RLS avant : le reste de l'interface utilise encore des
-accès directs aux données et doit être converti table par table.
-
 La route `api/session` lit uniquement le profil strictement nécessaire à la
 session après validation du jeton Supabase Auth. Elle ne renvoie jamais
 `password_hash` ni une clé d'environnement.
@@ -29,3 +25,19 @@ Après le déploiement de `api/site-config.js`, exécuter
 active RLS sur les articles, les photos du catalogue et leurs écritures Storage.
 Les réglages éditoriaux stockés dans `app_config` passent déjà par une API Vercel
 authentifiée afin de ne pas perturber les autres modules de l'admin.
+
+## Phase 3 — données de l'administration
+
+Après le déploiement qui ajoute `api/staff.js` et `api/admin-config.js`, vérifier
+que **chaque** compte staff actif est relié à Supabase Auth (`auth_user_id` non
+nul), puis exécuter `sql/phase-3-admin-rls.sql`. Cette migration :
+
+- bloque tout accès navigateur direct à `staff` et `app_config` ;
+- limite les données opérationnelles aux rôles réellement autorisés ;
+- cloisonne la messagerie au seul expéditeur et destinataire ;
+- limite les écritures Storage aux comptes staff authentifiés.
+
+Ne pas exécuter cette phase avant le déploiement : l'interface doit d'abord
+passer par les nouvelles API serveur pour les profils et la configuration.
+Lorsque tous les comptes ont été testés, l'ancien champ `staff.password_hash`
+peut être vidé dans une étape séparée et irréversible.

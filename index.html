@@ -2018,11 +2018,33 @@ async function setTheme(mode) {
   try { localStorage.setItem('lg_theme', mode); } catch (e) {}
   if (currentUser) {
     try {
-      await sb.from('staff').update({ theme_preference: mode }).eq('id', currentUser.id);
+      await staffApi('PATCH', {action:'self', theme_preference:mode});
       currentUser.theme_preference = mode;
     } catch (e) { console.warn('setTheme save error:', e.message); }
   }
   closeModal('modal-first-theme');
+}
+
+async function staffApi(method, body, query='') {
+  const { data } = await sb.auth.getSession();
+  const token = data.session && data.session.access_token;
+  if (!token) throw new Error('Session absente');
+  const res = await fetch('/api/staff'+query, {
+    method,
+    headers: { Authorization:'Bearer '+token, ...(body ? {'Content-Type':'application/json'} : {}) },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||'Opération impossible'); }
+  return res.status===204 ? null : res.json();
+}
+
+async function adminConfigApi(method='GET', body) {
+  const { data } = await sb.auth.getSession();
+  const token = data.session && data.session.access_token;
+  if (!token) throw new Error('Session absente');
+  const res = await fetch('/api/admin-config', { method, headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})}, body:body?JSON.stringify(body):undefined });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||'Opération impossible'); }
+  return res.status===204 ? null : res.json();
 }
 function initTheme() {
   if (currentUser && currentUser.theme_preference) {
@@ -2327,8 +2349,8 @@ async function saveHomeNotes(){
   const v=el.value;
   const hint=document.getElementById('home-notes-hint');
   try{
-    const{error}=await sb.from('staff').update({home_notes:v}).eq('id',currentUser.id);
-    if(hint) hint.textContent=error?'Erreur de sauvegarde':'Enregistré ✓';
+    await staffApi('PATCH',{action:'self',home_notes:v});
+    if(hint) hint.textContent='Enregistré ✓';
   }catch(e){
     if(hint) hint.textContent='Erreur de sauvegarde';
     try{ localStorage.setItem('lg_home_notes_'+currentUser.id,v); }catch(e2){}
@@ -2342,9 +2364,8 @@ async function loadHomeNotes(){
   if(!el||!currentUser) return;
   let text='';
   try{
-    const{data,error}=await sb.from('staff').select('home_notes').eq('id',currentUser.id).single();
-    if(!error) text=(data&&data.home_notes)||'';
-    else text=localStorage.getItem('lg_home_notes_'+currentUser.id)||'';
+    const data=await staffApi('GET',null,'?self=1');
+    text=(data.staff&&data.staff.home_notes)||'';
   }catch(e){
     try{ text=localStorage.getItem('lg_home_notes_'+currentUser.id)||''; }catch(e2){}
   }
@@ -2860,8 +2881,8 @@ function splitLignes(d){
   return { veh: arr.filter(l => !l.promo), promos: arr.filter(l => l.promo) };
 }
 async function savePromos(){
-  const { error } = await sb.from('app_config').upsert({ key:'promotions', value:JSON.stringify(PROMOS) }, { onConflict:'key' });
-  if(error){ alert('Erreur sauvegarde des promotions : '+error.message); return false; }
+  try { await adminConfigApi('PUT',{key:'promotions',value:JSON.stringify(PROMOS)}); }
+  catch(e){ alert('Erreur sauvegarde des promotions : '+e.message); return false; }
   return true;
 }
 function renderPromosUI(){
@@ -3304,8 +3325,8 @@ function renderInterimaires() {
 }
 
 async function loadStaff(){
-  const{data}=await sb.from('staff').select('*').order('created_at');
-  staff=data||[];
+  try { const data=await staffApi('GET'); staff=data.staff||[]; }
+  catch(e) { console.warn('loadStaff:',e.message); staff=[]; }
 }
 
 function renderStaff(){
@@ -3345,7 +3366,8 @@ async function saveStaff(){
 
 async function toggleStaff(id,actif){
   if (currentUser.role !== 'president') { toast('Accès réservé au Président'); return; }
-  await sb.from('staff').update({actif:!actif}).eq('id',id);
+  try { await staffApi('PATCH',{action:'set_active',id,actif:!actif}); }
+  catch(e) { alert('Erreur : '+e.message); return; }
   toast(actif?'Compte désactivé':'Compte réactivé');
   await loadStaff();renderStaff();
 }
@@ -3527,8 +3549,8 @@ async function saveProfil(){
     if(authError){showErr('Erreur de mise à jour du mot de passe : '+authError.message);return;}
   }
   if(Object.keys(updates).length){
-    const{error}=await sb.from('staff').update(updates).eq('id',currentUser.id);
-    if(error){showErr('Erreur : '+error.message);return;}
+    try { await staffApi('PATCH',{action:'self',...updates}); }
+    catch(e){showErr('Erreur : '+e.message);return;}
   }
   if(newUsername)currentUser.username=newUsername;
   showOk('Modifications enregistrées !');
@@ -3864,9 +3886,10 @@ async function sbSafe(fn, context='') {
 // ============================================================
 async function loadAppConfig() {
   try {
-    const { data } = await sb.from('app_config').select('*');
-    if (data) {
-      data.forEach(r => {
+    const { config } = await adminConfigApi();
+    if (config) {
+      Object.entries(config).forEach(([key,value]) => {
+        const r={key,value};
         if (r.key === 'sal_csv_url')  SAL_CSV_URL  = r.value;
         if (r.key === 'pole_csv_url') POLE_CSV_URL = r.value;
         if (r.key === 'promotions') { try { const a = JSON.parse(r.value); if (Array.isArray(a)) PROMOS = a; } catch(e) {} }
@@ -3890,8 +3913,8 @@ async function saveAppConfig() {
   if (!salUrl.includes('output=csv'))  salUrl  += (salUrl.includes('?')  ? '&' : '?') + 'output=csv';
   if (!poleUrl.includes('output=csv')) poleUrl += (poleUrl.includes('?') ? '&' : '?') + 'output=csv';
   try {
-    await sb.from('app_config').upsert({key:'sal_csv_url',  value:salUrl},  {onConflict:'key'});
-    await sb.from('app_config').upsert({key:'pole_csv_url', value:poleUrl}, {onConflict:'key'});
+    await adminConfigApi('PUT',{key:'sal_csv_url',value:salUrl});
+    await adminConfigApi('PUT',{key:'pole_csv_url',value:poleUrl});
     SAL_CSV_URL  = salUrl;
     POLE_CSV_URL = poleUrl;
     const r = document.getElementById('cfg-result');
@@ -4584,12 +4607,8 @@ function loadTarifsUI() {
 async function deleteStaff(id, username) {
   if (currentUser.role !== 'president') { toast('Accès refusé'); return; }
   if (!confirm('Supprimer définitivement le compte "' + username + '" ? Cette action est irréversible.')) return;
-  // Dissocier les FK avant suppression
-  await sb.from('factures').update({ created_by: null }).eq('created_by', id);
-  await sb.from('interimaires').update({ created_by: null }).eq('created_by', id);
-  await sb.from('objectifs').update({ created_by: null }).eq('created_by', id);
-  const { error } = await sb.from('staff').delete().eq('id', id);
-  if (error) { alert('Erreur : ' + error.message); return; }
+  try { await staffApi('DELETE',{action:'delete',id}); }
+  catch(e) { alert('Erreur : ' + e.message); return; }
   toast('Compte supprimé ✓');
   await loadStaff();
   renderStaff();
@@ -4885,7 +4904,7 @@ async function pubLoadModels(){
       }
       return asArr(raw);
     };
-    const ov = await sb.from('app_config').select('*').eq('key', 'parc_categories');
+    const ov = { data: [{ value: JSON.stringify(await siteConfigGet('parc_categories') || {}) }] };
     const lg = await fetchParc('global');
     const ll = await fetchParc('location').catch(() => []);
     try { pubCatOverrides = JSON.parse(((ov.data || [])[0] || {}).value || '{}') || {}; } catch(e) { pubCatOverrides = {}; }
