@@ -1,7 +1,7 @@
 const CONTENT_KEYS = new Set([
   'site_popup', 'site_links_extra', 'site_discord', 'site_reglement',
   'site_brand', 'site_theme', 'site_navigation', 'site_seo', 'site_pages',
-  'site_home', 'site_publication', 'site_studio_draft'
+  'site_home', 'site_publication', 'site_studio_draft', 'site_history'
 ]);
 const PRESIDENT_KEYS = new Set(['site_links', 'parc_sheet_urls']);
 const PARC_KEY = 'parc_categories';

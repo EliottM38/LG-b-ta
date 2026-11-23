@@ -1309,7 +1309,7 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
       <div class="pdf-stitle" style="margin-top:18px">Pages et référencement</div>
       <div class="field"><label>Page à modifier</label><select id="studio-page" onchange="loadStudioPageFields()" style="width:100%"><option value="index.html">Accueil</option><option value="presentation.html">Présentation</option><option value="forfaits.html">Forfaits</option><option value="reglement.html">Règlement</option><option value="rejoindre.html">Nous rejoindre</option><option value="pole-location.html">Pôle Location</option><option value="pole-exploitation.html">Pôle Exploitation</option><option value="pole-financement.html">Pôle Financement</option></select></div>
       <div class="field"><label>Titre de la page</label><input id="studio-page-title" style="width:100%"></div><div class="field"><label>Texte d’introduction</label><textarea id="studio-page-intro" rows="3" style="width:100%"></textarea></div><div class="field"><label>Description Google</label><textarea id="studio-page-description" rows="2" style="width:100%"></textarea></div>
-      <div class="pdf-stitle" style="margin-top:18px">Publication</div><label style="display:flex;gap:8px;align-items:center"><input id="studio-published" type="checkbox" checked> Le site est publiquement accessible</label><div id="studio-preview" style="display:none;margin-top:16px;border:1px solid var(--border);border-radius:14px;overflow:hidden"></div><div id="studio-result" style="margin-top:12px;font-weight:600"></div>
+      <div class="pdf-stitle" style="margin-top:18px">Publication</div><label style="display:flex;gap:8px;align-items:center"><input id="studio-published" type="checkbox" checked> Le site est publiquement accessible</label><div class="field" style="margin-top:12px"><label>Versions précédentes</label><div style="display:flex;gap:8px"><select id="studio-history" style="flex:1"><option value="">Aucune version</option></select><button type="button" class="btn" onclick="restoreStudioVersion()">Restaurer</button></div></div><div id="studio-preview" style="display:none;margin-top:16px;border:1px solid var(--border);border-radius:14px;overflow:hidden"></div><div id="studio-result" style="margin-top:12px;font-weight:600"></div>
     </div>
   </div>
 
@@ -4903,14 +4903,16 @@ function mountPublicSitePage(){
   loadSiteStudio();
 }
 
-let siteStudio = { brand: {}, theme: {}, pages: {}, publication: {} };
+let siteStudio = { brand: {}, theme: {}, pages: {}, publication: {} }, siteStudioHistory = [];
 async function loadSiteStudio(){
   const card = document.getElementById('card-site-studio');
   if (!card || !canManagePublicContent()) return;
   card.style.display = '';
   try {
-    const [brand, theme, pages, publication, draft] = await Promise.all(['site_brand','site_theme','site_pages','site_publication','site_studio_draft'].map(siteConfigGet));
+    const [brand, theme, pages, publication, draft, history] = await Promise.all(['site_brand','site_theme','site_pages','site_publication','site_studio_draft','site_history'].map(siteConfigGet));
     siteStudio = draft || { brand: brand || {}, theme: theme || {}, pages: pages || {}, publication: publication || {} };
+    siteStudioHistory = Array.isArray(history) ? history : [];
+    document.getElementById('studio-history').innerHTML = '<option value="">Choisir une version</option>' + siteStudioHistory.map((x,i) => `<option value="${i}">${escHtml(new Date(x.at).toLocaleString('fr-FR'))} — ${escHtml(x.by || 'publication')}</option>`).join('');
     document.getElementById('studio-name').value = siteStudio.brand.name || 'Lutèce Group';
     document.getElementById('studio-slogan').value = siteStudio.brand.slogan || 'Opérateur de transport';
     document.getElementById('studio-logo').value = siteStudio.brand.logo || '';
@@ -4942,10 +4944,17 @@ function previewSiteStudio(){
   el.style.display='block'; el.innerHTML = `<div style="background:${d.theme.navy};color:#fff;padding:16px 18px;font-family:Inter,system-ui"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><b style="letter-spacing:.1em">${escHtml(d.brand.name || 'Lutèce Group')}</b><button style="background:${d.theme.gold};border:0;border-radius:7px;padding:7px 10px;font-weight:700">${escHtml(d.brand.cta || 'Nous rejoindre')}</button></div><small style="opacity:.7">${escHtml(d.brand.slogan || '')}</small></div><div style="padding:22px 18px;background:var(--white)"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:${d.theme.gold}">Aperçu · ${escHtml(key)}</div><h2 style="margin:8px 0;color:var(--text)">${escHtml(p.title || 'Titre de la page')}</h2><p style="color:var(--text-sec);line-height:1.5;margin:0">${escHtml(p.intro || 'Le texte d’introduction apparaîtra ici.')}</p></div>`;
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+function restoreStudioVersion(){
+  const i = Number(document.getElementById('studio-history').value), v = siteStudioHistory[i];
+  if (!v || !v.data) return;
+  siteStudio = v.data; document.getElementById('studio-name').value = v.data.brand?.name || ''; document.getElementById('studio-slogan').value = v.data.brand?.slogan || ''; document.getElementById('studio-logo').value = v.data.brand?.logo || ''; document.getElementById('studio-cta').value = v.data.brand?.cta || '';
+  document.getElementById('studio-navy').value = v.data.theme?.navy || '#0d1f4e'; document.getElementById('studio-gold').value = v.data.theme?.gold || '#b8922a'; document.getElementById('studio-accent').value = v.data.theme?.accent || '#1e3a8a'; document.getElementById('studio-published').checked = v.data.publication?.published !== false; loadStudioPageFields(); previewSiteStudio(); contentRes('studio-result','Version restaurée dans le brouillon. Publiez pour la mettre en ligne.',true);
+}
 async function saveSiteStudio(draft){
   const d = studioPayload(); if (!d || !d.brand) return;
   try { if (draft) { await siteConfigSet('site_studio_draft', d); contentRes('studio-result', 'Brouillon enregistré. Il n’est pas visible sur le site public.', true); return; }
-    await Promise.all([siteConfigSet('site_brand', d.brand), siteConfigSet('site_theme', d.theme), siteConfigSet('site_pages', d.pages), siteConfigSet('site_publication', d.publication)]); contentRes('studio-result', 'Réglages publiés sur le site.', true); logAction('site_public_studio', '', 'a mis à jour l’identité, les couleurs ou une page du site public'); }
+    siteStudioHistory.unshift({ at: new Date().toISOString(), by: currentUser.nom_affiche || currentUser.username || 'staff', data: d }); siteStudioHistory = siteStudioHistory.slice(0, 20);
+    await Promise.all([siteConfigSet('site_brand', d.brand), siteConfigSet('site_theme', d.theme), siteConfigSet('site_pages', d.pages), siteConfigSet('site_publication', d.publication), siteConfigSet('site_history', siteStudioHistory)]); contentRes('studio-result', 'Réglages publiés sur le site.', true); logAction('site_public_studio', '', 'a mis à jour l’identité, les couleurs ou une page du site public'); }
   catch(e) { contentRes('studio-result', 'Erreur : ' + e.message, false); }
 }
 
