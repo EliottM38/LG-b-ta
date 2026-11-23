@@ -1,14 +1,19 @@
-const CONTENT_KEYS = new Set(['site_popup', 'site_links_extra', 'site_discord', 'site_reglement']);
+const CONTENT_KEYS = new Set([
+  'site_popup', 'site_links_extra', 'site_discord', 'site_reglement',
+  'site_brand', 'site_theme', 'site_navigation', 'site_seo', 'site_pages',
+  'site_home', 'site_publication'
+]);
 const PRESIDENT_KEYS = new Set(['site_links', 'parc_sheet_urls']);
 const PARC_KEY = 'parc_categories';
 
 async function staffFor(req) {
-  const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = process.env;
+  const { SUPABASE_URL } = process.env;
+  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
   const secret = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_KEY;
   const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || !secret || !token) return null;
+  if (!SUPABASE_URL || !publishable || !secret || !token) return null;
   const base = SUPABASE_URL.replace(/\/$/, '');
-  const auth = await fetch(base + '/auth/v1/user', { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: 'Bearer ' + token } });
+  const auth = await fetch(base + '/auth/v1/user', { headers: { apikey: publishable, Authorization: 'Bearer ' + token } });
   if (!auth.ok) return null;
   const user = await auth.json();
   const profile = await fetch(base + '/rest/v1/staff?select=role,actif&auth_user_id=eq.' + encodeURIComponent(user.id) + '&limit=1', { headers: { apikey: secret, Authorization: 'Bearer ' + secret } });
