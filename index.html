@@ -1575,6 +1575,10 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
         <div class="field"><label>Articulé / mois</label><input type="number" id="t-articule-m" class="tarif-input"></div>
       </div>
       <div class="row2" style="margin-bottom:8px">
+        <div class="field"><label>BHNS / sem.</label><input type="number" id="t-bhns-s" class="tarif-input"></div>
+        <div class="field"><label>BHNS / mois</label><input type="number" id="t-bhns-m" class="tarif-input"></div>
+      </div>
+      <div class="row2" style="margin-bottom:8px">
         <div class="field"><label>Car longue distance / sem.</label><input type="number" id="t-carle-s" class="tarif-input"></div>
         <div class="field"><label>Car longue distance / mois</label><input type="number" id="t-carle-m" class="tarif-input"></div>
       </div>
@@ -4609,6 +4613,7 @@ const TARIFS_DEFAULT = {
   midibus_s:1200, midibus_m:4000,
   standard_s:1500, standard_m:5000,
   articule_s:1800, articule_m:6000,
+  bhns_s:1500, bhns_m:5000,
   carle_s:1500, carle_m:5000,
   ultimate_gratuit:25,
   cond_std_s:800, cond_ult_s:500,
@@ -4633,7 +4638,7 @@ async function loadTarifs() {
 
 async function saveTarifs() {
   const keys = ['minibus_s','minibus_m','midibus_s','midibus_m','standard_s','standard_m',
-    'articule_s','articule_m','carle_s','carle_m','ultimate_gratuit',
+    'articule_s','articule_m','bhns_s','bhns_m','carle_s','carle_m','ultimate_gratuit',
     'cond_std_s','cond_ult_s','meca_std_j','meca_ult_j','interim_gratuit',
     'ct','revision','fco',
     'renov_affichages','renov_barres','renov_sellerie','renov_sol',
@@ -4670,6 +4675,7 @@ function loadTarifsUI() {
     'midibus-s':'midibus_s','midibus-m':'midibus_m',
     'standard-s':'standard_s','standard-m':'standard_m',
     'articule-s':'articule_s','articule-m':'articule_m',
+    'bhns-s':'bhns_s','bhns-m':'bhns_m',
     'carle-s':'carle_s','carle-m':'carle_m',
     'ultimate-gratuit':'ultimate_gratuit',
     'cond-std-s':'cond_std_s','cond-ult-s':'cond_ult_s',
@@ -5061,7 +5067,7 @@ async function deletePubManualVehicle(i){
   catch(e) { pubManualResult('Erreur : ' + e.message, false); }
 }
 
-const PUB_LOCATION_TARIFS = [['minibus','Minibus'],['midibus','Midibus'],['standard','Standards'],['articule','Articulés'],['carle','Cars / LE']];
+const PUB_LOCATION_TARIFS = [['minibus','Minibus'],['midibus','Midibus'],['standard','Standards'],['articule','Articulés'],['bhns','BHNS'],['carle','Cars / LE']];
 async function loadPubLocationTarifs(){
   const el = document.getElementById('pub-location-tarifs-fields'); if (!el) return;
   const { data, error } = await sb.from('tarifs').select('key,value');
