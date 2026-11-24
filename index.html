@@ -1348,6 +1348,13 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
         </details>
       </div>
 
+      <div id="pub-location-tarifs" style="display:none;margin-top:24px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:6px"><i class="fa-solid fa-tags"></i> Tarifs de location affichés sur le site</div>
+        <p style="font-size:13px;color:var(--text-sec);margin:0 0 14px">Ces montants alimentent les pages « Pôle Location », le catalogue et les fiches véhicules.</p>
+        <div id="pub-location-tarifs-fields" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px"><button class="btn btn-primary" type="button" onclick="savePubLocationTarifs()"><i class="fa-solid fa-floppy-disk"></i> Publier les tarifs</button><span id="pub-location-tarifs-result" style="font-size:13px;font-weight:600"></span></div>
+      </div>
+
       <!-- Président uniquement : liens publics + liens Google Sheet du parc -->
       <div id="pub-config" style="display:none;margin-top:24px;border-top:1px solid var(--border-light);padding-top:18px">
         <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-link"></i> Liens affichés sur le site public</div>
@@ -4990,6 +4997,7 @@ async function loadPublicSiteCard(){
   renderPubSlots();
   renderPubModels();
   await loadPubManualParc();
+  if (['president', 'vice_president'].includes(currentUser.role)) { document.getElementById('pub-location-tarifs').style.display = ''; await loadPubLocationTarifs(); }
   if (currentUser.role === 'president'){
     document.getElementById('pub-config').style.display = '';
     await loadPubConfig();
@@ -5051,6 +5059,29 @@ async function deletePubManualVehicle(i){
   const key = pubRefKey(v.ref); pubManualVehicles = pubManualVehicles.filter(x => pubRefKey(x.ref || x.numero_parc) !== key); delete pubParcOverrides[key];
   try { await Promise.all([siteConfigSet('parc_manual', pubManualVehicles), siteConfigSet('parc_overrides', pubParcOverrides)]); renderPubManualParc(); pubManualResult('Modification supprimée.', true); }
   catch(e) { pubManualResult('Erreur : ' + e.message, false); }
+}
+
+const PUB_LOCATION_TARIFS = [['minibus','Minibus'],['midibus','Midibus'],['standard','Standards'],['articule','Articulés'],['carle','Cars / LE']];
+async function loadPubLocationTarifs(){
+  const el = document.getElementById('pub-location-tarifs-fields'); if (!el) return;
+  const { data, error } = await sb.from('tarifs').select('key,value');
+  if (error) { document.getElementById('pub-location-tarifs-result').textContent = 'Impossible de charger les tarifs : ' + error.message; return; }
+  const values = Object.fromEntries((data || []).map(row => [row.key, row.value]));
+  el.innerHTML = PUB_LOCATION_TARIFS.map(([key, label]) => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;border:1px solid var(--border-light);border-radius:10px;padding:10px"><b style="grid-column:1/-1;font-size:13px;color:var(--text)">${label}</b><div class="field" style="margin:0"><label>Semaine (€)</label><input id="pub-t-${key}-s" type="number" min="0" step="1" value="${escHtml(values[key + '_s'] ?? TARIFS_DEFAULT[key + '_s'] ?? '')}" style="width:100%"></div><div class="field" style="margin:0"><label>Mois (€)</label><input id="pub-t-${key}-m" type="number" min="0" step="1" value="${escHtml(values[key + '_m'] ?? TARIFS_DEFAULT[key + '_m'] ?? '')}" style="width:100%"></div></div>`).join('');
+}
+async function savePubLocationTarifs(){
+  if (!currentUser || !['president','vice_president'].includes(currentUser.role)) return toast('Accès non autorisé');
+  const rows = [];
+  for (const [key] of PUB_LOCATION_TARIFS) for (const period of ['s','m']) {
+    const value = Number(document.getElementById(`pub-t-${key}-${period}`).value);
+    if (!Number.isFinite(value) || value < 0) return document.getElementById('pub-location-tarifs-result').textContent = 'Saisissez un montant positif ou nul.';
+    rows.push({ key: key + '_' + period, value, updated_at: new Date().toISOString() });
+  }
+  const { error } = await sb.from('tarifs').upsert(rows, { onConflict: 'key' });
+  const out = document.getElementById('pub-location-tarifs-result');
+  if (error) { out.textContent = 'Erreur : ' + error.message; out.style.color = '#991b1b'; return; }
+  rows.forEach(r => TARIFS[r.key] = r.value); out.textContent = 'Tarifs publiés. Le site public se met à jour en quelques minutes.'; out.style.color = '#166534';
+  logAction('site_public_tarifs', '', 'a mis à jour les tarifs de location affichés sur le site');
 }
 
 function pubThumbs(cle){
