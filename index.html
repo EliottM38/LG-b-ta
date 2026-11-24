@@ -2536,7 +2536,8 @@ detectDevice();
 // MEMBRES
 // ============================================================
 async function loadMembres(){
-  const{data}=await sb.from('membres').select('*').order('id',{ascending:false});
+  const{data,error}=await sb.from('membres').select('*').order('id',{ascending:false});
+  if(error){ console.error('Lecture des membres impossible',error); document.getElementById('tbody-membres').innerHTML='<tr><td colspan="8">Impossible de charger les membres. Vérifiez votre connexion et les droits d’accès, puis rechargez la page.</td></tr>'; return; }
   membres=data||[]; renderMembres();
   // Auto-sync TM si clé configurée (silencieux)
   syncTMMembresAuto(); // le proxy utilisera la clé locale si présente, sinon celle du serveur
@@ -2742,7 +2743,8 @@ async function deleteMembre(id){
 // CHARGEMENT FACTURES
 // ============================================================
 async function loadFactures(){
-  const{data}=await sb.from('factures').select('*').order('id',{ascending:false});
+  const{data,error}=await sb.from('factures').select('*').order('id',{ascending:false});
+  if(error){ console.error('Lecture des factures impossible',error); toast('Impossible de charger les factures. Vérifiez votre connexion et vos droits d’accès.'); return; }
   factures=data||[]; renderFactures();
 }
 
