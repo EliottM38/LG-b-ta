@@ -1330,6 +1330,24 @@ html[data-theme="dark"] .pdf .pdf-footer{background:#f4f6fb!important;color:#6b7
       <div id="pub-models-info" style="font-size:12px;color:var(--text-muted);margin-bottom:10px"></div>
       <div id="pub-models"><div class="empty">Cliquez sur « Charger les modèles depuis TM ».</div></div>
 
+      <div style="margin-top:24px;border-top:1px solid var(--border-light);padding-top:18px">
+        <div class="pdf-stitle" style="margin-bottom:6px"><i class="fa-solid fa-shield-heart"></i> Disponibilités et sauvegarde du parc</div>
+        <p style="font-size:13px;color:var(--text-sec);margin:0 0 14px">Chaque matin, une copie du parc est mise à jour depuis TM. Ici, vous pouvez conserver un véhicule, corriger sa disponibilité ou sa date de retour : ces réglages restent actifs même si TM ne répond plus.</p>
+        <div id="pub-manual-list" style="margin-bottom:14px"></div>
+        <details style="border:1px solid var(--border-light);border-radius:12px;padding:12px 14px;background:var(--surface)">
+          <summary style="cursor:pointer;font-weight:700;color:var(--text)"><i class="fa-solid fa-plus"></i> Ajouter ou corriger un véhicule</summary>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px">
+            <div class="field"><label>N° de parc *</label><input id="pub-manual-ref" style="width:100%" placeholder="Ex. 1204"></div>
+            <div class="field"><label>Marque</label><input id="pub-manual-marque" style="width:100%" placeholder="Mercedes-Benz"></div>
+            <div class="field"><label>Modèle</label><input id="pub-manual-modele" style="width:100%" placeholder="Citaro"></div>
+            <div class="field"><label>Catégorie</label><select id="pub-manual-categorie" style="width:100%"><option value="">Automatique</option><option>Minibus</option><option>Midibus</option><option>Standards</option><option>Articulés</option><option>BHNS</option><option>LE &amp; Cars</option></select></div>
+            <div class="field"><label>Disponibilité *</label><select id="pub-manual-statut" style="width:100%"><option>Disponible</option><option>En location</option><option>En préparation</option><option>Aux ateliers</option></select></div>
+            <div class="field"><label>Retour prévu</label><input id="pub-manual-retour" type="date" style="width:100%"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-primary" type="button" onclick="savePubManualVehicle()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer la modification</button><span id="pub-manual-result" style="font-size:13px;font-weight:600"></span></div>
+        </details>
+      </div>
+
       <!-- Président uniquement : liens publics + liens Google Sheet du parc -->
       <div id="pub-config" style="display:none;margin-top:24px;border-top:1px solid var(--border-light);padding-top:18px">
         <div class="pdf-stitle" style="margin-bottom:10px"><i class="fa-solid fa-link"></i> Liens affichés sur le site public</div>
@@ -4971,10 +4989,68 @@ async function loadPublicSiteCard(){
   pubPhotos = data || [];
   renderPubSlots();
   renderPubModels();
+  await loadPubManualParc();
   if (currentUser.role === 'president'){
     document.getElementById('pub-config').style.display = '';
     await loadPubConfig();
   }
+}
+
+let pubManualVehicles = [], pubParcOverrides = {};
+const pubRefKey = v => String(v || '').trim().toLowerCase().replace(/[\s._-]+/g, '');
+function pubManualResult(message, ok){ const el = document.getElementById('pub-manual-result'); if (!el) return; el.textContent = message; el.style.color = ok ? '#166534' : '#991b1b'; }
+function renderPubManualParc(){
+  const el = document.getElementById('pub-manual-list'); if (!el) return;
+  const overrideRows = Object.entries(pubParcOverrides).map(([ref, value]) => ({ ref, ...value, override: true }));
+  const joined = [...pubManualVehicles.map(v => ({ ...v, ref: v.ref || v.numero_parc })), ...overrideRows.filter(o => !pubManualVehicles.some(v => pubRefKey(v.ref || v.numero_parc) === pubRefKey(o.ref)))];
+  if (!joined.length) { el.innerHTML = '<div class="empty">Aucune modification manuelle. Le parc affiché provient de TM et de sa dernière sauvegarde.</div>'; return; }
+  el.innerHTML = joined.map((v, i) => `<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border-light)">
+    <div style="min-width:170px"><b>${escHtml(v.ref || 'Sans référence')}</b><div style="font-size:12px;color:var(--text-muted)">${escHtml([v.marque,v.modele].filter(Boolean).join(' ') || (v.override ? 'Correction de statut' : 'Véhicule manuel'))}</div></div>
+    <span style="font-size:13px;color:var(--text-sec)">${escHtml(v.statut || 'Disponible')}${v.retour ? ' · retour ' + escHtml(v.retour) : ''}</span>
+    <button class="btn btn-sm" type="button" onclick="editPubManualVehicle(${i})"><i class="fa-solid fa-pen"></i> Modifier</button>
+    <button class="btn btn-sm btn-danger" type="button" onclick="deletePubManualVehicle(${i})"><i class="fa-solid fa-trash"></i></button>
+  </div>`).join('');
+  window.__pubManualJoined = joined;
+}
+async function loadPubManualParc(){
+  try {
+    const [manual, overrides] = await Promise.all([siteConfigGet('parc_manual'), siteConfigGet('parc_overrides')]);
+    pubManualVehicles = Array.isArray(manual) ? manual : [];
+    pubParcOverrides = overrides && typeof overrides === 'object' ? overrides : {};
+    renderPubManualParc();
+  } catch(e) { pubManualResult('Impossible de charger les modifications : ' + e.message, false); }
+}
+function editPubManualVehicle(i){
+  const v = (window.__pubManualJoined || [])[i]; if (!v) return;
+  document.getElementById('pub-manual-ref').value = v.ref || '';
+  document.getElementById('pub-manual-marque').value = v.marque || '';
+  document.getElementById('pub-manual-modele').value = v.modele || '';
+  document.getElementById('pub-manual-categorie').value = PUB_CATS.includes(v.categorie) ? v.categorie : '';
+  document.getElementById('pub-manual-statut').value = ['Disponible','En location','En préparation','Aux ateliers'].includes(v.statut) ? v.statut : 'Disponible';
+  document.getElementById('pub-manual-retour').value = v.retour || '';
+  document.getElementById('pub-manual-ref').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+async function savePubManualVehicle(){
+  if (!canManagePublicSite()) return toast('Accès non autorisé');
+  const ref = document.getElementById('pub-manual-ref').value.trim();
+  const statut = document.getElementById('pub-manual-statut').value;
+  if (!ref) return pubManualResult('Le numéro de parc est obligatoire.', false);
+  const vehicle = { ref, marque: document.getElementById('pub-manual-marque').value.trim(), modele: document.getElementById('pub-manual-modele').value.trim(), categorie: document.getElementById('pub-manual-categorie').value, statut, retour: document.getElementById('pub-manual-retour').value };
+  const key = pubRefKey(ref), at = pubManualVehicles.findIndex(v => pubRefKey(v.ref || v.numero_parc) === key);
+  // Sans marque/modèle, il s'agit d'une correction sur un véhicule venant de TM.
+  if (vehicle.marque || vehicle.modele) { if (at >= 0) pubManualVehicles[at] = vehicle; else pubManualVehicles.push(vehicle); }
+  pubParcOverrides[key] = { statut, retour: statut === 'En location' ? vehicle.retour : '', updated_at: new Date().toISOString() };
+  try {
+    await Promise.all([siteConfigSet('parc_manual', pubManualVehicles), siteConfigSet('parc_overrides', pubParcOverrides)]);
+    pubManualResult('Modification enregistrée. Elle sera visible après le prochain rafraîchissement du site.', true);
+    renderPubManualParc(); logAction('site_public_parc', ref, 'a mis à jour la disponibilité du véhicule ' + ref);
+  } catch(e) { pubManualResult('Erreur : ' + e.message, false); }
+}
+async function deletePubManualVehicle(i){
+  const v = (window.__pubManualJoined || [])[i]; if (!v || !confirm('Supprimer cette modification manuelle ?')) return;
+  const key = pubRefKey(v.ref); pubManualVehicles = pubManualVehicles.filter(x => pubRefKey(x.ref || x.numero_parc) !== key); delete pubParcOverrides[key];
+  try { await Promise.all([siteConfigSet('parc_manual', pubManualVehicles), siteConfigSet('parc_overrides', pubParcOverrides)]); renderPubManualParc(); pubManualResult('Modification supprimée.', true); }
+  catch(e) { pubManualResult('Erreur : ' + e.message, false); }
 }
 
 function pubThumbs(cle){

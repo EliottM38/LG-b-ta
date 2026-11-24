@@ -4,7 +4,7 @@ const CONTENT_KEYS = new Set([
   'site_home', 'site_publication', 'site_studio_draft', 'site_history'
 ]);
 const PRESIDENT_KEYS = new Set(['site_links', 'parc_sheet_urls']);
-const PARC_KEY = 'parc_categories';
+const PARC_KEYS = new Set(['parc_categories', 'parc_manual', 'parc_overrides']);
 
 async function staffFor(req) {
   const { SUPABASE_URL } = process.env;
@@ -24,7 +24,7 @@ async function staffFor(req) {
 
 function canManage(role, key) {
   if (PRESIDENT_KEYS.has(key)) return role === 'president';
-  if (key === PARC_KEY) return ['president', 'vice_president', 'gestionnaire_parc'].includes(role);
+  if (PARC_KEYS.has(key)) return ['president', 'vice_president', 'gestionnaire_parc'].includes(role);
   return CONTENT_KEYS.has(key) && ['president', 'vice_president'].includes(role);
 }
 
